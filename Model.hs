@@ -15,6 +15,7 @@ instance Show Agent where
 
 
 type World = Int
+type Rel = [[World]]
 
 data Prop = Top | P Char | Not Prop | And Prop Prop 
 
@@ -24,9 +25,23 @@ data EpistM = Mo
     [World]              -- Set of possible worlds
     [Agent]              -- Set of agents in model
     [(World, [Prop])]    -- Valuation function; \pi : World -> Set of props.
-    [(Agent, [[World]])] -- Epistemic relation between worlds
+    [(Agent, Rel)] -- Epistemic relation between worlds
     [World]              -- Set of initial worlds. 
 
+example :: EpistM
+example = Mo 
+    [0 .. 3]
+    [a, b, c]
+    []
+    [(a, [[0], [1], [2], [3]]), (b, [[0], [1], [2], [3]]), (c, [[0 .. 3]])]
+    [1]
+
+rel :: Agent -> EpistM -> Rel
+rel ag (Mo _ _ _ rels _) = table2fn rels ag
+
+-- TODO: Consider changing default value to error?
+table2fn :: [(Agent, Rel)] -> Agent -> Rel
+table2fn t ag = maybe [] id (lookup ag t)
 
 
 
