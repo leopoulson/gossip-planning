@@ -17,7 +17,7 @@ type World = Int
 type Rel = [[World]]
 
 -- TODO: Find a better way to do this
-data Form = Top | P Prop | Not Form | And Form Form | K Agent Form deriving (Eq, Show)
+data Form = Top | P Prop | Not Form | And Form Form | Or Form Form | K Agent Form deriving (Eq, Show)
 -- data FormK = Pr Form | K Agent Form
 
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
@@ -60,7 +60,8 @@ satisfies :: PointedEM -> Form -> Bool
 satisfies _ Top = True
 satisfies (m, w) (P n) = P n `elem` val m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
-satisfies (m, w) (And p q) = and (satisfies (m, w) p, satisfies (m, w) q)
+satisfies (m, w) (And p q) = (satisfies (m, w) p) && (satisfies (m, w) q)
+satisfies (m, w) (Or p q) = (satisfies (m, w) p) || (satisfies (m, w) q)
 satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw 
   where 
     r :: Rel
@@ -90,10 +91,10 @@ callIncludes (Call i j) ag = (i == ag) || (j == ag)
 -- TODO implement or 
 postUpdate :: Postcondition
 postUpdate (Call i j, S n m) 
-    | callIncludes (Call i j) n = Not (And (Not (P (S i m))) (Not (P (S j m)))) 
+    | callIncludes (Call i j) n = Or (P (S i m)) (P (S j m)) 
     | otherwise                 = P (S n m)
 postUpdate (Call i j, N n m) 
-    | callIncludes (Call i j) n = Not (And (Not (P (N i m))) (Not (P (N j m)))) 
+    | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
     | otherwise                 = P (N n m)
 
 
