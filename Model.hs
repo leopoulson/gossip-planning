@@ -14,7 +14,7 @@ instance Show Agent where
     show (Ag n) = "Agent " ++ show n
 
 type World = Int
-type Rel = [[World]]
+type Rel a = [[a]]
 
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And Form Form | Or Form Form | K Agent Form deriving (Eq, Show)
@@ -26,7 +26,7 @@ data EpistM = Mo
     [World]           -- Set of possible worlds
     [Agent]           -- Set of agents in model
     [(World, [Form])]  -- Valuation function; \pi : World -> Set of props.
-    [(Agent, Rel)]    -- Epistemic relation between worlds
+    [(Agent, Rel World)]    -- Epistemic relation between worlds
     [World]           -- Set of pointed worlds.
 
 type PointedEM = (EpistM, World)  -- This is a pointed model. 
@@ -40,12 +40,12 @@ example = Mo
     [1]
 
 -- This lets us access the relations for a given agent
-rel :: EpistM -> Agent -> Rel
+rel :: EpistM -> Agent -> Rel World
 rel (Mo _ _ _ rels _) ag = table2fn rels ag
 
 -- This gets the worlds related to world w
 -- TODO: Perhaps change from head $
-relatedWorlds :: Rel -> World -> [World]
+relatedWorlds :: Rel World -> World -> [World]
 relatedWorlds r w = concat $ filter (elem w) r
 
 val :: EpistM -> World -> [Form]
@@ -64,7 +64,7 @@ satisfies (m, w) (And p q) = (satisfies (m, w) p) && (satisfies (m, w) q)
 satisfies (m, w) (Or p q) = (satisfies (m, w) p) || (satisfies (m, w) q)
 satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw 
   where 
-    r :: Rel
+    r :: Rel World
     r = rel m ag
     rw :: [World]
     rw = relatedWorlds r w
@@ -97,8 +97,7 @@ postUpdate (Call i j, N n m)
     | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
     | otherwise                 = P (N n m)
 
-type EventRel = [[Event]]
-type EventModel = ([Event], EventRel, Precondition, Postcondition)
+type EventModel = ([Event], Rel Event, Precondition, Postcondition)
 
 
 
