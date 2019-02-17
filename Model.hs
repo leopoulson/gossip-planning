@@ -97,6 +97,9 @@ postUpdate (Call i j, N n m)
     | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
     | otherwise                 = P (N n m)
 
+type EventRel = [[Event]]
+type EventModel = ([Event], EventRel, Precondition, Postcondition)
+
 
 
 
