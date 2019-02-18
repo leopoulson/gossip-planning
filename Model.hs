@@ -27,9 +27,10 @@ data EpistM = Mo
     [Agent]           -- Set of agents in model
     [(World, [Form])]  -- Valuation function; \pi : World -> Set of props.
     [(Agent, Rel World)]    -- Epistemic relation between worlds
-    [World]           -- Set of pointed worlds.
+    [World]           -- Set of pointed worlds. 
+    deriving (Show)
 
-type PointedEM = (EpistM, World)  -- This is a pointed model. 
+type PointedEpM = (EpistM, World)  -- This is a pointed model. 
 
 example :: EpistM
 example = Mo 
@@ -56,7 +57,7 @@ table2fn :: Eq a => [(a, [b])] -> a -> [b]
 table2fn t ag = maybe [] id (lookup ag t)
 
 -- Give a semantics!
-satisfies :: PointedEM -> Form -> Bool
+satisfies :: PointedEpM -> Form -> Bool
 satisfies _ Top = True
 satisfies (m, w) (P n) = P n `elem` val m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
@@ -88,21 +89,36 @@ callIncludes :: Event -> Agent -> Bool
 callIncludes (Call i j) ag = (i == ag) || (j == ag)
 -- callIncludes _ ag = False   -- In the case that we have any other events, what do we do? 
 
--- TODO implement or 
 postUpdate :: Postcondition
 postUpdate (Call i j, S n m) 
-    | callIncludes (Call i j) n = Or (P (S i m)) (P (S j m)) 
+    | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
     | otherwise                 = P (S n m)
 postUpdate (Call i j, N n m) 
     | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
     | otherwise                 = P (N n m)
 
 type EventModel = ([Event], Rel Event, Precondition, Postcondition)
+type PointedEvM = (EventModel, Event)
+
+produceAllProps :: [Agent] -> [Prop]
+produceAllProps ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
 
 
+update :: EpistM -> PointedEvM -> EpistM
+update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) = 
+    Mo states' ag val' rels' actual
+    where
+        states' = [s | s <- states, satisfies (m, s) (pre e)]
+        rels' = rels -- TODO: Change this? 
+        val' = [(w, ps w) | w <- states]
+        ps w = [P p | p <- props, satisfies (m, w) (post (e, p))]
+        props = produceAllProps ag
 
+callExample :: EpistM
+callExample = Mo [0] [a, b] [(0, [P (N a b)])] [(a, [[0]]), (b, [[0]])] [1]
 
-
+callEvM :: EventModel
+callEvM = ([], [], anyCall, postUpdate)
 
 
 
