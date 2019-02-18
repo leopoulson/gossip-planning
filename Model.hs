@@ -89,9 +89,10 @@ callIncludes :: Event -> Agent -> Bool
 callIncludes (Call i j) ag = (i == ag) || (j == ag)
 -- callIncludes _ ag = False   -- In the case that we have any other events, what do we do? 
 
+-- This doesn't work; fix it
 postUpdate :: Postcondition
 postUpdate (Call i j, S n m) 
-    | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
+    | callIncludes (Call i j) n = Or (P (S i m)) (P (S j m)) 
     | otherwise                 = P (S n m)
 postUpdate (Call i j, N n m) 
     | callIncludes (Call i j) n = Or (P (N i m)) (P (N j m)) 
@@ -115,7 +116,7 @@ update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) =
         props = produceAllProps ag
 
 callExample :: EpistM
-callExample = Mo [0] [a, b] [(0, [P (N a b)])] [(a, [[0]]), (b, [[0]])] [1]
+callExample = Mo [0] [a, b] [(0, [P (N a b), P (S a a), P (S b b)])] [(a, [[0]]), (b, [[0]])] [1]
 
 callEvM :: EventModel
 callEvM = ([], [], anyCall, postUpdate)
