@@ -1,7 +1,8 @@
 # Feature list
 
-- Add updates, calls ✅
-- Add gossip states and a model for these ✅
+- Add action models 
+- Consider how to encode a world? We want it to be (World, [Event]) -> Update code to take the event relation as well
+- Add gossip states and a model for these 
 - Include construction of ME* and assorted transducers
 - Implement power set construction
 - Visualisations thereof 
