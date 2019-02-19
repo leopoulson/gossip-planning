@@ -12,22 +12,30 @@ data GGraph = Gossip [Agent] KnowMap KnowMap
 --     deriving (Show, Eq)
 
 type KnowMap = M.Map Agent (S.Set Agent)
-
 type Call = (Agent, Agent)
 
--- gExample :: GGraph
--- gExample = Gossip [a, b, c] [N a b, N b c]
-
 gExample :: GGraph
-gExample = Gossip [a, b, c] (M.fromList [(a, S.singleton b), (b, S.singleton c)]) M.empty
+gExample = Gossip [a, b, c] (M.fromList [(a, S.fromList [a, b]), (b, S.fromList [b,c]), (c, S.empty)]) (M.fromList [(a, S.singleton a), (b, S.singleton b), (c, S.singleton c)])
 
 possible :: Call -> GGraph -> Bool
 possible (i, j) (Gossip _ n _) = S.member j (fromMaybe S.empty (M.lookup i n) )
 
--- call :: GGraph -> Call -> GGraph
--- call g c 
---     | possible c g  = 
---     | otherwise = error $ "impossible call " ++ show c
+performCall :: GGraph -> Call -> GGraph
+performCall g@(Gossip ag n s) call@(i, j) 
+    | not $ possible call g = error $ "impossible call " ++ show call
+    | otherwise = Gossip ag n' s' where
+        n' = M.adjust (S.union (n M.! i)) j $ M.adjust (S.union (n M.! j)) i n
+        s' = M.adjust (S.union (s M.! i)) j $ M.adjust (S.union (s M.! j)) i s
+    
+performCalls :: [Call] -> GGraph -> GGraph
+performCalls calls g = foldl performCall g calls
+
+
+
+
+
+
+
 
 
 
