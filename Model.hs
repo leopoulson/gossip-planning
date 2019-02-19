@@ -111,7 +111,7 @@ update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) =
     where
         states' = [s | s <- states, satisfies (m, s) (pre e)]
         rels' = rels -- TODO: Change this? 
-        val' = [(w, ps w) | w <- states]
+        val' = [(w, ps w) | w <- states']
         ps w = [P p | p <- props, satisfies (m, w) (post (e, p))]
         props = produceAllProps ag
 
@@ -120,6 +120,16 @@ callExample = Mo [0] [a, b] [(0, [P (N a b), P (S a a), P (S b b)])] [(a, [[0]])
 
 callEvM :: EventModel
 callEvM = ([], [], anyCall, postUpdate)
+
+
+
+
+
+
+
+
+
+
 
 
 
