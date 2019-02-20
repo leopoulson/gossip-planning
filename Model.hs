@@ -114,6 +114,17 @@ update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) =
         ps w = [P p | p <- props, satisfies (m, w) (post (e, p))]
         props = produceAllProps ag
 
+update' :: EpistM -> EventModel -> EpistM
+update' m@(Mo states ag val rels actual) (evm@(events, erels, pre, post)) = 
+    Mo states' ag val' rels' actual
+    where
+        states' = [State (w, es ++ [e]) | s@(State (w, es)) <- states, e <- events , satisfies (m, s) (pre e)]
+        rels' = rels -- [(a, newRel a) | a <- ag]
+        -- newRel a = [[]]
+        val' = [(State (w, es ++ [e]), ps s e) | s@(State (w, es)) <- states', e <- events]
+        ps w e = [P p | p <- props, satisfies (m, w) (post (e, p))]
+        props = produceAllProps ag
+
 callExample :: EpistM
 callExample = Mo 
     [State (0, [])] 
