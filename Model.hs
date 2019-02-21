@@ -1,6 +1,7 @@
 module Model where
 
 import Data.Maybe
+import Control.Applicative
 
 newtype Agent = Ag Int deriving (Eq, Ord)
 
@@ -120,15 +121,19 @@ update' :: EpistM -> EventModel -> EpistM
 update' m@(Mo states ag val rels actual) (events, erels, pre, post) = 
     Mo states' ag val' rels' actual
     where
-        states' = [State (w, es ++ [e]) | s@(State (w, es)) <- states, e <- events , satisfies (m, s) (pre e)]
+        states' = [stateUpdate s e | s@(State (w, es)) <- states, e <- events , satisfies (m, s) (pre e)]
         rels' = [(a, newRel a) | a <- ag]
-        newRel a = [zipUpdate ss es | ss <- (fromMaybe [] (lookup a rels)), es <- erels]
+        newRel a = [liftA2 stateUpdate ss es | ss <- (fromMaybe [] (lookup a rels)), es <- erels]
         val' = [(State (w, es ++ [e]), ps s e) | s@(State (w, es)) <- states', e <- events]
         ps w e = [P p | p <- props, satisfies (m, w) (post (e, p))]
         props = produceAllProps ag
 
 zipUpdate :: [State] -> [Event] -> [State]
-zipUpdate = zipWith (\s@(State (w, es)) e -> State (w, es ++ [e]))
+zipUpdate = zipWith stateUpdate
+
+stateUpdate :: State -> Event -> State
+stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
+
 
 callExample :: EpistM
 callExample = Mo 
@@ -144,7 +149,6 @@ callEvM = ([], [], anyCall, postUpdate)
 allExperts :: EpistM -> Form 
 allExperts (Mo _ ag _ _ _) = And [P (S i j) | i <- ag, j <- ag]
 -- satisfies (update callExample (callEvM, Call a b), State (0, [])) (allExperts callExample)
-
 
 
 
