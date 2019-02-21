@@ -1,13 +1,18 @@
+# Remember 
+
+- We have made the equivalence relation reflexive (technically, it's an equivalence relation now) for simplicity of implementation - address this in dissertation.
+
 # Feature list
 
 - Add action models 
-- Consider how to encode a world? We want it to be (World, [Event]) -> Update code to take the event relation as well
+- Consider how to encode a world? We want it to be (World, [Event]) -> Update code to take the event relation as well. Finish update' for this!
 - Add gossip states and a model for these 
 - Include construction of ME* and assorted transducers
 - Implement power set construction
 - Visualisations thereof 
 - Implement a program to generate gossip graphs for testing
 - Add in automated testing (QuickCheck?)
+- Understand how to use Transducers in Haskell
 
 ## To Consider
 
