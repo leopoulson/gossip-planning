@@ -108,24 +108,13 @@ postUpdate (Call i j, N n m)
 produceAllProps :: [Agent] -> [Prop]
 produceAllProps ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
 
-update :: EpistM -> PointedEvM -> EpistM
-update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) = 
-    Mo states' ag val' rels' actual
-    where
-        states' = [s | s <- states, satisfies (m, s) (pre e)]
-        rels' = rels -- TODO: Change this? 
-        val' = [(w, ps w) | w <- states']
-        ps w = [P p | p <- props, satisfies (m, w) (post (e, p))]
-        props = produceAllProps ag
-
-update' :: EpistM -> EventModel -> EpistM
-update' m@(Mo states ags val rels actual) (events, erels, pre, post) = 
+update :: EpistM -> EventModel -> EpistM
+update m@(Mo states ags _ rels actual) (events, erels, pre, post) = 
     Mo states' ags val' rels' actual
     where
         states' = [stateUpdate s ev | s <- states, ev <- events , satisfies (m, s) (pre ev)]
         rels' = [(ag, newRel ag) | ag <- ags]
         newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent rels), es <- fromMaybe [] (lookup agent erels)]
-
         val' = [(s, ps s) | s <- states']
         ps s = [P p | p <- props, satisfies (m, trimLast s) (post (lastEv s, p))]
         props = produceAllProps ags
@@ -137,7 +126,7 @@ allExperts :: EpistM -> Form
 allExperts (Mo _ ag _ _ _) = And [P (S i j) | i <- ag, j <- ag]
 
 lastEv :: State -> Event
-lastEv (State (w, es)) = last es
+lastEv (State (_, es)) = last es
 
 trimLast :: State -> State
 trimLast (State (w, es)) = State (w, init es)
