@@ -22,7 +22,6 @@ data EpistM = Mo
     [(State, [Form])]  -- Valuation function; \pi : World -> Set of props.
     (AgentRel State)    -- Epistemic relation between worlds
     [State]           -- Set of pointed worlds. 
-    deriving (Show)
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
@@ -51,8 +50,16 @@ instance Show Event where
     show (Call i j) = show i ++ " " ++ show j 
 
 instance Show State where
-    show (State (w, [])) = "S " ++ show w ++ " " 
+    show (State (w, [])) = "S " ++ show w
     show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
+
+instance Show EpistM where
+    show (Mo states agents valuation erel initial) = 
+        "States: " ++ show states ++ "\n" ++
+        "Agents: " ++ show agents ++ "\n" ++
+        "Valuation: " ++ show valuation ++ "\n" ++ 
+        "Relations: " ++ show erel ++ "\n" ++ 
+        "Initial: " ++ show initial ++ "\n"
 
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
@@ -118,8 +125,9 @@ update' m@(Mo states ags val rels actual) (events, erels, pre, post) =
         states' = [stateUpdate s ev | s <- states, ev <- events , satisfies (m, s) (pre ev)]
         rels' = [(ag, newRel ag) | ag <- ags]
         newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent rels), es <- fromMaybe [] (lookup agent erels)]
-        val' = [(State (w, es ++ [ev]), ps s ev) | s@(State (w, es)) <- states', ev <- events]
-        ps w ev = [P p | p <- props, satisfies (m, w) (post (ev, p))]
+
+        val' = [(s, ps s) | s <- states']
+        ps s = [P p | p <- props, satisfies (m, trimLast s) (post (lastEv s, p))]
         props = produceAllProps ags
 
 stateUpdate :: State -> Event -> State
@@ -128,7 +136,11 @@ stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 allExperts :: EpistM -> Form 
 allExperts (Mo _ ag _ _ _) = And [P (S i j) | i <- ag, j <- ag]
 
+lastEv :: State -> Event
+lastEv (State (w, es)) = last es
 
+trimLast :: State -> State
+trimLast (State (w, es)) = State (w, init es)
 
 
 

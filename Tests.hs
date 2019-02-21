@@ -17,7 +17,7 @@ callExample :: EpistM
 callExample = Mo 
     [State (0, [])] 
     [a, b] 
-    [(State (0, []), [P (N a b), P (S a a), P (S b b)])] 
+    [(State (0, []), [P (N a b), P (N a a), P (N b b), P (S a a), P (S b b)])] 
     [(a, [[State (0, [])]]), (b, [[State (0, [])]])] 
     [State (1, [])]
 
