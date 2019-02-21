@@ -2,6 +2,30 @@ module Tests where
 
 import Model
 
+
+-- Testing Calls
+
+example :: EpistM
+example = Mo 
+    [State (0, []), State (1, []), State (2, []), State (3, [])]
+    [a, b, c]
+    [(State (0, []), [P (S a b)]), (State (1, []), [P (S a b)]), (State (2, []), [P (S a b)])]
+    [(a, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (b, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (c, [[State (0, []), State (1, []), State (2, [])], [State (3, [])]])]
+    [State (1, [])]
+
+callExample :: EpistM
+callExample = Mo 
+    [State (0, [])] 
+    [a, b] 
+    [(State (0, []), [P (N a b), P (S a a), P (S b b)])] 
+    [(a, [[State (0, [])]]), (b, [[State (0, [])]])] 
+    [State (1, [])]
+
+callEvM :: EventModel
+callEvM = ([], [], anyCall, postUpdate)
+-- satisfies (update callExample (callEvM, Call a b), State (0, [])) (allExperts callExample)
+
+-- Testing Relations
 exampleRel :: EpistM
 exampleRel = Mo 
     [State (0, []), State (1, []), State (2, [])]

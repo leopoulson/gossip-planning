@@ -37,14 +37,6 @@ data EpistM = Mo
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
-example :: EpistM
-example = Mo 
-    [State (0, []), State (1, []), State (2, []), State (3, [])]
-    [a, b, c]
-    [(State (0, []), [P (S a b)]), (State (1, []), [P (S a b)]), (State (2, []), [P (S a b)])]
-    [(a, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (b, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (c, [[State (0, []), State (1, []), State (2, [])], [State (3, [])]])]
-    [State (1, [])]
-
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
 rel (Mo _ _ _ rels _) ag = table2fn rels ag
@@ -128,27 +120,12 @@ update' m@(Mo states ag val rels actual) (events, erels, pre, post) =
         ps w e = [P p | p <- props, satisfies (m, w) (post (e, p))]
         props = produceAllProps ag
 
-zipUpdate :: [State] -> [Event] -> [State]
-zipUpdate = zipWith stateUpdate
-
 stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 
-
-callExample :: EpistM
-callExample = Mo 
-    [State (0, [])] 
-    [a, b] 
-    [(State (0, []), [P (N a b), P (S a a), P (S b b)])] 
-    [(a, [[State (0, [])]]), (b, [[State (0, [])]])] 
-    [State (1, [])]
-
-callEvM :: EventModel
-callEvM = ([], [], anyCall, postUpdate)
-
 allExperts :: EpistM -> Form 
 allExperts (Mo _ ag _ _ _) = And [P (S i j) | i <- ag, j <- ag]
--- satisfies (update callExample (callEvM, Call a b), State (0, [])) (allExperts callExample)
+
 
 
 
