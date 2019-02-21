@@ -5,17 +5,6 @@ import Control.Applicative
 
 newtype Agent = Ag Int deriving (Eq, Ord)
 
--- We have an infinite amount of possible agents
--- But the first five get names!
-a, b, c, d, e :: Agent
-a = Ag 0; b = Ag 1; c = Ag 2; d = Ag 3; e = Ag 4
-
-instance Show Agent where
-    show (Ag 0) = "Agent a"; show (Ag 1) = "Agent b"
-    show (Ag 2) = "Agent c"; show (Ag 3) = "Agent d"
-    show (Ag 4) = "Agent e"
-    show (Ag n) = "Agent " ++ show n
-
 type World = Int
 newtype State = State (World, [Event]) 
     deriving (Eq, Show, Ord)
@@ -23,7 +12,6 @@ type Rel a = [[a]]
 
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
--- data FormK = Pr Form | K Agent Form
 
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
@@ -36,6 +24,27 @@ data EpistM = Mo
     deriving (Show)
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
+
+-- So we want to be able to describe events; for us, we only have calls.
+data Event = Call Agent Agent deriving (Eq, Show, Ord)
+
+-- We have event models = (E, R^E, pre, post).
+-- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
+type EventModel = ([Event], Rel Event, Precondition, Postcondition)
+type PointedEvM = (EventModel, Event)
+type Precondition  = Event -> Form
+type Postcondition = (Event, Prop) -> Form
+
+-- We have an infinite amount of possible agents
+-- But the first five get names!
+a, b, c, d, e :: Agent
+a = Ag 0; b = Ag 1; c = Ag 2; d = Ag 3; e = Ag 4
+
+instance Show Agent where
+    show (Ag 0) = "Agent a"; show (Ag 1) = "Agent b"
+    show (Ag 2) = "Agent c"; show (Ag 3) = "Agent d"
+    show (Ag 4) = "Agent e"
+    show (Ag n) = "Agent " ++ show n
 
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
@@ -65,18 +74,6 @@ satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw
     r = rel m ag
     rw = relatedWorlds r w
 
-
--- Calls section
-
--- So we want to be able to describe events; for us, we only have calls.
-data Event = Call Agent Agent deriving (Eq, Show, Ord)
-
--- We have event models = (E, R^E, pre, post).
--- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
-type Precondition  = Event -> Form
-type Postcondition = (Event, Prop) -> Form
--- So we can write a precondition like this!
-
 anyCall :: Precondition
 anyCall (Call i j) = P (N i j)
 
@@ -92,9 +89,6 @@ postUpdate (Call i j, S n m)
 postUpdate (Call i j, N n m) 
     | callIncludes (Call i j) n = Or [P (N i m), P (N j m)]
     | otherwise                 = P (N n m)
-
-type EventModel = ([Event], Rel Event, Precondition, Postcondition)
-type PointedEvM = (EventModel, Event)
 
 produceAllProps :: [Agent] -> [Prop]
 produceAllProps ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
