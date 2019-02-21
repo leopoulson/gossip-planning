@@ -7,8 +7,9 @@ newtype Agent = Ag Int deriving (Eq, Ord)
 
 type World = Int
 newtype State = State (World, [Event]) 
-    deriving (Eq, Show, Ord)
+    deriving (Eq, Ord)
 type Rel a = [[a]]
+type AgentRel a = [(Agent, Rel a)]
 
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
@@ -19,18 +20,18 @@ data EpistM = Mo
     [State]           -- Set of possible worlds
     [Agent]           -- Set of agents in model
     [(State, [Form])]  -- Valuation function; \pi : World -> Set of props.
-    [(Agent, Rel State)]    -- Epistemic relation between worlds
+    (AgentRel State)    -- Epistemic relation between worlds
     [State]           -- Set of pointed worlds. 
     deriving (Show)
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
 -- So we want to be able to describe events; for us, we only have calls.
-data Event = Call Agent Agent deriving (Eq, Show, Ord)
+data Event = Call Agent Agent deriving (Eq, Ord)
 
 -- We have event models = (E, R^E, pre, post).
 -- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
-type EventModel = ([Event], Rel Event, Precondition, Postcondition)
+type EventModel = ([Event], AgentRel Event, Precondition, Postcondition)
 type PointedEvM = (EventModel, Event)
 type Precondition  = Event -> Form
 type Postcondition = (Event, Prop) -> Form
@@ -41,10 +42,17 @@ a, b, c, d, e :: Agent
 a = Ag 0; b = Ag 1; c = Ag 2; d = Ag 3; e = Ag 4
 
 instance Show Agent where
-    show (Ag 0) = "Agent a"; show (Ag 1) = "Agent b"
-    show (Ag 2) = "Agent c"; show (Ag 3) = "Agent d"
-    show (Ag 4) = "Agent e"
-    show (Ag n) = "Agent " ++ show n
+    show (Ag 0) = "Ag a"; show (Ag 1) = "Ag b"
+    show (Ag 2) = "Ag c"; show (Ag 3) = "Ag d"
+    show (Ag 4) = "Ag e"
+    show (Ag n) = "Ag " ++ show n
+
+instance Show Event where
+    show (Call i j) = show i ++ " " ++ show j 
+
+instance Show State where
+    show (State (w, [])) = "S " ++ show w ++ " " 
+    show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
 
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
@@ -104,15 +112,15 @@ update m@(Mo states ag val rels actual) (evm@(es, erels, pre, post), e) =
         props = produceAllProps ag
 
 update' :: EpistM -> EventModel -> EpistM
-update' m@(Mo states ag val rels actual) (events, erels, pre, post) = 
-    Mo states' ag val' rels' actual
+update' m@(Mo states ags val rels actual) (events, erels, pre, post) = 
+    Mo states' ags val' rels' actual
     where
-        states' = [stateUpdate s e | s@(State (w, es)) <- states, e <- events , satisfies (m, s) (pre e)]
-        rels' = [(a, newRel a) | a <- ag]
-        newRel a = [liftA2 stateUpdate ss es | ss <- (fromMaybe [] (lookup a rels)), es <- erels]
-        val' = [(State (w, es ++ [e]), ps s e) | s@(State (w, es)) <- states', e <- events]
-        ps w e = [P p | p <- props, satisfies (m, w) (post (e, p))]
-        props = produceAllProps ag
+        states' = [stateUpdate s ev | s <- states, ev <- events , satisfies (m, s) (pre ev)]
+        rels' = [(ag, newRel ag) | ag <- ags]
+        newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent rels), es <- fromMaybe [] (lookup agent erels)]
+        val' = [(State (w, es ++ [ev]), ps s ev) | s@(State (w, es)) <- states', ev <- events]
+        ps w ev = [P p | p <- props, satisfies (m, w) (post (ev, p))]
+        props = produceAllProps ags
 
 stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
