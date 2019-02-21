@@ -10,6 +10,7 @@ newtype State = State (World, [Event])
     deriving (Eq, Ord)
 type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]
+type Valuation = [(State, [Form])]
 
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
@@ -17,11 +18,11 @@ data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deri
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
 data EpistM = Mo 
-    [State]           -- Set of possible worlds
-    [Agent]           -- Set of agents in model
-    [(State, [Form])]  -- Valuation function; \pi : World -> Set of props.
+    [State]             -- Set of possible worlds
+    [Agent]             -- Set of agents in model
+    Valuation           -- Valuation function; \pi : World -> Set of props.
     (AgentRel State)    -- Epistemic relation between worlds
-    [State]           -- Set of pointed worlds. 
+    [State]             -- Set of pointed worlds. 
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
@@ -105,7 +106,7 @@ postUpdate (Call i j, N n m)
     | otherwise                 = P (N n m)
 
 produceAllProps :: [Agent] -> [Prop]
-produceAllProps ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
+produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
 
 update :: EpistM -> EventModel -> EpistM
 update m@(Mo states ags _ rels actual) (events, erels, pre, post) = 
@@ -132,11 +133,6 @@ lastEv (State (_, es)) = last es
 
 trimLast :: State -> State
 trimLast (State (w, es)) = State (w, init es)
-
-
-
-
-
 
 
 
