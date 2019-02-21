@@ -5,11 +5,9 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Maybe
 
---                              Number  Secret
+--                           Number  Secret
 data GGraph = Gossip [Agent] KnowMap KnowMap
     deriving (Show, Eq)
--- data GGraph = Gossip [Agent] [Prop]
---     deriving (Show, Eq)
 
 type KnowMap = M.Map Agent (S.Set Agent)
 type Call = (Agent, Agent)

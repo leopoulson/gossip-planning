@@ -75,15 +75,15 @@ val (Mo _ _ vals _ _) st = table2fn vals st
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
-table2fn t ag = maybe [] id (lookup ag t)
+table2fn t ag = fromMaybe [] (lookup ag t)
 
 -- Give a semantics!
 satisfies :: PointedEpM -> Form -> Bool
 satisfies _ Top = True
 satisfies (m, w) (P n) = P n `elem` val m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
-satisfies (m, w) (And ps) = and $ map (\p -> satisfies (m, w) p) ps--(satisfies (m, w) p) && (satisfies (m, w) q)
-satisfies (m, w) (Or ps) = or $ map (\p -> satisfies (m, w) p) ps
+satisfies (m, w) (And ps) = all (satisfies (m, w)) ps 
+satisfies (m, w) (Or ps) = any (satisfies (m, w)) ps
 satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw 
   where 
     r = rel m ag
@@ -96,7 +96,6 @@ callIncludes :: Event -> Agent -> Bool
 callIncludes (Call i j) ag = (i == ag) || (j == ag)
 -- callIncludes _ ag = False   -- In the case that we have any other events, what do we do? 
 
--- This doesn't work; fix it
 postUpdate :: Postcondition
 postUpdate (Call i j, S n m) 
     | callIncludes (Call i j) n = Or [P (S i m), P (S j m)]
@@ -118,6 +117,9 @@ update m@(Mo states ags _ rels actual) (events, erels, pre, post) =
         val' = [(s, ps s) | s <- states']
         ps s = [P p | p <- props, satisfies (m, trimLast s) (post (lastEv s, p))]
         props = produceAllProps ags
+
+ptUpdate :: PointedEpM -> PointedEvM -> PointedEpM
+ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
 
 stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
