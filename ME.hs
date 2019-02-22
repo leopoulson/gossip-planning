@@ -2,6 +2,7 @@ module ME where
 
 import Model
 import FSM
+import FST
 import Data.Maybe
 
 -- data Character = World State | Call Agent Agent deriving (Eq, Show)
@@ -13,6 +14,11 @@ type Alphabet' = [Character']
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
 data QState = Q [Prop] | QInit
+
+data ME = ME 
+    (FSM QState Character')
+    [(Agent, FST QState Character')] 
+    [(Agent, FSM QState Character')]
 
 -- getAlphabet :: EpistM -> EventModel -> Alphabet
 -- getAlphabet (Mo states _ _ _ _) (events, _, _, _) = map World states ++ map (\(Model.Call i j) -> ME.Call i j) events
