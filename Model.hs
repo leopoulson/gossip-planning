@@ -134,6 +134,29 @@ lastEv (State (_, es)) = last es
 trimLast :: State -> State
 trimLast (State (w, es)) = State (w, init es)
 
+stateRelPairs :: EpistM -> Agent -> [(State, State)]
+stateRelPairs (Mo _ _ _ arel _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
+
+eventRelPairs :: EventModel -> Agent -> [(Event, Event)]
+eventRelPairs (_, erel, _, _) ag = relPairs $ fromMaybe [] (lookup ag erel) 
+
+relPairs :: Rel a -> [(a, a)]
+relPairs = concatMap allPairs
+-- relPairs rel = concat $ [allPairs xs | xs <- rel]
+
+allPairs :: [a] -> [(a, a)]
+allPairs xs = concatMap (`pair` xs) xs
+
+pair :: a -> [a] -> [(a, a)]
+pair x ys = [(x, y) | y <- ys]
+
+
+
+
+
+
+
+
 
 
 

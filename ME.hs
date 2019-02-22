@@ -13,12 +13,12 @@ type Alphabet' = [Character']
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit
+data QState = Q [Prop] | QInit 
 
 data ME = ME 
-    (FSM QState Character')
-    [(Agent, FST QState Character')] 
-    [(Agent, FSM QState Character')]
+    (FSM Character' QState)
+    [(Agent, FST Character' QState)] 
+    [(Agent, FSM Character' QState)]
 
 -- getAlphabet :: EpistM -> EventModel -> Alphabet
 -- getAlphabet (Mo states _ _ _ _) (events, _, _, _) = map World states ++ map (\(Model.Call i j) -> ME.Call i j) events
@@ -61,6 +61,11 @@ meTrans (Mo _ ags _ _ _) (_, _, pre, post) (Q ps , Right ev)
 models :: [Prop] -> Form -> Bool
 models ps f = fromForm f `elem` ps
 
+buildTransducer :: Agent -> EpistM -> EventModel -> FST Character' QState
+buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
+  where
+    trans :: [BiTransition QState Character']
+    trans = [(QInit, Left w, Left w', QInit) | (w, w') <- stateRelPairs ep ag]
 
 
 
