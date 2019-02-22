@@ -64,7 +64,7 @@ instance Show EpistM where
 
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
-rel (Mo _ _ _ rels _) ag = table2fn rels ag
+rel (Mo _ _ _ rels _) = table2fn rels
 
 -- This gets the worlds related to world w
 -- TODO: Perhaps change from head $
@@ -72,7 +72,7 @@ relatedWorlds :: Rel State -> State -> [State]
 relatedWorlds r w = concat $ filter (elem w) r
 
 val :: EpistM -> State -> [Form]
-val (Mo _ _ vals _ _) st = table2fn vals st
+val (Mo _ _ vals _ _) = table2fn vals
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]

@@ -39,18 +39,18 @@ isForm _ = False
 
 fromForm :: Form -> Prop
 fromForm (P p) = p
-fromForm _ = undefined
+fromForm _ = undefined --eek what happens here 
 
 getForms :: [Form] -> [Prop]
 getForms = map fromForm . filter isForm
 
-meTrans :: [Agent] -> Valuation -> Precondition -> Postcondition -> Transition QState Character'
-meTrans _   v _   _    (QInit, Left state)   = Q . getForms $ fromMaybe undefined (lookup state v)
-meTrans _   _ _   _    (QInit, Right _)      = undefined -- Bad input
-meTrans _   _ _   _    (Q _  , Left _)       = undefined -- Another baddie
-meTrans ags _ pre post (Q ps , Right ev) 
-    | not $ ps `models` pre ev               = undefined -- another baddie
-    | otherwise                              = Q [p | p <- produceAllProps ags, ps `models` post (ev, p)]
+meTrans :: EpistM -> EventModel -> Transition QState Character'
+meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Q . getForms $ fromMaybe undefined (lookup state v)
+meTrans _                 _                (QInit, Right _)      = undefined -- Reject input
+meTrans _                 _                (Q _  , Left _)       = undefined -- Reject input
+meTrans (Mo _ ags _ _ _) (_, _, pre, post) (Q ps , Right ev) 
+    | not $ ps `models` pre ev                                   = undefined -- Reject input
+    | otherwise                                                  = Q [p | p <- produceAllProps ags, ps `models` post (ev, p)]
 
 models :: [Prop] -> Form -> Bool
 models ps f = fromForm f `elem` ps
