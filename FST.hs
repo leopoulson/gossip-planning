@@ -8,3 +8,4 @@ data FST ch st = FST
     [BiTransition st ch]    -- Transition function
     [st]                    -- Set of initial states
     [(st, Bool)]            -- Set of accepting states 
+    deriving Show

@@ -13,7 +13,7 @@ type Alphabet' = [Character']
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit 
+data QState = Q [Prop] | QInit deriving Show
 
 data ME = ME 
     (FSM Character' QState)
@@ -61,11 +61,14 @@ meTrans (Mo _ ags _ _ _) (_, _, pre, post) (Q ps , Right ev)
 models :: [Prop] -> Form -> Bool
 models ps f = fromForm f `elem` ps
 
+buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character' QState)]
+buildTransducers ep@(Mo _ agents _ _ _) ev = [(agent, buildTransducer agent ep ev) | agent <- agents]
+
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character' QState
 buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
   where
     trans :: [BiTransition QState Character']
-    trans = [(QInit, Left w, Left w', QInit) | (w, w') <- stateRelPairs ep ag]
+    trans = [(QInit, Left w, Left w', QInit) | (w, w') <- stateRelPairs ep ag] ++ [(QInit, Right e, Right e', QInit) | (e, e') <- eventRelPairs ev ag]
 
 
 
