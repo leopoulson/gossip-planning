@@ -22,6 +22,7 @@
 - Consider the best way to differentiate between propositions (i.e. S i j, N i j) and other formulas. Specifically, how to restrict the language of propositions to the bit without K
 - Consider the type of Postcondition being (Event, Prop) -> Form. One day extend it to be (Event, Form) -> Form? is this even needed? 
 - Consider what should happen when we try and make an impossible call
+- Figure out what to do about undefined transitions; move to the empty set? 
 
 ## Bugs / To fix / To update
 

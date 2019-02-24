@@ -80,9 +80,14 @@ identityTransducer (FSM alpha states trans initial accepting) =
         trans' (Q ps, Right ev) = [(Right ev, trans (Q ps, Right ev))]
         trans' _ = undefined
 
+pAutomata :: FSM Character' QState -> Prop -> FSM Character' QState
+pAutomata (FSM alpha states trans initial accepting) pr = 
+    FSM alpha states trans initial accepting' where
+        accepting' = map (pUpdate pr) accepting
 
-
-
+pUpdate :: Prop -> (QState, Bool) -> (QState, Bool)
+pUpdate p (Q ps, _)  = (Q ps, p `elem` ps)
+pUpdate _ qsb = qsb
 
 
 
