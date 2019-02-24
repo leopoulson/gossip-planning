@@ -17,12 +17,13 @@ data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deri
 
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
-data EpistM = Mo 
-    [State]             -- Set of possible worlds
-    [Agent]             -- Set of agents in model
-    Valuation           -- Valuation function; \pi : World -> Set of props.
-    (AgentRel State)    -- Epistemic relation between worlds
-    [State]             -- Set of pointed worlds. 
+data EpistM = Mo {
+    states :: [State],             -- Set of possible worlds
+    agents :: [Agent],             -- Set of agents in model
+    val :: Valuation,              -- Valuation function; \pi : World -> Set of props.
+    eprel :: (AgentRel State),     -- Epistemic relation between worlds
+    pointedWorld :: [State]        -- Set of pointed worlds. 
+    }
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
@@ -68,11 +69,14 @@ rel (Mo _ _ _ rels _) = table2fn rels
 
 -- This gets the worlds related to world w
 -- TODO: Perhaps change from head $
-relatedWorlds :: Rel State -> State -> [State]
+relatedWorlds :: Eq a => Rel a -> a -> [a]
 relatedWorlds r w = concat $ filter (elem w) r
 
-val :: EpistM -> State -> [Form]
-val (Mo _ _ vals _ _) = table2fn vals
+relatedWorldsAgent :: Eq a => AgentRel a -> Agent -> a -> [a]
+relatedWorldsAgent r ag = relatedWorlds (fromMaybe [] (lookup ag r))
+
+tval :: EpistM -> State -> [Form]
+tval (Mo _ _ vals _ _) = table2fn vals
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
@@ -81,7 +85,7 @@ table2fn t ag = fromMaybe [] (lookup ag t)
 -- Give a semantics!
 satisfies :: PointedEpM -> Form -> Bool
 satisfies _ Top = True
-satisfies (m, w) (P n) = P n `elem` val m w
+satisfies (m, w) (P n) = P n `elem` tval m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
 satisfies (m, w) (And ps) = all (satisfies (m, w)) ps 
 satisfies (m, w) (Or ps) = any (satisfies (m, w)) ps

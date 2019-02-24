@@ -65,13 +65,20 @@ buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character' QState)]
 buildTransducers ep@(Mo _ agents _ _ _) ev = [(agent, buildTransducer agent ep ev) | agent <- agents]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character' QState
-buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
+buildTransducer ag ep ev@(_, evrel, _, _) = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
   where
-    trans :: [BiTransition QState Character']
-    trans = [(QInit, Left w, Left w', QInit) | (w, w') <- stateRelPairs ep ag] ++ [(QInit, Right e, Right e', QInit) | (e, e') <- eventRelPairs ev ag]
+    trans :: BiTransition QState Character'
+    trans (QInit, Left w) = [(Left w', QInit) | w' <- relatedWorldsAgent (eprel ep) ag w]
+    trans (QInit, Right e) = [(Right e', QInit) | e' <- relatedWorldsAgent evrel ag e]
+    trans _ = undefined
 
-
-
+identityTransducer :: FSM Character' QState -> FST Character' QState
+identityTransducer (FSM alpha states trans initial accepting) = 
+    FST alpha states trans' initial accepting where
+        trans' :: BiTransition QState Character'
+        trans' (QInit, Left state) = [(Left state, trans (QInit, Left state))]
+        trans' (Q ps, Right ev) = [(Right ev, trans (Q ps, Right ev))]
+        trans' _ = undefined
 
 
 
