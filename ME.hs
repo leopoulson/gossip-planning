@@ -24,7 +24,7 @@ data ME = ME
 -- getAlphabet (Mo states _ _ _ _) (events, _, _, _) = map World states ++ map (\(Model.Call i j) -> ME.Call i j) events
 
 getAlphabet' :: EpistM -> EventModel -> Alphabet'
-getAlphabet' (Mo states _ _ _ _) (events, _, _, _) = map Left states ++ map Right events
+getAlphabet' ep evm = map Left (states ep) ++ map Right (events evm)
 
 powerList :: [a] -> [[a]]
 powerList [] = [[]]
@@ -54,9 +54,9 @@ meTrans :: EpistM -> EventModel -> Transition QState Character'
 meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Q . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = undefined -- Reject input
 meTrans _                 _                (Q _  , Left _)       = undefined -- Reject input
-meTrans (Mo _ ags _ _ _) (_, _, pre, post) (Q ps , Right ev) 
-    | not $ ps `models` pre ev                                   = undefined -- Reject input
-    | otherwise                                                  = Q [p | p <- produceAllProps ags, ps `models` post (ev, p)]
+meTrans (Mo _ ags _ _ _) evm (Q ps , Right ev) 
+    | not $ ps `models` pre evm ev                                   = undefined -- Reject input
+    | otherwise                                                  = Q [p | p <- produceAllProps ags, ps `models` post evm (ev, p)]
 
 models :: [Prop] -> Form -> Bool
 models ps f = fromForm f `elem` ps
@@ -65,11 +65,11 @@ buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character' QState)]
 buildTransducers ep@(Mo _ agents _ _ _) ev = [(agent, buildTransducer agent ep ev) | agent <- agents]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character' QState
-buildTransducer ag ep ev@(_, evrel, _, _) = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
+buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
   where
     trans :: BiTransition QState Character'
     trans (QInit, Left w) = [(Left w', QInit) | w' <- relatedWorldsAgent (eprel ep) ag w]
-    trans (QInit, Right e) = [(Right e', QInit) | e' <- relatedWorldsAgent evrel ag e]
+    trans (QInit, Right e) = [(Right e', QInit) | e' <- relatedWorldsAgent (evrel ev) ag e]
     trans _ = undefined
 
 identityTransducer :: FSM Character' QState -> FST Character' QState

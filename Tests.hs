@@ -23,7 +23,7 @@ callExample = Mo
     [State (1, [])]
 
 callEvM :: EventModel
-callEvM = ([Call a b, Call b a], [(a, [[Call a b], [Call b a]]), (b, [[Call a b], [Call b a]])], anyCall, postUpdate)
+callEvM = EvMo [Call a b, Call b a] [(a, [[Call a b], [Call b a]]), (b, [[Call a b], [Call b a]])] anyCall postUpdate
 -- satisfies (update callExample (callEvM, Call a b) (State (0, [])) (allExperts callExample)
 
 -- Testing Relations
@@ -36,7 +36,7 @@ exampleRel = Mo
     [State (0, [])]
 
 exampleCallModelRel :: EventModel
-exampleCallModelRel = ([Call a b, Call b c, Call c d, Call d a], [(a, [[Call a b, Call b c], [Call c d, Call d a]])], anyCall, postUpdate)
+exampleCallModelRel = EvMo [Call a b, Call b c, Call c d, Call d a] [(a, [[Call a b, Call b c], [Call c d, Call d a]])] anyCall postUpdate
 
 exampleRelUpd :: EpistM
 exampleRelUpd = update exampleRel exampleCallModelRel

@@ -22,7 +22,7 @@ data EpistM = Mo {
     agents :: [Agent],             -- Set of agents in model
     val :: Valuation,              -- Valuation function; \pi : World -> Set of props.
     eprel :: (AgentRel State),     -- Epistemic relation between worlds
-    pointedWorld :: [State]        -- Set of pointed worlds. 
+    actual :: [State]        -- Set of pointed worlds. 
     }
 
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
@@ -32,7 +32,12 @@ data Event = Call Agent Agent deriving (Eq, Ord)
 
 -- We have event models = (E, R^E, pre, post).
 -- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
-type EventModel = ([Event], AgentRel Event, Precondition, Postcondition)
+data EventModel = EvMo {
+    events :: [Event], 
+    evrel :: AgentRel Event, 
+    pre :: Precondition, 
+    post :: Postcondition
+}
 type PointedEvM = (EventModel, Event)
 type Precondition  = Event -> Form
 type Postcondition = (Event, Prop) -> Form
@@ -113,15 +118,15 @@ produceAllProps :: [Agent] -> [Prop]
 produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
 
 update :: EpistM -> EventModel -> EpistM
-update m@(Mo states ags _ rels actual) (events, erels, pre, post) = 
-    Mo states' ags val' rels' actual
+update epm evm = 
+    Mo states' (agents epm) val' rels' (actual epm)
     where
-        states' = [stateUpdate s ev | s <- states, ev <- events , satisfies (m, s) (pre ev)]
-        rels' = [(ag, newRel ag) | ag <- ags]
-        newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent rels), es <- fromMaybe [] (lookup agent erels)]
+        states' = [stateUpdate s ev | s <- states epm, ev <- events evm, satisfies (epm, s) (pre evm ev)]
+        rels' = [(ag, newRel ag) | ag <- agents epm]
+        newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent $ eprel epm), es <- fromMaybe [] (lookup agent $ evrel evm)]
         val' = [(s, ps s) | s <- states']
-        ps s = [P p | p <- props, satisfies (m, trimLast s) (post (lastEv s, p))]
-        props = produceAllProps ags
+        ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
+        props = produceAllProps $ agents epm
 
 ptUpdate :: PointedEpM -> PointedEvM -> PointedEpM
 ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
@@ -142,7 +147,7 @@ stateRelPairs :: EpistM -> Agent -> [(State, State)]
 stateRelPairs (Mo _ _ _ arel _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
 
 eventRelPairs :: EventModel -> Agent -> [(Event, Event)]
-eventRelPairs (_, erel, _, _) ag = relPairs $ fromMaybe [] (lookup ag erel) 
+eventRelPairs ev ag = relPairs $ fromMaybe [] (lookup ag (evrel ev)) 
 
 relPairs :: Rel a -> [(a, a)]
 relPairs = concatMap allPairs
