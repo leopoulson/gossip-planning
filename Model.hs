@@ -21,7 +21,7 @@ data EpistM = Mo {
     states :: [State],             -- Set of possible worlds
     agents :: [Agent],             -- Set of agents in model
     val :: Valuation,              -- Valuation function; \pi : World -> Set of props.
-    eprel :: (AgentRel State),     -- Epistemic relation between worlds
+    eprel :: AgentRel State,     -- Epistemic relation between worlds
     actual :: [State]        -- Set of pointed worlds. 
     }
 
@@ -61,9 +61,9 @@ instance Show State where
     show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
 
 instance Show EpistM where
-    show (Mo states agents valuation erel initial) = 
-        "States: " ++ show states ++ "\n" ++
-        "Agents: " ++ show agents ++ "\n" ++
+    show (Mo sts ags valuation erel initial) = 
+        "States: " ++ show sts ++ "\n" ++
+        "Agents: " ++ show ags ++ "\n" ++
         "Valuation: " ++ show valuation ++ "\n" ++ 
         "Relations: " ++ show erel ++ "\n" ++ 
         "Initial: " ++ show initial ++ "\n"

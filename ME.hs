@@ -13,7 +13,7 @@ type Alphabet' = [Character']
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit deriving Show
+data QState = Q [Prop] | QInit deriving (Show, Eq)
 
 data ME = ME 
     (FSM Character' QState)
@@ -24,7 +24,7 @@ data ME = ME
 -- getAlphabet (Mo states _ _ _ _) (events, _, _, _) = map World states ++ map (\(Model.Call i j) -> ME.Call i j) events
 
 getAlphabet' :: EpistM -> EventModel -> Alphabet'
-getAlphabet' ep evm = map Left (states ep) ++ map Right (events evm)
+getAlphabet' ep evm = map Left (Model.states ep) ++ map Right (events evm)
 
 powerList :: [a] -> [[a]]
 powerList [] = [[]]
@@ -65,12 +65,15 @@ buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character' QState)]
 buildTransducers ep@(Mo _ agents _ _ _) ev = [(agent, buildTransducer agent ep ev) | agent <- agents]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character' QState
-buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] [(QInit, True)]
+buildTransducer ag ep ev = FST (getAlphabet' ep ev) [QInit] trans [QInit] acc
   where
     trans :: BiTransition QState Character'
     trans (QInit, Left w) = [(Left w', QInit) | w' <- relatedWorldsAgent (eprel ep) ag w]
     trans (QInit, Right e) = [(Right e', QInit) | e' <- relatedWorldsAgent (evrel ev) ag e]
     trans _ = undefined
+    acc :: QState -> Bool
+    acc QInit = True
+    acc _ = False
 
 identityTransducer :: FSM Character' QState -> FST Character' QState
 identityTransducer (FSM alpha states trans initial accepting) = 
@@ -83,11 +86,25 @@ identityTransducer (FSM alpha states trans initial accepting) =
 pAutomata :: FSM Character' QState -> Prop -> FSM Character' QState
 pAutomata (FSM alpha states trans initial accepting) pr = 
     FSM alpha states trans initial accepting' where
-        accepting' = map (pUpdate pr) accepting
+        accepting' = pUpdate' pr accepting
 
 pUpdate :: Prop -> (QState, Bool) -> (QState, Bool)
 pUpdate p (Q ps, _)  = (Q ps, p `elem` ps)
 pUpdate _ qsb = qsb
+
+pUpdate' :: Prop -> (QState -> Bool) -> (QState -> Bool)
+pUpdate' _ f QInit  = f QInit
+pUpdate' p f (Q ps) 
+  | p `elem` ps = True
+  | otherwise   = f (Q ps)
+
+
+
+
+
+
+
+
 
 
 

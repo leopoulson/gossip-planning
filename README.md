@@ -9,8 +9,8 @@
 - Add gossip states and a model for these 
 - Include construction of ME* and assorted transducers
     - Word automata for A ✅
-    - Word automata for P
-    - Word automata for Transducers ✅
+    - Word automata for P ✅
+    - Transducers ✅
 - Implement power set construction
 - Visualisations thereof 
 - Implement a program to generate gossip graphs for testing
@@ -27,5 +27,6 @@
 ## Bugs / To fix / To update
 
 - Change table2fn s.t. satisfies (example, 4) (K c (P (S a b))) errors; a world that isn't covered from the accessibility relaton should not be able to be used, or something
-- Use record syntax
+- Use record syntax (Halfway there)
+- Update FSM accepting functions to be functions
 
