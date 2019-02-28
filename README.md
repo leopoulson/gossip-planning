@@ -6,7 +6,7 @@
 
 - Add action models ✅
 - Consider how to encode a world? We want it to be (World, [Event]) -> Update code to take the event relation as well. Finish update' for this! ✅
-- Add gossip states and a model for these 
+- Add gossip states and a model for these  ✅
 - Include construction of ME* and assorted transducers
     - Word automata for A ✅
     - Word automata for P ✅
@@ -27,6 +27,7 @@
 ## Bugs / To fix / To update
 
 - Change table2fn s.t. satisfies (example, 4) (K c (P (S a b))) errors; a world that isn't covered from the accessibility relaton should not be able to be used, or something
-- Use record syntax (Halfway there)
-- Update FSM accepting functions to be functions
+- Use record syntax (Halfway there) ✅
+- Update FSM accepting functions to be functions ✅
+- Maybe do a tripleCompose function?
 

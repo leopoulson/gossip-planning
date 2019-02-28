@@ -20,6 +20,7 @@ composeFST (FST alpha1 states1 trans1 initial1 accepting1)
     alpha = alpha1
     trans ((s1, s2), a) = [(c, (s1', s2')) | (b, s1') <- trans1 (s1, a), (c, s2') <- trans2 (s2, b)]
 
+-- So we take the value returned from t1 and put this into s2 
 
 
 
