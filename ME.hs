@@ -64,7 +64,7 @@ models :: [Prop] -> Form -> Bool
 models ps f = fromForm f `elem` ps
 
 buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
-buildTransducers ep@(Mo _ agents _ _ _) ev = [(agent, buildTransducer agent ep ev) | agent <- agents]
+buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character QState
 buildTransducer ag ep ev = FST (getAlphabet ep ev) [QInit] trans [QInit] acc
@@ -78,11 +78,11 @@ buildTransducer ag ep ev = FST (getAlphabet ep ev) [QInit] trans [QInit] acc
     acc _ = False
 
 identityTransducer :: FSM Character QState -> FST Character QState
-identityTransducer (FSM alpha states trans initial accepting) = 
-    FST alpha states trans' initial accepting where
+identityTransducer fsm = 
+    FST (alphabet fsm) (FSM.states fsm) trans' (initial fsm) (accepting fsm) where
         trans' :: BiTransition QState Character
-        trans' (QInit, Left state) = [(Left state, trans (QInit, Left state))]
-        trans' (Q ps, Right ev) = [(Right ev, trans (Q ps, Right ev))]
+        trans' (QInit, Left state) = [(Left state, transition fsm (QInit, Left state))]
+        trans' (Q ps, Right ev) = [(Right ev, transition fsm (Q ps, Right ev))]
         trans' _ = undefined
 
 buildComposedTransducers :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character ((QState, QState), QState)

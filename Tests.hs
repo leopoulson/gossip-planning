@@ -3,6 +3,19 @@ module Tests where
 import Model
 import ME
 
+import Test.HUnit hiding (State)
+
+-- HUnit stuff
+
+test1 :: Test
+test1 = "1 + 2" ~: 3 ~=? (1 + 2)
+
+tests :: Test
+tests = TestList [TestLabel "t1" test1]
+
+
+
+
 
 -- Testing Calls
 
