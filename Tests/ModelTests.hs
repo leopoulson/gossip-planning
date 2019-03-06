@@ -58,26 +58,41 @@ updateModel = update exampleModel1 eventModel1
 
 -- Testing Relations
 
--- relModel :: EpistM
--- relModel = Mo 
---     [State (0, []), State (1, [])]
---     [a, b]
---     [(State (0, []))]
+relTests :: Test
+relTests = test [
+            "Agent a cannot distinguish between any of the four worlds"
+            ~: (a, [[State (0, [Call a b]), State (0, [Call b a]), State (1, [Call a b]), State (1, [Call b a])]])
+            ~=? (showRel relUpdate !! 0),
+            "Agent b can distinguish between all three world"
+            ~: (b, [[State (0, [Call a b])], [State (0, [Call b a])], [State (1, [Call a b])], [State (1, [Call b a])]])
+            ~=? (showRel relUpdate !! 1)
+            ]
 
-
-exampleRel :: EpistM
-exampleRel = Mo 
-    [State (0, []), State (1, []), State (2, [])]
-    [a, b, c, d]
-    []
-    [(a, [[State (0, []), State (1, []), State (2, [])]])]
+relModel :: EpistM
+relModel = Mo 
+    [State (0, []), State (1, [])]
+    [a, b]
+    [(State (0, []), [P (N a b), P (N b a)]), (State (1, []), [P (N a b), P (N b a)])]
+    [(a, [[State (0, []), State (1, [])]]), (b, [[State (0, [])], [State (1, [])]])]
     [State (0, [])]
 
-exampleCallModelRel :: EventModel
-exampleCallModelRel = EvMo [Call a b, Call b c, Call c d, Call d a] [(a, [[Call a b, Call b c], [Call c d, Call d a]])] anyCall postUpdate
+relEvent :: EventModel
+relEvent = EvMo
+    [Call a b, Call b a]
+    [(a, [[Call a b, Call b a]]), (b, [[Call a b], [Call b a]])]
+    anyCall
+    postUpdate
 
-exampleRelUpd :: EpistM
-exampleRelUpd = update exampleRel exampleCallModelRel
+relUpdate :: EpistM
+relUpdate = update relModel relEvent
 
 showRel :: EpistM -> [(Agent, Rel State)]
 showRel (Mo _ _ _ r _) = r
+
+
+
+
+
+
+
+
