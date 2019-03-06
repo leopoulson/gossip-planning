@@ -87,10 +87,21 @@ tval (Mo _ _ vals _ _) = table2fn vals
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
 table2fn t ag = fromMaybe [] (lookup ag t)
 
+evaluateProp :: Prop -> EpistM -> State -> Bool
+evaluateProp (N i j) m w 
+    | i == j    = True
+    | otherwise = P (N i j) `elem` tval m w
+evaluateProp (S i j) m w 
+    | i == j    = True
+    | otherwise = P (S i j) `elem` tval m w
+
+-- evaluateProp (S i j) _ _ = True
+-- evaluateProp p m w       = P p `elem` tval m w
+
 -- Give a semantics!
 satisfies :: PointedEpM -> Form -> Bool
 satisfies _ Top = True
-satisfies (m, w) (P n) = P n `elem` tval m w
+satisfies (m, w) (P n) = evaluateProp n m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
 satisfies (m, w) (And ps) = all (satisfies (m, w)) ps 
 satisfies (m, w) (Or ps) = any (satisfies (m, w)) ps
