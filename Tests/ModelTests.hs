@@ -18,12 +18,25 @@ tev3 :: Test
 tev3 = "Check updates working"
      ~: True ~=? satisfies (updateModel, (State (0, [Call a b]))) (P (S b a))
 
+tev4 :: Test
+tev4 = "Check that updates to everyone being an expert work "
+     ~: True ~=? satisfies (updateModel, (State (0, [Call a b]))) (allExperts updateModel)
+
+tev5 :: Test
+tev5 = "Check that impossible call updates can't evaluate to true"
+     ~: False ~=? satisfies (updateModel, (State (0, [Call b a]))) (P (S b a))
+
+tev6 :: Test 
+tev6 = "Indeed, check that impossible calls don't produce an updated state"
+     ~: False ~=? (State (0, [Call b a])) `elem` states updateModel
+
+tev7 :: Test 
+tev7 = "Check that possible calls do yield an updated state"
+     ~: True ~=? (State (0, [Call a b])) `elem` states updateModel
 
 -- We don't need Test n in front of the actual test
 tevTests :: Test
-tevTests = test ["Test 1" ~: tev1, 
-                 "Test 2" ~: tev2,
-                 "Test 3" ~: tev3]
+tevTests = test [tev1, tev2, tev3, tev4, tev5, tev6, tev7]
 
 exampleModel1 :: EpistM
 exampleModel1 = Mo 
@@ -43,34 +56,15 @@ eventModel1 = EvMo
 updateModel :: EpistM
 updateModel = update exampleModel1 eventModel1
 
-
--- Testing Calls
-
-example :: EpistM
-example = Mo 
-    [State (0, []), State (1, []), State (2, []), State (3, [])]
-    [a, b, c]
-    [(State (0, []), [P (S a b)]), (State (1, []), [P (S a b)]), (State (2, []), [P (S a b)])]
-    [(a, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (b, [[State (0, [])], [State (1, [])], [State (2, [])], [State (3, [])]]), (c, [[State (0, []), State (1, []), State (2, [])], [State (3, [])]])]
-    [State (1, [])]
-
-callExample :: EpistM
-callExample = Mo 
-    [State (0, [])] 
-    [a, b] 
-    [(State (0, []), [P (N a b), P (N a a), P (N b b), P (S a a), P (S b b)])] 
-    [(a, [[State (0, [])]]), (b, [[State (0, [])]])] 
-    [State (1, [])]
-
-callEvM :: EventModel
-callEvM = EvMo 
-    [Call a b, Call b a] 
-    [(a, [[Call a b], [Call b a]]), (b, [[Call a b], [Call b a]])] 
-    anyCall 
-    postUpdate
--- satisfies (update callExample callEvM, (State (0, []))) (allExperts callExample)
-
 -- Testing Relations
+
+-- relModel :: EpistM
+-- relModel = Mo 
+--     [State (0, []), State (1, [])]
+--     [a, b]
+--     [(State (0, []))]
+
+
 exampleRel :: EpistM
 exampleRel = Mo 
     [State (0, []), State (1, []), State (2, [])]

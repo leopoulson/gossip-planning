@@ -134,13 +134,18 @@ update epm evm =
     where
         states' = [stateUpdate s ev | s <- states epm, ev <- events evm, satisfies (epm, s) (pre evm ev)]
         rels' = [(ag, newRel ag) | ag <- agents epm]
-        newRel agent = [liftA2 stateUpdate ss es | ss <- fromMaybe [] (lookup agent $ eprel epm), es <- fromMaybe [] (lookup agent $ evrel evm)]
+        newRel agent = filterRel states' [liftA2 stateUpdate ss es |
+                                          ss <- fromMaybe [] (lookup agent $ eprel epm),
+                                          es <- fromMaybe [] (lookup agent $ evrel evm)] 
         val' = [(s, ps s) | s <- states']
         ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
         props = produceAllProps $ agents epm
 
 ptUpdate :: PointedEpM -> PointedEvM -> PointedEpM
 ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
+
+filterRel :: Eq a => [a] -> Rel a -> Rel a
+filterRel as = filter (not . null) . map (filter (`elem` as))
 
 stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
