@@ -2,12 +2,13 @@ module FST where
 
 type BiTransition q e = (q, e) -> [(e, q)]
 
-data FST ch st = FST 
-    [ch]                    -- Alphabet
-    [st]                    -- Set of states
-    (BiTransition st ch)    -- Transition function
-    [st]                    -- Set of initial states
-    (st -> Bool)            -- Set of accepting states 
+data FST ch st = FST {
+    alphabet :: [ch],                      -- Alphabet
+    states :: [st],                        -- Set of states
+    bitransition :: BiTransition st ch,    -- Transition function
+    initial :: [st],                       -- Set of initial states
+    accepting :: st -> Bool                -- Set of accepting states 
+}
 
 composeFST :: FST ch st1 -> FST ch st2 -> FST ch (st1, st2)
 composeFST (FST alpha1 states1 trans1 initial1 accepting1) 

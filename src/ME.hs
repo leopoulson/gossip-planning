@@ -84,23 +84,24 @@ buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character QState
-buildTransducer ag ep ev = FST (getAlphabet ep ev) [QInit] trans [QInit] acc
+buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
   where
     trans :: BiTransition QState Character
     trans (QInit, Left w) = [(Left w', QInit) | w' <- relatedWorldsAgent (eprel ep) ag w]
-    trans (QInit, Right e) = [(Right e', QInit) | e' <- relatedWorldsAgent (evrel ev) ag e]
-    trans _ = undefined
+    trans (QInit, Right ev) = [(Right ev', QInit) | ev' <- relatedWorldsAgent (evrel evm) ag ev]
+    trans (Q _, _) = error "No transition for states other than QInit"
     acc :: QState -> Bool
     acc QInit = True
     acc _ = False
 
 identityTransducer :: FSM Character QState -> FST Character QState
-identityTransducer fsm = 
-    FST (alphabet fsm) (FSM.states fsm) trans' (initial fsm) (accepting fsm) where
+identityTransducer (FSM alpha states trans initial accepting) = 
+    FST alpha states trans' initial accepting where
         trans' :: BiTransition QState Character
-        trans' (QInit, Left state) = [(Left state, transition fsm (QInit, Left state))]
-        trans' (Q ps, Right ev) = [(Right ev, transition fsm (Q ps, Right ev))]
-        trans' _ = undefined
+        trans' (st, ch) = [(ch, trans (st, ch))]
+        -- trans' (QInit, Left state) = [(Left state, trans (QInit, Left state))]
+        -- trans' (Q ps, Right ev) = [(Right ev, trans (Q ps, Right ev))]
+        -- trans' _ = undefined
 
 buildComposedTransducers :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character ((QState, QState), QState)
 buildComposedTransducers ag ep ev fsm = idt `composeFST` buildTransducer ag ep ev `composeFST` idt 
