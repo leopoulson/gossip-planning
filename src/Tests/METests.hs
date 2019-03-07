@@ -4,6 +4,7 @@ import ME
 import Model
 import FSM
 import FST
+import SSFST
 import Tests.Tests
 
 import Test.HUnit hiding (State)
@@ -177,6 +178,24 @@ t3 = bitransition concat1 $ ((Q [N b a], QInit), Right (Call a a))
 
 t4 :: [(Character, ((QState, QState), QState))]
 t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
+
+-- Testing SSFST
+
+sstrans :: SSFST Character
+sstrans = buildSSTransducer a cTransModel cTransEv
+
+idTrans = identityTransducer transAuto
+
+tripleTrans :: FST Character QState
+tripleTrans = tricomposeFST idTrans sstrans idTrans
+
+tripleTransFn = bitransition tripleTrans
+
+ttTest1 = tripleTransFn (Q [N a b], Right (Call a b))
+
+ttTest2 = tripleTransFn (Q [N b a], Right (Call b a))
+
+ttTest3 = tripleTransFn (Q [N b a], Right (Call a a))
 
 
 

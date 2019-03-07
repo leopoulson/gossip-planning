@@ -3,6 +3,7 @@ module ME where
 import Model
 import FSM
 import FST
+import SSFST
 import RS
 import Data.Maybe
 import Data.List (sort)
@@ -82,6 +83,13 @@ models _  (K _ _)     = error "How to model K?"
 
 buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
+
+buildSSTransducer :: Agent -> EpistM -> EventModel -> SSFST Character
+buildSSTransducer ag ep evm = SSFST (getAlphabet ep evm) trans 
+  where
+    trans :: SSTransition Character
+    trans (Left w)  =  [Left w'   | w'  <- relatedWorldsAgent (eprel ep) ag w]
+    trans (Right ev) = [Right ev' | ev' <- relatedWorldsAgent (evrel evm) ag ev]
 
 buildTransducer :: Agent -> EpistM -> EventModel -> FST Character QState
 buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
