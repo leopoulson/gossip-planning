@@ -15,7 +15,7 @@ type Valuation = [(State, [Form])]
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
 
-data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
+data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show, Ord)
 
 data EpistM = Mo {
     states :: [State],             -- Set of possible worlds
@@ -38,6 +38,7 @@ data EventModel = EvMo {
     pre :: Precondition, 
     post :: Postcondition
 }
+
 type PointedEvM = (EventModel, Event)
 type Precondition  = Event -> Form
 type Postcondition = (Event, Prop) -> Form

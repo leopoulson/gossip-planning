@@ -5,6 +5,7 @@ import FSM
 import FST
 import RS
 import Data.Maybe
+import Data.List (sort)
 
 -- data Character = World State | Call Agent Agent deriving (Eq, Show)
 -- type Alphabet = [Character]
@@ -14,7 +15,13 @@ type Alphabet = [Character]
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit deriving (Show, Eq)
+data QState = Q [Prop] | QInit deriving (Show)
+
+instance Eq QState where
+    QInit == QInit = True
+    Q ps1 == Q ps2 = sort ps1 == sort ps2
+    QInit == _     = False   
+    Q _   == _     = False 
 
 data ME = ME 
     (FSM Character QState)
@@ -47,21 +54,31 @@ isForm _ = False
 
 fromForm :: Form -> Prop
 fromForm (P p) = p
-fromForm _ = undefined --eek what happens here 
+fromForm f = error ("From form received " ++ show f)
 
 getForms :: [Form] -> [Prop]
 getForms = map fromForm . filter isForm
+
+idProps :: [Agent] -> [Prop]
+idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM -> EventModel -> Transition QState Character
 meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Q . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = undefined -- Reject input
 meTrans _                 _                (Q _  , Left _)       = undefined -- Reject input
 meTrans (Mo _ ags _ _ _) evm (Q ps , Right ev) 
-    | not $ ps `models` pre evm ev                               = undefined -- Reject input
-    | otherwise                                                  = Q [p | p <- produceAllProps ags, ps `models` post evm (ev, p)]
+    | not $ psID `models` pre evm ev              = error "Doesn't satisfy precondition"
+    | otherwise                                                  = Q [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
+    where
+        psID = ps ++ idProps ags        
 
 models :: [Prop] -> Form -> Bool
-models ps f = fromForm f `elem` ps
+models _  Top         = True
+models ps (Not form)  = not $ models ps form
+models ps (P form)    = form `elem` ps
+models ps (Or forms)  = any (models ps) forms
+models ps (And forms) = all (models ps) forms
+models _  (K _ _)     = error "How to model K?"
 
 buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
