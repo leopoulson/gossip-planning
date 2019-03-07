@@ -1,8 +1,15 @@
 module ModelTests where
 
 import Model
+import Tests
+import Control.Monad
 
 import Test.HUnit hiding (State)
+
+allTestsList :: [Test]
+allTestsList = [tevTests, relTests]
+
+allTests = concatTests allTestsList
 
 -- Testing Evaluation
 
