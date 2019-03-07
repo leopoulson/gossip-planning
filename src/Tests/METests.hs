@@ -9,7 +9,7 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 allTests :: [Test]
-allTests = [meTests, transTests, idTests]
+allTests = [meTests, transTests, idTests, cTransTests]
 
 doAllTests :: IO Counts
 doAllTests = runTestTT $ concatTests allTests
@@ -91,7 +91,7 @@ transModel :: EpistM
 transModel = Mo
     [State (0, []), State (1, []), State (2, [])]
     [a]
-    []
+    [(State (0, []), [P (N a b)]), (State (1, []), [P (N a b)]), (State (2, []), [P (N b a)])]
     [(a, [[State (0, [])], [State (1, []), State (2, [])]])]
     [State (0, [])]
 
@@ -125,6 +125,60 @@ idT :: FST Character QState
 idT = identityTransducer dAutomata
 
 -- Tests for composition transducer construction
+
+t1 :: [(Character, ((QState, QState), QState))]
+t1 = biT (((Q [N a b], QInit), Q [N a b]), Right (Call a b))
+
+t2 :: [(Character, ((QState, QState), QState))]
+t2 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call b a))
+
+ctT1 :: Test
+ctT1 = "Testing the way the transition works for composed transducers"
+    ~: [(Right (Call a b),((Q [N a b, N b a, S a b, S b a], QInit), Q [N a b, N b a, S a b, S b a]))] ~=? t1
+
+ctT2 :: Test
+ctT2 = "Testing the way it works for indistinguishable events"
+    ~: [(Right (Call b a),((Q [N a b, N b a, S a b, S b a], QInit),Q [N a b, N b a, S a b, S b a])),(Right (Call a a),((Q [N a b, N b a, S a b, S b a], QInit),Q [N b a]))] ~=? t2
+
+cTransTests :: Test
+cTransTests = TestList [ctT1, ctT2]
+
+doCTransTests :: IO Counts
+doCTransTests = runTestTT cTransTests
+
+cTransModel :: EpistM
+cTransModel = Mo
+    [State (0, []), State (1, []), State (2, [])]
+    [a, b]
+    [(State (0, []), [P (N a b)]), (State (1, []), [P (N a b)]), (State (2, []), [P (N b a)])]
+    [(a, [[State (0, [])], [State (1, []), State (2, [])]]), (b, [[State (0, [])], [State (1, []), State (2, [])]])]
+    [State (0, [])]
+
+cTransEv :: EventModel
+cTransEv = EvMo
+    [Call a b, Call b a, Call a a]
+    [(a, [[Call a b], [Call b a, Call a a]]), (b, [[Call a b], [Call b a, Call a a]])]
+    anyCall
+    postUpdate
+
+transAuto :: FSM Character QState
+transAuto = buildDAutomata cTransModel cTransEv
+
+cTrans :: FST Character ((QState, QState), QState)
+cTrans = buildComposedTransducers a cTransModel cTransEv (buildDAutomata cTransModel cTransEv)
+
+biT :: BiTransition ((QState, QState), QState) Character
+biT = bitransition cTrans
+
+concat1 :: FST Character (QState, QState)
+concat1 = composeFST (identityTransducer transAuto) (buildTransducer a cTransModel cTransEv)
+
+t3 = bitransition concat1 $ ((Q [N b a], QInit), Right (Call a a))
+
+t4 :: [(Character, ((QState, QState), QState))]
+t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
+
+
 
 
 
