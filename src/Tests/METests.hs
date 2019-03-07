@@ -181,6 +181,20 @@ t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
 
 -- Testing SSFST
 
+-- Our problem is essentially that we want our composed transducer to relate calls, and tell us which 
+-- state we could be in having just consumed that input at our current one. However this is not working.
+
+-- It seems that the identity transducer contains in itself the call update, thus updating our state
+-- with an event before we can actually process the event. This is not particularly effective, and does 
+-- not solve our problem. 
+-- This could perhaps be rectified by removing the transducer that comes before the identity transducer,
+-- which would stop the computation from happening. Further, it would mean that we get our set of 
+-- indistinguishable events and *then* act upon them. This seems like it's exactly what we actually 
+-- want to do. Putting the transducer in front never reallly made that much sense in the first place anyway...
+
+-- With this change, it now behaves like we would expect it to. However, it's important to consider if this
+-- is really the behaviour that we want?
+
 sstrans :: SSFST Character
 sstrans = buildSSTransducer a cTransModel cTransEv
 
