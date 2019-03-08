@@ -116,6 +116,9 @@ buildComposedTransducers ag ep ev fsm = idt `composeFST` buildTransducer ag ep e
   where
     idt = identityTransducer fsm
 
+buildComposedSS :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character QState
+buildComposedSS ag ep evm fsm = buildSSTransducer ag ep evm `composeSS` identityTransducer fsm
+
 pAutomata :: FSM Character QState -> Prop -> FSM Character QState
 pAutomata (FSM alpha states trans initial accepting) pr = 
     FSM alpha states trans initial accepting' where

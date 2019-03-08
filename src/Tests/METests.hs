@@ -10,7 +10,7 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 allTests :: [Test]
-allTests = [meTests, transTests, idTests, cTransTests]
+allTests = [meTests, transTests, idTests, cTransTests, ssTests]
 
 doAllTests :: IO Counts
 doAllTests = runTestTT $ concatTests allTests
@@ -133,6 +133,9 @@ t1 = biT (((Q [N a b], QInit), Q [N a b]), Right (Call a b))
 t2 :: [(Character, ((QState, QState), QState))]
 t2 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call b a))
 
+t7 :: [(Character, ((QState, QState), QState))]
+t7 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
+
 ctT1 :: Test
 ctT1 = "Testing the way the transition works for composed transducers"
     ~: [(Right (Call a b),((Q [N a b, N b a, S a b, S b a], QInit), Q [N a b, N b a, S a b, S b a]))] ~=? t1
@@ -161,9 +164,6 @@ cTransEv = EvMo
     [(a, [[Call a b], [Call b a, Call a a]]), (b, [[Call a b], [Call b a, Call a a]])]
     anyCall
     postUpdate
-
-transAuto :: FSM Character QState
-transAuto = buildDAutomata cTransModel cTransEv
 
 cTrans :: FST Character ((QState, QState), QState)
 cTrans = buildComposedTransducers a cTransModel cTransEv (buildDAutomata cTransModel cTransEv)
@@ -195,20 +195,46 @@ t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
 -- With this change, it now behaves like we would expect it to. However, it's important to consider if this
 -- is really the behaviour that we want?
 
+ssTest1 :: Test
+ssTest1 = "Check that for single relations, behaves as expected"
+       ~: [(Right (Call a b), Q [S a b, S b a, N a b, N b a])] ~=? tripleTransFn (Q [N a b], Right (Call a b))
+
+ssTest2 :: Test
+ssTest2 = "Checl that it also works for non-single ones"
+       ~: [(Right (Call b a), Q [S a b, S b a, N a b, N b a]), (Right (Call a a), Q [N b a])] ~=? tripleTransFn (Q [N b a], Right (Call b a))     
+
+ssTest3 :: Test
+ssTest3 = "Check that it's the same for two indistinguishable calls"
+       ~: tripleTransFn (Q [N b a], Right (Call b a)) ~=? tripleTransFn (Q [N b a], Right (Call a a))
+
+ssTests :: Test
+ssTests = TestList [ssTest1, ssTest2, ssTest3]
+
+dossTests :: IO Counts
+dossTests = runTestTT ssTests
+
 sstrans :: SSFST Character
 sstrans = buildSSTransducer a cTransModel cTransEv
 
+idTrans :: FST Character QState
 idTrans = identityTransducer transAuto
 
-tripleTrans :: FST Character QState
-tripleTrans = tricomposeFST idTrans sstrans idTrans
+transAuto :: FSM Character QState
+transAuto = buildDAutomata cTransModel cTransEv
 
+tripleTrans :: FST Character QState
+tripleTrans = buildComposedSS a cTransModel cTransEv transAuto
+
+tripleTransFn :: BiTransition QState Character
 tripleTransFn = bitransition tripleTrans
 
+ttTest1 :: [(Character, QState)]
 ttTest1 = tripleTransFn (Q [N a b], Right (Call a b))
 
+ttTest2 :: [(Character, QState)]
 ttTest2 = tripleTransFn (Q [N b a], Right (Call b a))
 
+ttTest3 :: [(Character, QState)]
 ttTest3 = tripleTransFn (Q [N b a], Right (Call a a))
 
 

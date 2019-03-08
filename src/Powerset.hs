@@ -5,24 +5,30 @@ import FSM
 import FST
 import ME
 
-data PState = PState { 
-    state :: QState,  
-    possStates :: [QState],
-    endStates :: QState -> [QState]
-}
+-- data PState = PState { 
+--     state :: QState,  
+--     possStates :: [QState]
+-- }
 
+data PState = PState QState [QState]
 
 buildPSA :: FSM Character QState -> FST Character QState -> FSM Character PState
-buildPSA fsm (FST _ _ bitransition _ _) = FSM alphabet' states' transition' initial' accepting' where
-    alphabet'    = alphabet fsm
-    accepting'   = accepting fsm . state 
+buildPSA fsm fst = FSM alphabet' states' transition' initial' accepting' where
+    alphabet'    = FSM.alphabet fsm
+    accepting'   = undefined --FSM.accepting fsm . state 
     states'      = undefined -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
     initial'     = undefined
-    transition' (PState state possStates endStates, ch) = 
-        PState 
-        (transition fsm (state, ch))
-        (possStates' possStates ch) --[s' | s <- possStates, (_, s') <- bitransition (s, ch)] --(possStates' possStates ch)
-        endStates'
-    possStates' possStates ch = [s' | s <- possStates, (_, s') <- bitransition (s, ch)]
-    endStates'  = undefined
+    transition' (PState state possStates, ch) = 
+                 PState (FSM.transition fsm (state, ch))  -- the next "current" state
+                        (getPossStates ch possStates)     -- the set of possible states we can be in
+    getPossStates :: Character -> [QState] -> [QState]
+    getPossStates ch = concatMap (\ st -> map snd $ bitransition fst (st, ch))
+
+
+
+
+
+
+
+
 

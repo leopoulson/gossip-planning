@@ -35,6 +35,15 @@ tricomposeFST (FST alpha1 states1 trans1 initial1 accepting1)
     trans (s1, a) = [(c, s2) | b <- trans2 a, (c, s2) <- trans3 (s1, b)]
     -- trans (s1, a) = [(d, s3) | (b, s2) <- trans1 (s1, a), c <- trans2 b, (d, s3) <- trans3 (s2, c)]
 
+composeSS :: SSFST ch -> FST ch st -> FST ch st
+composeSS (SSFST _ transSS) (FST alpha states trans initial accepting) =
+          FST alpha' states' trans' initial' accepting' where
+    alpha' = alpha
+    states' = states
+    initial' = initial
+    accepting' = accepting
+    trans' (s1, a) = [(c, s2) | b <- transSS a, (c, s2) <- trans (s1, b)]
+
 -- So we take the value returned from t1 and put this into s2 
 
 
