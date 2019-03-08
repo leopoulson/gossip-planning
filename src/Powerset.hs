@@ -24,7 +24,10 @@ buildPSA fsm fst = FSM alphabet' states' transition' initial' accepting' where
     getPossStates :: Character -> [QState] -> [QState]
     getPossStates ch = concatMap (\ st -> map snd $ bitransition fst (st, ch))
 
-
+psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character PState
+psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)
+  where
+    dAuto = buildDAutomata ep ev
 
 
 
