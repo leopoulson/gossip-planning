@@ -11,7 +11,7 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
@@ -27,6 +27,15 @@ psTest2 = "Test that transition for related states is correct"
 psTest3 :: Test
 psTest3 = "There should be no duplicates for related states"
        ~: PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]] ~=? t5
+
+psTest4 :: Test
+psTest4 = "Check that PEval is working right, positively"
+       ~: True ~=? evalPState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]])
+
+psTest5 :: Test
+psTest5 = "Check that PEval is working right, negatively"
+       ~: False ~=? evalPState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
+
 
 t1 = powersetTrans (PState (Q [N a b]) [Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call b a))

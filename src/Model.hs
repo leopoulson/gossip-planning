@@ -152,7 +152,10 @@ stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 
 allExperts :: EpistM -> Form 
-allExperts (Mo _ ag _ _ _) = And [P (S i j) | i <- ag, j <- ag]
+allExperts (Mo _ ag _ _ _) = allExpertsAg ag
+
+allExpertsAg :: [Agent] -> Form
+allExpertsAg ag = And [P (S i j) | i <- ag, j <- ag, i /= j] 
 
 lastEv :: State -> Event
 lastEv (State (_, es)) = last es

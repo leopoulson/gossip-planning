@@ -68,10 +68,14 @@ meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Q . getForms 
 meTrans _                 _                (QInit, Right _)      = undefined -- Reject input
 meTrans _                 _                (Q _  , Left _)       = undefined -- Reject input
 meTrans (Mo _ ags _ _ _) evm (Q ps , Right ev) 
-    | not $ psID `models` pre evm ev              = error "Doesn't satisfy precondition"
+    | not $ psID `models` pre evm ev                             = error "Doesn't satisfy precondition"
     | otherwise                                                  = Q [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
     where
         psID = ps ++ idProps ags        
+
+evalQState :: Form -> QState -> Bool
+evalQState form (Q ps) = models ps form
+evalQState _ QInit          = error "Cannot evaluate QInit"
 
 models :: [Prop] -> Form -> Bool
 models _  Top         = True

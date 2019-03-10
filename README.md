@@ -11,7 +11,7 @@
     - Word automata for A ✅
     - Word automata for P ✅
     - Transducers ✅
-- Implement power set construction
+- Implement power set construction ✅
 - Visualisations thereof 
 - Implement a program to generate gossip graphs for testing
 - Add in automated testing (QuickCheck?)
