@@ -15,6 +15,9 @@ data FSM ch st = FSM {
     accepting :: st -> Bool        -- Set of accepting states 
 }
 
+existsWinningPath :: Eq st => FSM ch st -> [st] -> Bool
+existsWinningPath fsm = any (accepting fsm) . findPathReachable fsm
+
 findPathReachable :: Eq st => FSM ch st -> [st] -> [st]
 findPathReachable fsm sts 
   | sts == sts' = sts
@@ -22,6 +25,8 @@ findPathReachable fsm sts
   where
     sts' = findReachableFromSet fsm sts
 
+-- using nub here has the same complexity as using a set then converting to a list
+-- as set insertion takes O(log n), and we would insert n things
 findReachableFromSet :: Eq st => FSM ch st -> [st] -> [st]
 findReachableFromSet fsm sts = nub $ sts `union` concatMap (findReachableFromOne fsm) sts
 

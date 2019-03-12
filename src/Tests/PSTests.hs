@@ -11,22 +11,22 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, psTest6]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
 
 psTest1 :: Test
 psTest1 = "Test that transition for non-related states is correct" 
-       ~: PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]] ~=? t1
+       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]]) ~=? t1
 
 psTest2 :: Test 
 psTest2 = "Test that transition for related states is correct"
-       ~: PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]] ~=? t2
+       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? t2
 
 psTest3 :: Test
 psTest3 = "There should be no duplicates for related states"
-       ~: PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]] ~=? t5
+       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]]) ~=? t5
 
 psTest4 :: Test
 psTest4 = "Check that PEval is working right, positively"
@@ -36,6 +36,9 @@ psTest5 :: Test
 psTest5 = "Check that PEval is working right, negatively"
        ~: False ~=? evalPState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
 
+psTest6 :: Test
+psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
+       ~: Just (PState (Q [N b a]) [Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b b))
 
 t1 = powersetTrans (PState (Q [N a b]) [Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call b a))
@@ -50,6 +53,10 @@ t3 = powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b a))
 t4 = powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a], Q [N b a, S b c]], Right (Call b a))
 t5 = powersetTrans (PState (Q [N b a, S b a, N a b, S a b]) [Q [N b a, S b a, N a b, S a b]], Right (Call b a))
 
+------------------------------------------------------------------------------
+
+t6 = findReachableFromSet powerset [PState (Q [N b a]) [Q [N b a]]]
+t7 = findReachableFromSet powerset [PState (Q [N a b]) [Q [N a b]]]
 
 -- psTest3 :: Test 
 -- psTest3 = "Test that result is identical for indistinguishable calls"
@@ -70,8 +77,8 @@ model = Mo
 
 eventModel :: EventModel
 eventModel = EvMo
-    [Call a b, Call b a, Call a a]
-    [(a, [[Call a b], [Call b a, Call a a]]), (b, [[Call a b], [Call b a, Call a a]])]
+    [Call a b, Call b a, Call a a, Call b b]
+    [(a, [[Call a b], [Call b a, Call a a], [Call b b]]), (b, [[Call a b], [Call b a, Call a a], [Call b b]])]
     anyCall
     postUpdate
 

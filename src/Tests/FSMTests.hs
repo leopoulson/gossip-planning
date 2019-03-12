@@ -29,7 +29,7 @@ accept _ = False
 -- Basic FSM testing 
 
 tests :: Test
-tests = TestList [test1, test2, test3, test4, test5, test6]
+tests = TestList [test1, test2, test3, test4, test5, test6, test7, test8]
 
 doTests :: IO Counts
 doTests = runTestTT tests
@@ -58,6 +58,12 @@ test6 :: Test
 test6 = "Negatively test findPathReachable"
      ~: [2] ~=? findPathReachable testFSM [2]
 
+test7 :: Test
+test7 = "Positively test winning path"
+     ~: True ~=? existsWinningPath testFSM [0]
 
-
+test8 :: Test
+test8 = "Negatively test winning path"
+     ~: False ~=? existsWinningPath testFSM [2]
+--
 
