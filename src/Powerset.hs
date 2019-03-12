@@ -34,7 +34,7 @@ evalPState (K ag p) (PState q qs) = all (evalQState p) qs
 evalPState form (PState q _) = evalQState form q 
 
 buildPSA :: FSM Character QState -> FST Character QState -> FSM Character PState
-buildPSA fsm fst = FSM alphabet' states' transition' initial' accepting' where
+buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting' (PState st _) = FSM.accepting fsm st
     states'                  = undefined -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
@@ -43,7 +43,7 @@ buildPSA fsm fst = FSM alphabet' states' transition' initial' accepting' where
                  PState (FSM.transition fsm (state, ch))  -- the next "current" state
                         (getPossStates ch possStates)     -- the set of possible states we can be in
     getPossStates :: Character -> [QState] -> [QState]
-    getPossStates ch = nub . concatMap (\ st -> map snd $ bitransition fst (st, ch))
+    getPossStates ch = nub . concatMap (\ st -> map snd $ bitransition fstr (st, ch))
 
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character PState
 psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)

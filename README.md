@@ -15,6 +15,7 @@
 - Visualisations thereof 
 - Implement a program to generate gossip graphs for testing
 - Add in automated testing (QuickCheck?)
+	- It may still be good to try and use QuickCheck for some property-based stuff. HUnit is cool, but QuickCheck might let us do some more powerful things. 
 - Understand how to use Transducers in Haskell ✅
 
 ## To Consider
@@ -29,5 +30,23 @@
 - Change table2fn s.t. satisfies (example, 4) (K c (P (S a b))) errors; a world that isn't covered from the accessibility relaton should not be able to be used, or something
 - Use record syntax (Halfway there) ✅
 - Update FSM accepting functions to be functions ✅
-- Maybe do a tripleCompose function?
+- Maybe do a tripleCompose function? ✅
+
+## How do we find all the successful paths?
+
+All of the solutions found require us to enumerate the states we have. This is rather impractical, given that a state does not particularly "exist" before it's travelled to. 
+
+We can probably just get the set of relevant states by traversing the graph from the starting point. This is not so bad? 
+
+
+
+
+
+
+
+
+
+
+
+
 
