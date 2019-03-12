@@ -40,8 +40,9 @@ buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
     states'                  = undefined -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
     initial'                 = undefined
     transition' (PState state possStates, ch) = 
-                 PState (FSM.transition fsm (state, ch))  -- the next "current" state
-                        (getPossStates ch possStates)     -- the set of possible states we can be in
+                case FSM.transition fsm (state, ch) of   --Probably update this to fmap eventually 
+                        Just st -> Just $ PState st (getPossStates ch possStates)
+                        Nothing -> Nothing 
     getPossStates :: Character -> [QState] -> [QState]
     getPossStates ch = nub . concatMap (\ st -> map snd $ bitransition fstr (st, ch))
 

@@ -64,12 +64,12 @@ idProps :: [Agent] -> [Prop]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM -> EventModel -> Transition QState Character
-meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Q . getForms $ fromMaybe undefined (lookup state v)
-meTrans _                 _                (QInit, Right _)      = undefined -- Reject input
-meTrans _                 _                (Q _  , Left _)       = undefined -- Reject input
+meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . getForms $ fromMaybe undefined (lookup state v)
+meTrans _                 _                (QInit, Right _)      = Nothing
+meTrans _                 _                (Q _  , Left _)       = Nothing
 meTrans (Mo _ ags _ _ _) evm (Q ps , Right ev) 
-    | not $ psID `models` pre evm ev                             = error "Doesn't satisfy precondition"
-    | otherwise                                                  = Q [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
+    | not $ psID `models` pre evm ev                             = Nothing
+    | otherwise                                                  = Just $  Q [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
     where
         psID = ps ++ idProps ags        
 
@@ -110,10 +110,9 @@ identityTransducer :: FSM Character QState -> FST Character QState
 identityTransducer (FSM alpha states trans initial accepting) = 
     FST alpha states trans' initial accepting where
         trans' :: BiTransition QState Character
-        trans' (st, ch) = [(ch, trans (st, ch))]
-        -- trans' (QInit, Left state) = [(Left state, trans (QInit, Left state))]
-        -- trans' (Q ps, Right ev) = [(Right ev, trans (Q ps, Right ev))]
-        -- trans' _ = undefined
+        trans' (st, ch) = case trans (st, ch) of --[(ch, trans (st, ch))]
+            Just q  -> [(ch, q)]
+            Nothing -> []
 
 buildComposedTransducers :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character ((QState, QState), QState)
 buildComposedTransducers ag ep ev fsm = idt `composeFST` buildTransducer ag ep ev `composeFST` idt 

@@ -1,7 +1,7 @@
 module Model where
 
 import Data.Maybe
-import Control.Applicative
+import Control.Applicative (liftA2)
 
 newtype Agent = Ag Int deriving (Eq, Ord)
 
