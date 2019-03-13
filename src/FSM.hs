@@ -16,7 +16,7 @@ data FSM ch st = FSM {
 }
 
 existsWinningPath :: Eq st => FSM ch st -> [st] -> Bool
-existsWinningPath fsm = any (accepting fsm) . findPathReachable fsm
+existsWinningPath fsm sts = any (accepting fsm) $ findPathReachable fsm sts
 
 findPathReachable :: Eq st => FSM ch st -> [st] -> [st]
 findPathReachable fsm sts 
@@ -32,6 +32,9 @@ findReachableFromSet fsm sts = nub $ sts `union` concatMap (findReachableFromOne
 
 findReachableFromOne :: FSM ch st -> st -> [st]
 findReachableFromOne (FSM alph _ trans _ _) st = catMaybes [trans (st, ch) | ch <- alph]
+
+updateAcccepting :: (st -> Bool) -> FSM ch st -> FSM ch st
+updateAcccepting accepting' (FSM al st trans int _) = FSM al st trans int accepting' 
 
 
 

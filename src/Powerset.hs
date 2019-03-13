@@ -51,12 +51,8 @@ psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)
   where
     dAuto = buildDAutomata ep ev
 
-setAccepting :: Form -> FSM Character PState -> FSM Character PState
-setAccepting f (FSM alpha sts trans initialSt _) = 
-  FSM alpha sts trans initialSt accepting' 
-  where 
-    accepting' = evalPState f
-
+setSuccessfulFormula :: Form -> FSM Character PState -> FSM Character PState
+setSuccessfulFormula f = updateAcccepting (evalPState f) 
 
 
 

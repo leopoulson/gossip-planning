@@ -2,6 +2,8 @@ module Tests.FSMTests where
 
 import Test.HUnit hiding (State)
 
+import Model
+import ME
 import FSM
 import Tests.Tests
 
@@ -65,5 +67,4 @@ test7 = "Positively test winning path"
 test8 :: Test
 test8 = "Negatively test winning path"
      ~: False ~=? existsWinningPath testFSM [2]
---
 
