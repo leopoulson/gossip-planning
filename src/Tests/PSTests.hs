@@ -11,7 +11,7 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, psTest6, psTest7, psTest8]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, psTest6, psTest7, psTest8, psTest9]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
@@ -43,10 +43,14 @@ psTest6 = "Check that we don't have any duplicates in the indistinguishable worl
 psTest7 :: Test
 psTest7 = "Check that we can correctly identify winning paths"
        ~: True ~=? existsWinningPath powerset [PState (Q [N a b]) [Q [N a b]]]
-
+       
 psTest8 :: Test
-psTest8 = "Check that we can negatively find winning paths"
-       ~: False ~=? existsWinningPath powerset [PState (Q [N b a]) [Q [N b a]]]
+psTest8 = "Make sure calls update states properly"
+       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call b a))
+
+psTest9 :: Test
+psTest9 = "Make sure calls update states properly"
+       ~: Just (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call a a))
 
 t1 = powersetTrans (PState (Q [N a b]) [Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call b a))
@@ -65,6 +69,8 @@ t5 = powersetTrans (PState (Q [N b a, S b a, N a b, S a b]) [Q [N b a, S b a, N 
 
 t6 = findReachableFromSet powerset [PState (Q [N b a]) [Q [N b a]]]
 t7 = findReachableFromSet powerset [PState (Q [N a b]) [Q [N a b]]]
+
+t6' = findPathReachable powerset [PState (Q [N b a]) [Q [N b a]]]
 
 t8 = FSM.accepting powerset $ PState (Q [N b a]) [Q [N b a]] -- PState (Q [N a b,N b a,S a b,S b a]) [Q [N a b,N b a,S a b,S b a],Q [N b a]]
 

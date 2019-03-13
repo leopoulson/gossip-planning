@@ -15,6 +15,9 @@ data FSM ch st = FSM {
     accepting :: st -> Bool        -- Set of accepting states 
 }
 
+winningFinalStates :: Eq st => FSM ch st -> [st] -> [st]
+winningFinalStates fsm sts = filter (accepting fsm) $ findPathReachable fsm sts
+
 existsWinningPath :: Eq st => FSM ch st -> [st] -> Bool
 existsWinningPath fsm sts = any (accepting fsm) $ findPathReachable fsm sts
 
