@@ -39,6 +39,27 @@ findReachableFromOne (FSM alph _ trans _ _) st = catMaybes [trans (st, ch) | ch 
 updateAcccepting :: (st -> Bool) -> FSM ch st -> FSM ch st
 updateAcccepting accepting' (FSM al st trans int _) = FSM al st trans int accepting' 
 
+-- This function sets the states of an FSM to strictly the states that it can access 
+-- Useful for FSMs with a huge possible state space
+setStatesReachable :: Eq st => FSM ch st -> [st] -> FSM ch st
+setStatesReachable fsm@(FSM al _ trans int acc) sts = FSM al (findReachableFromSet fsm sts) trans int acc
+
+findLoops :: Eq st => FSM ch st -> [(st, ch)]
+findLoops fsm = [(q, e) | q <- states fsm, e <- alphabet fsm, 
+                          transition fsm (q, e) == Just q]
+
+removeLoopsFSM :: (Eq st, Eq ch) => FSM ch st -> FSM ch st
+removeLoopsFSM fsm@(FSM al st trans int acc) = FSM al st trans' int acc 
+  where 
+    trans' = removeLoops trans $ findLoops fsm
+
+removeLoops :: (Eq st, Eq ch) => Transition st ch -> [(st, ch)] -> Transition st ch
+removeLoops = foldr removeLoop
+
+removeLoop :: (Eq st, Eq ch) => (st, ch) -> Transition st ch -> Transition st ch
+removeLoop (st, ch) trans (st', ch') 
+  | (st, ch) == (st', ch')  = Nothing
+  | otherwise               = trans (st', ch')
 
 
 

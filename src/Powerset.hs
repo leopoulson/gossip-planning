@@ -57,5 +57,3 @@ setSuccessfulFormula f = updateAcccepting (evalPState f)
 
 
 
-
-

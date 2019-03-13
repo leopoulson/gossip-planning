@@ -7,7 +7,7 @@ import ME
 import FSM
 import Tests.Tests
 
-data FChar = A | B
+data FChar = A | B deriving (Eq, Show)
 
 testFSM :: FSM FChar Integer
 testFSM = FSM 
@@ -67,4 +67,45 @@ test7 = "Positively test winning path"
 test8 :: Test
 test8 = "Negatively test winning path"
      ~: False ~=? existsWinningPath testFSM [2]
+
+----------- Testing Loops -----------------
+
+loopFSM :: FSM FChar Integer
+loopFSM = FSM 
+    [A, B]
+    [0, 1, 2, 3]
+    loopTrans
+    [0]
+    loopAccept
+
+loopTrans :: Transition Integer FChar
+loopTrans (0, A) = Just 0
+loopTrans (0, B) = Just 1
+loopTrans _ = Nothing
+
+loopAccept :: Integer -> Bool
+loopAccept 0 = True
+loopAccept _ = False
+
+lTests :: Test
+lTests = TestList [lTest1, lTest2, lTest3]
+
+dolTests :: IO Counts
+dolTests = runTestTT lTests
+
+lTest1 :: Test
+lTest1 = "Check find loops works"
+      ~: [(0, A)] ~=? findLoops loopFSM
+
+lTest2 :: Test 
+lTest2 = "Check remove loops works"
+      ~: Nothing ~=? transition (removeLoopsFSM loopFSM) (0, A)
+
+lTest3 :: Test
+lTest3 = "Check no loops left after remove loops"
+      ~: [] ~=? (findLoops . removeLoopsFSM) loopFSM 
+
+
+
+
 

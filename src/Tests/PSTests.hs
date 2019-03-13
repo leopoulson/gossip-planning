@@ -43,7 +43,7 @@ psTest6 = "Check that we don't have any duplicates in the indistinguishable worl
 psTest7 :: Test
 psTest7 = "Check that we can correctly identify winning paths"
        ~: True ~=? existsWinningPath powerset [PState (Q [N a b]) [Q [N a b]]]
-       
+
 psTest8 :: Test
 psTest8 = "Make sure calls update states properly"
        ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call b a))
@@ -82,6 +82,9 @@ powersetTrans = transition powerset
 
 powerset :: FSM Character PState
 powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a model eventModel
+
+psetBA :: FSM Character PState
+psetBA = setStatesReachable powerset [PState (Q [N b a]) [Q [N b a]]]
 
 model :: EpistM
 model = Mo
