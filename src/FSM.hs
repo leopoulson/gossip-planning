@@ -1,6 +1,6 @@
 module FSM where
 
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, mapMaybe)
 import Data.List (nub, union)
 
 -- Basically, this is going to have to change to be Maybe q
@@ -61,7 +61,8 @@ removeLoop (st, ch) trans (st', ch')
   | (st, ch) == (st', ch')  = Nothing
   | otherwise               = trans (st', ch')
 
-
+getNeighbours :: FSM ch st -> st -> [st]
+getNeighbours fsm st = mapMaybe (\ch -> transition fsm (st, ch)) $ alphabet fsm 
 
 
 
