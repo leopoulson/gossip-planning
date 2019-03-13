@@ -1,6 +1,6 @@
 module FSM where
 
-import Data.Maybe (catMaybes, mapMaybe)
+import Data.Maybe (catMaybes, mapMaybe, isJust, fromJust)
 import Data.List (nub, union)
 
 -- Basically, this is going to have to change to be Maybe q
@@ -63,6 +63,17 @@ removeLoop (st, ch) trans (st', ch')
 
 getNeighbours :: FSM ch st -> st -> [st]
 getNeighbours fsm st = mapMaybe (\ch -> transition fsm (st, ch)) $ alphabet fsm 
+
+getNeighboursEv :: FSM ch st -> st -> [(st, ch)]
+getNeighboursEv fsm st = map (\(st, ch) -> (fromJust st, ch)) . 
+                         filter (isJust . fst) . 
+                         map (\ch -> (transition fsm (st, ch), ch)) $ alphabet fsm
+
+
+
+
+
+
 
 
 
