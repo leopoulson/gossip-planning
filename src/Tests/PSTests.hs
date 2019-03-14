@@ -2,6 +2,7 @@ module Tests.PSTests where
 
 import Model
 import FSM
+import BFSM
 import FST 
 import SSFST
 import ME 
@@ -11,7 +12,8 @@ import Tests.Tests
 import Test.HUnit hiding (State)
 
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, psTest6, psTest7, psTest8, psTest9]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, 
+                    psTest6, psTest7, psTest8, psTest9, psTest10]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
@@ -52,6 +54,10 @@ psTest9 :: Test
 psTest9 = "Make sure calls update states properly"
        ~: Just (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call a a))
 
+psTest10 :: Test
+psTest10 = "Check that call string finding works fine"
+        ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
+
 t1 = powersetTrans (PState (Q [N a b]) [Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call b a))
 t2' = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call a a))
@@ -84,7 +90,7 @@ powerset :: FSM Character PState
 powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a model eventModel
 
 psetBA :: FSM Character PState
-psetBA = setStatesReachable powerset [PState (Q [N b a]) [Q [N b a]]]
+psetBA = setInitial [PState (Q [N b a]) [Q [N b a]]] $ setStatesReachable powerset [PState (Q [N b a]) [Q [N b a]]]
 
 model :: EpistM
 model = Mo

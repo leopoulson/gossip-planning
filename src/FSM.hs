@@ -44,6 +44,11 @@ updateAcccepting accepting' (FSM al st trans int _) = FSM al st trans int accept
 setStatesReachable :: Eq st => FSM ch st -> [st] -> FSM ch st
 setStatesReachable fsm@(FSM al _ trans int acc) sts = FSM al (findReachableFromSet fsm sts) trans int acc
 
+setInitial :: Eq st => [st] -> FSM ch st -> FSM ch st
+setInitial initStates (FSM al stts trans _ acc) 
+  | all (`elem` stts) initStates  = FSM al stts trans initStates acc
+  | otherwise                       = error "Initial state not member of states"
+
 findLoops :: Eq st => FSM ch st -> [(st, ch)]
 findLoops fsm = [(q, e) | q <- states fsm, e <- alphabet fsm, 
                           transition fsm (q, e) == Just q]
@@ -65,10 +70,9 @@ getNeighbours :: FSM ch st -> st -> [st]
 getNeighbours fsm st = mapMaybe (\ch -> transition fsm (st, ch)) $ alphabet fsm 
 
 getNeighboursEv :: FSM ch st -> st -> [(st, ch)]
-getNeighboursEv fsm st = map (\(st, ch) -> (fromJust st, ch)) . 
+getNeighboursEv fsm st = map (\(st', ch) -> (fromJust st', ch)) . 
                          filter (isJust . fst) . 
                          map (\ch -> (transition fsm (st, ch), ch)) $ alphabet fsm
-
 
 
 

@@ -37,8 +37,8 @@ buildPSA :: FSM Character QState -> FST Character QState -> FSM Character PState
 buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting' (PState st _) = FSM.accepting fsm st
-    states'                  = undefined -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
-    initial'                 = undefined
+    states'                  = error "No states defined" -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
+    initial'                 = error "No initial states defined"
     transition' (PState state possStates, ch) = 
                 case FSM.transition fsm (state, ch) of   --Probably update this to fmap eventually 
                         Just st -> Just $ PState st (getPossStates ch possStates)
