@@ -20,10 +20,7 @@
 
 ## To Consider
 
-- Consider the best way to differentiate between propositions (i.e. S i j, N i j) and other formulas. Specifically, how to restrict the language of propositions to the bit without K
-- Consider the type of Postcondition being (Event, Prop) -> Form. One day extend it to be (Event, Form) -> Form? is this even needed? 
-- Consider what should happen when we try and make an impossible call
-- Figure out what to do about undefined transitions; move to the empty set? 
+- It would be great to think about whether or not we need to enumerate all of the states in the automata before performing BFS. It seems that we don't, however it is probably useful elsewhere - e.g. in removing the loops. So we do need to use it in the end, but this is fine! 
 
 ## Bugs / To fix / To update
 
@@ -36,7 +33,9 @@
 
 All of the solutions found require us to enumerate the states we have. This is rather impractical, given that a state does not particularly "exist" before it's travelled to. 
 
-We can probably just get the set of relevant states by traversing the graph from the starting point. This is not so bad? 
+We can probably just get the set of relevant states by traversing the graph from the starting point. This is not so bad? We then just perform a BFS on it to find the shortest successful path. 
+
+
 
 
 

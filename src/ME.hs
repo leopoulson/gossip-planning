@@ -14,6 +14,10 @@ import Data.List (sort)
 type Character = Either State Event
 type Alphabet = [Character]
 
+-- This gives us state evaluation into the type
+class Eq st => EvalState st where 
+  evalState :: Form -> st -> Bool
+
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
 data QState = Q [Prop] | QInit deriving (Show)
@@ -23,6 +27,10 @@ instance Eq QState where
     Q ps1 == Q ps2 = sort ps1 == sort ps2
     QInit == _     = False   
     Q _   == _     = False 
+
+instance EvalState QState where
+    evalState f (Q ps)  = models ps f
+    evalState _ QInit   = error "Evaluation on QInit"
 
 data ME = ME 
     (FSM Character QState)
@@ -107,8 +115,8 @@ buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
     acc _ = False
 
 identityTransducer :: FSM Character QState -> FST Character QState
-identityTransducer (FSM alpha states trans initial accepting) = 
-    FST alpha states trans' initial accepting where
+identityTransducer (FSM alpha sts trans int accept) = 
+    FST alpha sts trans' int accept where
         trans' :: BiTransition QState Character
         trans' (st, ch) = case trans (st, ch) of --[(ch, trans (st, ch))]
             Just q  -> [(ch, q)]
@@ -123,9 +131,9 @@ buildComposedSS :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST 
 buildComposedSS ag ep evm fsm = buildSSTransducer ag ep evm `composeSS` identityTransducer fsm
 
 pAutomata :: FSM Character QState -> Prop -> FSM Character QState
-pAutomata (FSM alpha states trans initial accepting) pr = 
-    FSM alpha states trans initial accepting' where
-        accepting' = pUpdate' pr accepting
+pAutomata (FSM alpha sts trans int accept) pr = 
+    FSM alpha sts trans int accepting' where
+        accepting' = pUpdate' pr accept
 
 pUpdate :: Prop -> (QState, Bool) -> (QState, Bool)
 pUpdate p (Q ps, _)  = (Q ps, p `elem` ps)

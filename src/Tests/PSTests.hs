@@ -32,11 +32,11 @@ psTest3 = "There should be no duplicates for related states"
 
 psTest4 :: Test
 psTest4 = "Check that PEval is working right, positively"
-       ~: True ~=? evalPState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]])
+       ~: True ~=? evalState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]])
 
 psTest5 :: Test
 psTest5 = "Check that PEval is working right, negatively"
-       ~: False ~=? evalPState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
+       ~: False ~=? evalState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
 
 psTest6 :: Test
 psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
@@ -83,13 +83,13 @@ t8 = FSM.accepting powerset $ PState (Q [N b a]) [Q [N b a]] -- PState (Q [N a b
 -- psTest3 :: Test 
 -- psTest3 = "Test that result is identical for indistinguishable calls"
 
-powersetTrans :: Transition PState Character
+powersetTrans :: Transition (PState QState) Character
 powersetTrans = transition powerset
 
-powerset :: FSM Character PState
+powerset :: FSM Character (PState QState)
 powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a model eventModel
 
-psetBA :: FSM Character PState
+psetBA :: FSM Character (PState QState)
 psetBA = setInitial [PState (Q [N b a]) [Q [N b a]]] $ setStatesReachable powerset [PState (Q [N b a]) [Q [N b a]]]
 
 model :: EpistM

@@ -22,8 +22,8 @@ bfs :: Eq a => FSM ch a -> [BNode a ch] -> [a] -> Maybe [(a, Maybe ch)]
 bfs fsm queue seen = case queue of 
     []     -> Nothing    -- If the queue is empty, we stop and that is that
     (q:qs) -> case accepting fsm $ node q of 
-        True  -> Just $ rebuildPath q   -- Here construct the path 
-        False -> bfs fsm (updateQueue fsm q qs seen) (seen ++ [node q]) -- Here we want to recurse 
+        True  -> Just $ rebuildPath q                                     -- Here construct the path 
+        False -> bfs fsm (updateQueue fsm q qs seen) (seen ++ [node q])   -- Here we want to recurse 
 
 rebuildPath :: BNode a ch -> [(a, Maybe ch)]
 rebuildPath (BNode a (Just (bn, ch))) = (a, Just ch) : rebuildPath bn

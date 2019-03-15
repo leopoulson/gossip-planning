@@ -12,7 +12,7 @@ import Data.List (nub)
 --     possStates :: [QState]
 -- }
 
-data PState = PState QState [QState] deriving (Eq, Show)
+data PState st = PState st [st] deriving (Eq, Show)
 
 {- There's a couple of things to sort out w.r.t this function.
 
@@ -20,20 +20,13 @@ data PState = PState QState [QState] deriving (Eq, Show)
    knowledge-formula we want to evaluate is the one that the current PSA
    is constructed for. This will probably require baking the agent into
    the type of either PState or the PSA itself. 
-
- * The second is that we'll make PState parametric eventually. This means
-   that we'll have to act differently based on the type inside it, but this
-   is probably not a big problem. I suppose we have only two behaviours; 
-   - if we have a PState inside, just evalPState on that
-   - if we have a QState inside, evalQState on that
-   ...
-
 -}
-evalPState :: Form -> PState -> Bool
-evalPState (K ag p) (PState q qs) = all (evalQState p) qs
-evalPState form (PState q _) = evalQState form q 
+instance (EvalState st, Eq st) => EvalState (PState st) where
+  evalState (K _ p)  (PState _ sts) = all (evalState p) sts
+  evalState f        (PState st _)  = evalState f st
 
-buildPSA :: FSM Character QState -> FST Character QState -> FSM Character PState
+
+buildPSA :: EvalState st => FSM Character st -> FST Character st -> FSM Character (PState st)
 buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting' (PState st _) = FSM.accepting fsm st
@@ -43,16 +36,16 @@ buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
                 case FSM.transition fsm (state, ch) of   --Probably update this to fmap eventually 
                         Just st -> Just $ PState st (getPossStates ch possStates)
                         Nothing -> Nothing 
-    getPossStates :: Character -> [QState] -> [QState]
+    -- getPossStates :: Character -> [st] -> [st]
     getPossStates ch = nub . concatMap (\ st -> map snd $ bitransition fstr (st, ch))
 
-psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character PState
+psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
 psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)
   where
     dAuto = buildDAutomata ep ev
 
-setSuccessfulFormula :: Form -> FSM Character PState -> FSM Character PState
-setSuccessfulFormula f = updateAcccepting (evalPState f) 
+setSuccessfulFormula :: EvalState st => Form -> FSM Character (PState st) -> FSM Character (PState st)
+setSuccessfulFormula f = updateAcccepting (evalState f) 
 
 
 
