@@ -96,8 +96,7 @@ evaluateProp (S i j) m w
     | i == j    = True
     | otherwise = P (S i j) `elem` tval m w
 
--- evaluateProp (S i j) _ _ = True
--- evaluateProp p m w       = P p `elem` tval m w
+
 
 -- Give a semantics!
 satisfies :: PointedEpM -> Form -> Bool
@@ -110,6 +109,13 @@ satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw
   where 
     r = rel m ag
     rw = relatedWorlds r w
+
+standardEventModel :: [Agent] -> Precondition -> Postcondition -> EventModel
+standardEventModel ags = EvMo calls (callRel calls ags)
+  where
+    calls = [Call i j | i <- ags, j <- ags, i /= j]
+    callRel evs ags = [(ag, unrel ag evs) | ag <- ags]
+    unrel ag evs = [[ev] | ev <- evs, callIncludes ev ag] ++ [[ev | ev <- evs, not $ callIncludes ev ag]]
 
 anyCall :: Precondition
 anyCall (Call i j) = P (N i j)
@@ -141,6 +147,8 @@ update epm evm =
         val' = [(s, ps s) | s <- states']
         ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
         props = produceAllProps $ agents epm
+
+
 
 ptUpdate :: PointedEpM -> PointedEvM -> PointedEpM
 ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)

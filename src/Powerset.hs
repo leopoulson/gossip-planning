@@ -36,7 +36,6 @@ buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
                 case FSM.transition fsm (state, ch) of   --Probably update this to fmap eventually 
                         Just st -> Just $ PState st (getPossStates ch possStates)
                         Nothing -> Nothing 
-    -- getPossStates :: Character -> [st] -> [st]
     getPossStates ch = nub . concatMap (\ st -> map snd $ bitransition fstr (st, ch))
 
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)

@@ -107,3 +107,22 @@ eventModel = EvMo
     anyCall
     postUpdate
 
+-----------------------------------------------------------
+
+threeModel :: EpistM
+threeModel = Mo 
+    [State (0, [])]
+    [a, b, c]
+    [(State (0, []), [P (N a b), P (N b c)])]
+    [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
+    [State (0, [])]
+
+threeEvModel :: EventModel
+threeEvModel = EvMo 
+    [Call a b, Call b a, Call a c, Call c a, Call b c, Call c b]
+
+
+
+
+
+
