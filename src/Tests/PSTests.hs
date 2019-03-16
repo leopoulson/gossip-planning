@@ -90,7 +90,7 @@ powerset :: FSM Character (PState QState)
 powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a model eventModel
 
 psetBA :: FSM Character (PState QState)
-psetBA = setInitial [PState (Q [N b a]) [Q [N b a]]] $ setStatesReachable powerset [PState (Q [N b a]) [Q [N b a]]]
+psetBA = setInitial [PState (Q [N b a]) [Q [N b a]]] $ setStatesReachable [PState (Q [N b a]) [Q [N b a]]] powerset
 
 model :: EpistM
 model = Mo
@@ -118,8 +118,35 @@ threeModel = Mo
     [State (0, [])]
 
 threeEvModel :: EventModel
-threeEvModel = EvMo 
-    [Call a b, Call b a, Call a c, Call c a, Call b c, Call c b]
+threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
+
+psetThree :: FSM Character (PState QState)
+psetThree = setStatesReachableInit $ 
+            setInitial [PState (Q [N a b, N b c]) [Q [N a b, N b c]]] $
+            setSuccessfulFormula (K a (allExpertsAg [a, b, c])) $ 
+            psaFromScratch a threeModel threeEvModel
+
+fourModel :: EpistM 
+fourModel = Mo
+    [State (0, [])]
+    [a, b, c, d]
+    [(State (0, []), [P (N a b), P (N b c), P (N c d)])]
+    [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
+    [State (0, [])]
+
+fourEvModel :: EventModel
+fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
+
+-- For everyone expert, Just [Right Ag c Ag d,Right Ag b Ag c,Right Ag a Ag b,Right Ag c Ag b,Right Ag d Ag c]
+-- For K_a Expert,      Just [Right Ag b Ag c,Right Ag a Ag b,Right Ag b Ag d,Right Ag d Ag a,Right Ag a Ag c]
+psetFour :: FSM Character (PState QState)
+psetFour = setStatesReachableInit $
+           setInitial [PState (Q [N a b, N b c, N c d]) [Q [N a b, N b c, N c d]]] $
+           setSuccessfulFormula (K a (allExpertsAg [a, b, c, d])) $
+           psaFromScratch a fourModel fourEvModel
+
+
+
 
 
 

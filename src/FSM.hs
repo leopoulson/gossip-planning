@@ -39,15 +39,18 @@ findReachableFromOne (FSM alph _ trans _ _) st = catMaybes [trans (st, ch) | ch 
 updateAcccepting :: (st -> Bool) -> FSM ch st -> FSM ch st
 updateAcccepting accepting' (FSM al st trans int _) = FSM al st trans int accepting' 
 
+setStatesReachableInit :: Eq st => FSM ch st -> FSM ch st
+setStatesReachableInit fsm = setStatesReachable (initial fsm) fsm
+
 -- This function sets the states of an FSM to strictly the states that it can access 
 -- Useful for FSMs with a huge possible state space
-setStatesReachable :: Eq st => FSM ch st -> [st] -> FSM ch st
-setStatesReachable fsm@(FSM al _ trans int acc) sts = FSM al (findReachableFromSet fsm sts) trans int acc
+setStatesReachable :: Eq st => [st] -> FSM ch st -> FSM ch st
+setStatesReachable sts fsm@(FSM al _ trans int acc) = FSM al (findReachableFromSet fsm sts) trans int acc
 
 setInitial :: Eq st => [st] -> FSM ch st -> FSM ch st
-setInitial initStates (FSM al stts trans _ acc) 
-  | all (`elem` stts) initStates  = FSM al stts trans initStates acc
-  | otherwise                       = error "Initial state not member of states"
+setInitial initStates (FSM al stts trans _ acc) = FSM al stts trans initStates acc
+  -- | all (`elem` stts) initStates  = FSM al stts trans initStates acc
+  -- | otherwise                       = error "Initial state not member of states"
 
 findLoops :: Eq st => FSM ch st -> [(st, ch)]
 findLoops fsm = [(q, e) | q <- states fsm, e <- alphabet fsm, 
