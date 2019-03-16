@@ -1,8 +1,7 @@
 module FST where
 
-import SSFST
-
 type BiTransition q e = (q, e) -> [(e, q)]
+type SSTransition ch = ch -> [ch]
 
 data FST ch st = FST {
     alphabet :: [ch],                      -- Alphabet
@@ -10,6 +9,11 @@ data FST ch st = FST {
     bitransition :: BiTransition st ch,    -- Transition function
     initial :: [st],                       -- Set of initial states
     accepting :: st -> Bool                -- Set of accepting states 
+}
+
+data SSFST ch = SSFST {
+    ssAlphabet :: [ch],                      -- Alphabet
+    ssTransition :: SSTransition ch        -- Transition
 }
 
 -- This too

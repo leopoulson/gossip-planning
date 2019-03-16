@@ -91,7 +91,7 @@ models ps (Not form)  = not $ models ps form
 models ps (P form)    = form `elem` ps
 models ps (Or forms)  = any (models ps) forms
 models ps (And forms) = all (models ps) forms
-models _  (K _ _)     = error "How to model K?"
+models _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
 
 buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]

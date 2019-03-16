@@ -47,7 +47,7 @@ setStatesReachableInit fsm = setStatesReachable (initial fsm) fsm
 setStatesReachable :: Eq st => [st] -> FSM ch st -> FSM ch st
 setStatesReachable sts fsm@(FSM al _ trans int acc) = FSM al (findReachableFromSet fsm sts) trans int acc
 
-setInitial :: Eq st => [st] -> FSM ch st -> FSM ch st
+setInitial :: [st] -> FSM ch st -> FSM ch st
 setInitial initStates (FSM al stts trans _ acc) = FSM al stts trans initStates acc
   -- | all (`elem` stts) initStates  = FSM al stts trans initStates acc
   -- | otherwise                       = error "Initial state not member of states"

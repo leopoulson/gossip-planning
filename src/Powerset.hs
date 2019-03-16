@@ -7,11 +7,6 @@ import ME
 
 import Data.List (nub)
 
--- data PState = PState { 
---     state :: QState,  
---     possStates :: [QState]
--- }
-
 data PState st = PState st [st] deriving (Eq, Show)
 
 {- There's a couple of things to sort out w.r.t this function.
@@ -45,6 +40,15 @@ psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)
 
 setSuccessfulFormula :: EvalState st => Form -> FSM Character (PState st) -> FSM Character (PState st)
 setSuccessfulFormula f = updateAcccepting (evalState f) 
+
+findPath :: Form -> RegularStructure ch st -> [ch]
+findPath (K a phi) rs = undefined 
+
+
+
+
+
+
 
 
 
