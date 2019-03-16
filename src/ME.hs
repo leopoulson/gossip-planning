@@ -3,7 +3,6 @@ module ME where
 import Model
 import FSM
 import FST
-import SSFST
 import RS
 import Data.Maybe
 import Data.List (sort)
@@ -156,7 +155,7 @@ buildDAutomata ep ev = FSM
 buildMEStar :: EpistM -> EventModel -> RegularStructure Character QState
 buildMEStar ep ev = RegularStructure 
     dAuto 
-    [(ag, buildComposedTransducers ag ep ev dAuto) | ag <- agents ep]
+    [(ag, buildComposedSS ag ep ev dAuto) | ag <- agents ep]
     (pAutomata dAuto)
   where 
     dAuto = buildDAutomata ep ev

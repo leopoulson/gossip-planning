@@ -4,10 +4,13 @@ import Model
 import FSM
 import FST
 import ME
+import RS
+import BFSM
 
 import Data.List (nub)
+import Data.Maybe (fromMaybe)
 
-data PState st = PState st [st] deriving (Eq, Show)
+data PState st = PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
 
 {- There's a couple of things to sort out w.r.t this function.
 
@@ -21,7 +24,7 @@ instance (EvalState st, Eq st) => EvalState (PState st) where
   evalState f        (PState st _)  = evalState f st
 
 
-buildPSA :: EvalState st => FSM Character st -> FST Character st -> FSM Character (PState st)
+buildPSA :: EvalState st => FSM ch st -> FST ch st -> FSM ch (PState st)
 buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting' (PState st _) = FSM.accepting fsm st
@@ -38,14 +41,34 @@ psaFromScratch ag ep ev = buildPSA dAuto (buildComposedSS ag ep ev dAuto)
   where
     dAuto = buildDAutomata ep ev
 
-setSuccessfulFormula :: EvalState st => Form -> FSM Character (PState st) -> FSM Character (PState st)
+setSuccessfulFormula :: EvalState st => Form -> FSM ch st -> FSM ch st
 setSuccessfulFormula f = updateAcccepting (evalState f) 
 
-findPath :: Form -> RegularStructure ch st -> [ch]
+findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
 findPath (K a phi) rs = undefined 
+findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutomata rs)
 
+-- -- lens time
+buildSolveAutomata :: EvalState st => Form -> RegularStructure ch st -> RegularStructure ch (PState st)
+buildSolveAutomata (K ag (K ag' phi')) rs = 
+    RegularStructure (buildPSA (dAutomata $ buildSolveAutomata (K ag' phi') rs) (liftTransducer $ getTransducer ag rs))
+                        undefined undefined
+buildSolveAutomata (K ag phi) rs = 
+    RegularStructure (buildPSA (dAutomata rs) (getTransducer ag rs)) 
+                     undefined -- (liftTransducers . liftTransducers $ transducers rs) 
+                     undefined --(fAutomata rs)
+buildSolveAutomata phi rs        = undefined --RegularStructure (setSuccessfulFormula phi (dAutomata rs)) (transducers rs) (fAutomata rs)
 
+liftTransducers :: [(Agent, FST ch st)] -> [(Agent, FST ch (PState st))]
+liftTransducers = map (\(ag, tr) -> (ag, liftTransducer tr))
 
+-- Lol this isn't very good. Need to think more about this
+liftTransducer :: FST ch st -> FST ch (PState st)
+liftTransducer (FST _ _ tr _ _) = FST undefined undefined (liftTransition tr) undefined undefined
+
+liftTransition :: BiTransition st ch -> BiTransition (PState st) ch
+liftTransition trans (PState st sts, ch) = 
+    map (\(ch', s) -> (ch', PState s sts)) $ trans (st, ch)
 
 
 

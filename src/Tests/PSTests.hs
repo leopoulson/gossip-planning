@@ -4,8 +4,8 @@ import Model
 import FSM
 import BFSM
 import FST 
-import SSFST
 import ME 
+import RS
 import Powerset
 
 import Tests.Tests
@@ -126,6 +126,9 @@ psetThree = setStatesReachableInit $
             setSuccessfulFormula (K a (allExpertsAg [a, b, c])) $ 
             psaFromScratch a threeModel threeEvModel
 
+ppset :: FSM Character (PState (PState QState))
+ppset = buildPSA psetThree (liftTransducer (buildComposedSS b threeModel threeEvModel (buildDAutomata threeModel threeEvModel)))
+
 fourModel :: EpistM 
 fourModel = Mo
     [State (0, [])]
@@ -145,8 +148,13 @@ psetFour = setStatesReachableInit $
            setSuccessfulFormula (K a (allExpertsAg [a, b, c, d])) $
            psaFromScratch a fourModel fourEvModel
 
+-----------------------------------------------------------
 
+dAuto3 :: FSM Character QState
+dAuto3 = setStatesReachableInit . setInitial [Q [N a b, N b c]] $ buildDAutomata threeModel threeEvModel
 
+rs3 :: RegularStructure Character QState
+rs3 = RegularStructure dAuto3 undefined undefined
 
 
 
