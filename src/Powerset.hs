@@ -30,11 +30,12 @@ instance Foldable PState where
    is constructed for. This will probably require baking the agent into
    the type of either PState or the PSA itself. 
 -}
-instance (EvalState st, Eq st) => EvalState (PState st) where
-  -- evalState (K _ p)  (PCon _ sts) = all (evalState p) sts
-  -- evalState f        (PVar st)  = evalState f st
-  evalState p = all (evalState p) 
-
+instance (EvalState st, Eq st) => EvalState (PState st) where  
+  evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
+  evalState phi (PCon st _)        = evalState phi st
+  evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
+  evalState phi (PVar st)          = evalState phi st
+  
 -- Would it be possible to update the accepting states as we go along?
 -- We might have to set the states after we've returned the PSA
 -- Likewise for accepting; we don't know what the accepting states are
