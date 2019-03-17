@@ -17,7 +17,7 @@ data SSFST ch = SSFST {
 }
 
 -- This too
-composeFST :: FST ch st1 ->FST ch st2 -> FST ch (st1, st2)
+composeFST :: FST ch st1 -> FST ch st2 -> FST ch (st1, st2)
 composeFST (FST alpha1 states1 trans1 initial1 accepting1) 
            (FST _ states2 trans2 initial2 accepting2) = 
             FST alpha  states'  trans  initial'  accepting' where
@@ -51,8 +51,21 @@ composeSS (SSFST _ transSS) (FST alpha statesT trans initialT acceptingT) =
 
 -- So we take the value returned from t1 and put this into s2 
 
+getWordTrans :: FST ch st -> st -> [ch] -> [[ch]]
+getWordTrans trs int cs = map fst <$> startWordTrans trs int cs
 
+startWordTrans :: FST ch st -> st -> [ch] -> [[(ch, st)]]
+startWordTrans trs initState (c : cs) = wordTrans trs cs [[(call, state)] | (call, state) <- bitransition trs (initState, c) ]
+startWordTrans _ _ [] = []
 
+wordTrans :: FST ch st -> [ch] -> [[(ch, st)]] -> [[(ch, st)]]
+wordTrans _ [] ws = ws
+wordTrans trs (c:cs) ws = wordTrans trs cs $ concatMap (manyMove c) ws 
+  where
+    relCalls call state = bitransition trs (state, call)
+    -- manyMove :: ch -> [(ch, st)] -> [[(ch, st)]]
+    manyMove call word = [word ++ [(call', state')] | (call', state') <- relCalls call (snd . last $ word)]
+-- wordTrans trs []
 
 
 

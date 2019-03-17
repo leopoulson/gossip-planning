@@ -113,10 +113,10 @@ buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
     acc QInit = True
     acc _ = False
 
-identityTransducer :: FSM Character QState -> FST Character QState
+identityTransducer :: FSM Character st -> FST Character st
 identityTransducer (FSM alpha sts trans int accept) = 
     FST alpha sts trans' int accept where
-        trans' :: BiTransition QState Character
+        -- trans' :: BiTransition st Character
         trans' (st, ch) = case trans (st, ch) of --[(ch, trans (st, ch))]
             Just q  -> [(ch, q)]
             Nothing -> []
@@ -126,7 +126,7 @@ buildComposedTransducers ag ep ev fsm = idt `composeFST` buildTransducer ag ep e
   where
     idt = identityTransducer fsm
 
-buildComposedSS :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character QState
+buildComposedSS :: Agent -> EpistM -> EventModel -> FSM Character st -> FST Character st
 buildComposedSS ag ep evm fsm = buildSSTransducer ag ep evm `composeSS` identityTransducer fsm
 
 pAutomata :: FSM Character QState -> Prop -> FSM Character QState
@@ -156,7 +156,7 @@ buildMEStar :: EpistM -> EventModel -> RegularStructure Character QState
 buildMEStar ep ev = RegularStructure 
     dAuto 
     [(ag, buildComposedSS ag ep ev dAuto) | ag <- agents ep]
-    (pAutomata dAuto)
+    -- (pAutomata dAuto)
   where 
     dAuto = buildDAutomata ep ev
 

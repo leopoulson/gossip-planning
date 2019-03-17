@@ -9,8 +9,7 @@ import Data.Maybe (fromMaybe)
 -- Definition for transducers is a bit unsatisfactory
 data RegularStructure ch st = RegularStructure {
     dAutomata :: FSM ch st, 
-    transducers :: [(Agent, FST ch st)], 
-    fAutomata :: Prop -> FSM ch st
+    transducers :: [(Agent, FST ch st)]
 }
 
 getTransducer :: Agent -> RegularStructure ch st -> FST ch st
