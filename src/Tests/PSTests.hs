@@ -17,7 +17,8 @@ import Test.HUnit hiding (State)
 
 psTests :: Test
 psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5,
-                    psTest6, psTest7, psTest8, psTest9, psTest10]
+                    psTest6, psTest7, psTest8, psTest9, psTest10,
+                    psTest11]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
@@ -62,6 +63,10 @@ psTest10 :: Test
 psTest10 = "Check that call string finding works fine"
         ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
 
+psTest11 :: Test
+psTest11 = "Check that we find a good result for PS3"
+        ~: Just [Right (Call b c), Right (Call a b), Right (Call c b)] ~=? extractCalls (doBFS psetThree)
+
 t1 = powersetTrans (PCon (PVar $ Q [N a b]) [PVar $ Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a))
 --t2' = powersetTrans (PCon (Q [N b a]) [Q [N b a]], Right (Call a a))
@@ -76,16 +81,6 @@ t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a)
 t5 = powersetTrans (PCon (PVar $ Q [N b a, S b a, N a b, S a b]) [PVar $ Q [N b a, S b a, N a b, S a b]], Right (Call b a))
 
 ------------------------------------------------------------------------------
-
---t6 = findReachableFromSet powerset [PCon (Q [N b a]) [Q [N b a]]]
---t7 = findReachableFromSet powerset [PCon (Q [N a b]) [Q [N a b]]]
-
---t6' = findPathReachable powerset [PCon (Q [N b a]) [Q [N b a]]]
-
---t8 = FSM.accepting powerset $ PCon (Q [N b a]) [Q [N b a]] -- PState (Q [N a b,N b a,S a b,S b a]) [Q [N a b,N b a,S a b,S b a],Q [N b a]]
-
--- psTest3 :: Test 
--- psTest3 = "Test that result is identical for indistinguishable calls"
 
 powersetTrans :: Transition (PState QState) Character
 powersetTrans = transition powerset

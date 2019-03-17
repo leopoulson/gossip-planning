@@ -135,13 +135,6 @@ fromSndMaybe :: [(a, Maybe b)] -> [(a, b)]
 fromSndMaybe = map (\(l, r) -> (l, fromJust r)) . 
                filter (isJust . snd)
 
--- liftTransition :: BiTransition st ch -> BiTransition (PState st) ch
--- liftTransition trans (PCon st sts, ch) = 
---     map (\(ch', s) -> (ch', PCon s sts)) $ trans (pointedWorld st, ch)
--- liftTransition trans (PVar st, ch) =
---     map (\(ch', s) -> (ch', PVar s)) $ trans (st, ch)
-
-
 
 
 
