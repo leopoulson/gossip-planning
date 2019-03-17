@@ -16,7 +16,8 @@ import Test.HUnit hiding (State)
 --                    psTest6, psTest7, psTest8, psTest9, psTest10]
 
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3, psTest4]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5,
+                    psTest6, psTest7, psTest8, psTest9, psTest10]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
@@ -37,29 +38,29 @@ psTest4 :: Test
 psTest4 = "Check that PEval is working right, positively"
        ~: True ~=? evalState (K a (allExpertsAg [a, b])) (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a])])
 
---psTest5 :: Test
---psTest5 = "Check that PEval is working right, negatively"
---       ~: False ~=? evalState  (K a (allExpertsAg [a, b])) (PCon (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
+psTest5 :: Test
+psTest5 = "Check that PEval is working right, negatively"
+       ~: False ~=? evalState  (K a (allExpertsAg [a, b])) (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N a b])])
 
---psTest6 :: Test
---psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
---       ~: Just (PCon (Q [N b a]) [Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b b))
+psTest6 :: Test
+psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
+       ~: Just (PCon (PVar (Q [N b a])) [PVar (Q [N b a])]) ~=? powersetTrans (PCon (PVar (Q [N b a])) [PVar (Q [N b a]), PVar (Q [N b a])], Right (Call b b))
 
---psTest7 :: Test
---psTest7 = "Check that we can correctly identify winning paths"
---       ~: True ~=? existsWinningPath powerset [PCon (Q [N a b]) [Q [N a b]]]
+psTest7 :: Test
+psTest7 = "Check that we can correctly identify winning paths"
+        ~: True ~=? existsWinningPath powerset [PCon (PVar (Q [N a b])) [PVar (Q [N a b])]]
 
---psTest8 :: Test
---psTest8 = "Make sure calls update states properly"
---       ~: Just (PCon (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call b a))
+psTest8 :: Test
+psTest8 = "Make sure calls update states properly"
+       ~: Just (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N b a])]) ~=? powersetTrans (PCon (PVar (Q [N b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N b a])], Right (Call b a))
 
---psTest9 :: Test
---psTest9 = "Make sure calls update states properly"
---       ~: Just (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call a a))
+psTest9 :: Test
+psTest9 = "Make sure calls update states properly"
+       ~: Just (PCon (PVar (Q [N b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N b a])]) ~=? powersetTrans (PCon (PVar (Q [N b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N b a])], Right (Call a a))
 
---psTest10 :: Test
---psTest10 = "Check that call string finding works fine"
---        ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
+psTest10 :: Test
+psTest10 = "Check that call string finding works fine"
+        ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
 
 t1 = powersetTrans (PCon (PVar $ Q [N a b]) [PVar $ Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a))
