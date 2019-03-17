@@ -11,74 +11,77 @@ import Powerset
 import Tests.Tests
 import Test.HUnit hiding (State)
 
+--psTests :: Test
+--psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, 
+--                    psTest6, psTest7, psTest8, psTest9, psTest10]
+
 psTests :: Test
-psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5, 
-                    psTest6, psTest7, psTest8, psTest9, psTest10]
+psTests = TestList [psTest1, psTest2, psTest3, psTest4]
 
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
 
 psTest1 :: Test
 psTest1 = "Test that transition for non-related states is correct" 
-       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]]) ~=? t1
+       ~: Just (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a])]) ~=? t1
 
 psTest2 :: Test 
 psTest2 = "Test that transition for related states is correct"
-       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? t2
+       ~: Just (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a]), PVar (Q [N b a])]) ~=? t2
 
 psTest3 :: Test
 psTest3 = "There should be no duplicates for related states"
-       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]]) ~=? t5
+       ~: Just (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a])]) ~=? t5
 
 psTest4 :: Test
 psTest4 = "Check that PEval is working right, positively"
-       ~: True ~=? evalState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a]])
+       ~: True ~=? evalState (K a (allExpertsAg [a, b])) (PCon (PVar (Q [N a b, N b a, S a b, S b a])) [PVar (Q [N a b, N b a, S a b, S b a])])
 
-psTest5 :: Test
-psTest5 = "Check that PEval is working right, negatively"
-       ~: False ~=? evalState  (K a (allExpertsAg [a, b])) (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
+--psTest5 :: Test
+--psTest5 = "Check that PEval is working right, negatively"
+--       ~: False ~=? evalState  (K a (allExpertsAg [a, b])) (PCon (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N a b]])
 
-psTest6 :: Test
-psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
-       ~: Just (PState (Q [N b a]) [Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b b))
+--psTest6 :: Test
+--psTest6 = "Check that we don't have any duplicates in the indistinguishable worlds"
+--       ~: Just (PCon (Q [N b a]) [Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b b))
 
-psTest7 :: Test
-psTest7 = "Check that we can correctly identify winning paths"
-       ~: True ~=? existsWinningPath powerset [PState (Q [N a b]) [Q [N a b]]]
+--psTest7 :: Test
+--psTest7 = "Check that we can correctly identify winning paths"
+--       ~: True ~=? existsWinningPath powerset [PCon (Q [N a b]) [Q [N a b]]]
 
-psTest8 :: Test
-psTest8 = "Make sure calls update states properly"
-       ~: Just (PState (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call b a))
+--psTest8 :: Test
+--psTest8 = "Make sure calls update states properly"
+--       ~: Just (PCon (Q [N a b, N b a, S a b, S b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call b a))
 
-psTest9 :: Test
-psTest9 = "Make sure calls update states properly"
-       ~: Just (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PState (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call a a))
+--psTest9 :: Test
+--psTest9 = "Make sure calls update states properly"
+--       ~: Just (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]]) ~=? powersetTrans (PCon (Q [N b a]) [Q [N a b, N b a, S a b, S b a], Q [N b a]], Right (Call a a))
 
-psTest10 :: Test
-psTest10 = "Check that call string finding works fine"
-        ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
+--psTest10 :: Test
+--psTest10 = "Check that call string finding works fine"
+--        ~: Just [Right (Call b a), Right (Call a b)] ~=? extractCalls (doBFS psetBA)
 
-t1 = powersetTrans (PState (Q [N a b]) [Q [N a b]], Right (Call a b))
-t2 = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call b a))
-t2' = powersetTrans (PState (Q [N b a]) [Q [N b a]], Right (Call a a))
+t1 = powersetTrans (PCon (PVar $ Q [N a b]) [PVar $ Q [N a b]], Right (Call a b))
+t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a))
+--t2' = powersetTrans (PCon (Q [N b a]) [Q [N b a]], Right (Call a a))
 
 -- It's becoming time to consider what to do for a non-permitted call
 -- It seems to make the most sense to just return the empty list, thus making a 
 -- "non-transition" in the automata. 
 -- However, we need to consider what the implications of this will be elsewhere. 
 -- Will this be problematic for other cases
-t3 = powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b a))
-t4 = powersetTrans (PState (Q [N b a]) [Q [N b a], Q [N b a], Q [N b a, S b c]], Right (Call b a))
-t5 = powersetTrans (PState (Q [N b a, S b a, N a b, S a b]) [Q [N b a, S b a, N a b, S a b]], Right (Call b a))
+--t3 = powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b a))
+--t4 = powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a], Q [N b a, S b c]], Right (Call b a))
+t5 = powersetTrans (PCon (PVar $ Q [N b a, S b a, N a b, S a b]) [PVar $ Q [N b a, S b a, N a b, S a b]], Right (Call b a))
 
 ------------------------------------------------------------------------------
 
-t6 = findReachableFromSet powerset [PState (Q [N b a]) [Q [N b a]]]
-t7 = findReachableFromSet powerset [PState (Q [N a b]) [Q [N a b]]]
+--t6 = findReachableFromSet powerset [PCon (Q [N b a]) [Q [N b a]]]
+--t7 = findReachableFromSet powerset [PCon (Q [N a b]) [Q [N a b]]]
 
-t6' = findPathReachable powerset [PState (Q [N b a]) [Q [N b a]]]
+--t6' = findPathReachable powerset [PCon (Q [N b a]) [Q [N b a]]]
 
-t8 = FSM.accepting powerset $ PState (Q [N b a]) [Q [N b a]] -- PState (Q [N a b,N b a,S a b,S b a]) [Q [N a b,N b a,S a b,S b a],Q [N b a]]
+--t8 = FSM.accepting powerset $ PCon (Q [N b a]) [Q [N b a]] -- PState (Q [N a b,N b a,S a b,S b a]) [Q [N a b,N b a,S a b,S b a],Q [N b a]]
 
 -- psTest3 :: Test 
 -- psTest3 = "Test that result is identical for indistinguishable calls"
@@ -90,7 +93,7 @@ powerset :: FSM Character (PState QState)
 powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a model eventModel
 
 psetBA :: FSM Character (PState QState)
-psetBA = setInitial [PState (Q [N b a]) [Q [N b a]]] $ setStatesReachable [PState (Q [N b a]) [Q [N b a]]] powerset
+psetBA = setInitial [PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]]] $ setStatesReachable [PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]]] powerset
 
 model :: EpistM
 model = Mo
@@ -122,12 +125,12 @@ threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
 psetThree :: FSM Character (PState QState)
 psetThree = setStatesReachableInit $ 
-            setInitial [PState (Q [N a b, N b c]) [Q [N a b, N b c]]] $
+            setInitial [PCon (PVar $ Q [N a b, N b c]) [PVar $ Q [N a b, N b c]]] $
             setSuccessfulFormula (K a (allExpertsAg [a, b, c])) $ 
             psaFromScratch a threeModel threeEvModel
 
-ppset :: FSM Character (PState (PState QState))
-ppset = buildPSA psetThree (liftTransducer (buildComposedSS b threeModel threeEvModel (buildDAutomata threeModel threeEvModel)))
+--ppset :: FSM Character (PState (PState QState))
+--ppset = buildPSA psetThree (liftTransducer (buildComposedSS b threeModel threeEvModel (buildDAutomata threeModel threeEvModel)))
 
 fourModel :: EpistM 
 fourModel = Mo
@@ -144,17 +147,17 @@ fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 -- For K_a Expert,      Just [Right Ag b Ag c,Right Ag a Ag b,Right Ag b Ag d,Right Ag d Ag a,Right Ag a Ag c]
 psetFour :: FSM Character (PState QState)
 psetFour = setStatesReachableInit $
-           setInitial [PState (Q [N a b, N b c, N c d]) [Q [N a b, N b c, N c d]]] $
+           setInitial [PCon (PVar $ Q [N a b, N b c, N c d]) [PVar $ Q [N a b, N b c, N c d]]] $
            setSuccessfulFormula (K a (allExpertsAg [a, b, c, d])) $
            psaFromScratch a fourModel fourEvModel
 
 -----------------------------------------------------------
 
-dAuto3 :: FSM Character QState
-dAuto3 = setStatesReachableInit . setInitial [Q [N a b, N b c]] $ buildDAutomata threeModel threeEvModel
+--dAuto3 :: FSM Character QState
+--dAuto3 = setStatesReachableInit . setInitial [Q [N a b, N b c]] $ buildDAutomata threeModel threeEvModel
 
-rs3 :: RegularStructure Character QState
-rs3 = RegularStructure dAuto3 undefined undefined
+--rs3 :: RegularStructure Character QState
+--rs3 = RegularStructure dAuto3 undefined undefined
 
 
 
