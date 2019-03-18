@@ -20,8 +20,14 @@ psTests = TestList [psTest1, psTest2, psTest3, psTest4, psTest5,
                     psTest6, psTest7, psTest8, psTest9, psTest10,
                     psTest11]
 
+
 dopsTests :: IO Counts
 dopsTests = runTestTT psTests
+
+allTests :: Test
+allTests = concatTests [psTests, bSATests]
+
+runAllTests = runTestTT allTests
 
 psTest1 :: Test
 psTest1 = "Test that transition for non-related states is correct" 
@@ -67,14 +73,28 @@ psTest11 :: Test
 psTest11 = "Check that we find a good result for PS3"
         ~: Just [Right (Call b c), Right (Call a b), Right (Call c b)] ~=? extractCalls (doBFS psetThree)
 
+bSATests = TestList ["Check that BFS on constructed automata is fine, for 1 call"
+                    ~: Just [Right (Call a b)] ~=? (extractCalls . doBFS) solvingAutomata,
+                    "Check that this is also fine for FO knowledge"
+                    ~: Just [Right (Call a b)] ~=? (extractCalls . doBFS) foSA,
+                    "Check that results are the same for new and old constructions"
+                    ~: extractCalls (doBFS psetThree) ~=? extractCalls (doBFS saThree)
+                   ]
+
+doBSATests = runTestTT bSATests
+
+
 t1 = powersetTrans (PCon (PVar $ Q [N a b]) [PVar $ Q [N a b]], Right (Call a b))
 t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a))
---t2' = powersetTrans (PCon (Q [N b a]) [Q [N b a]], Right (Call a a))
+
+-- This won't work, as we don't have higher-order states here.
+-- So we try and evaluate a knowledge formula on a PVar state, which errors (as it should do).
+t3 = extractCalls . doBFS $ setSuccessfulFormula (K a (allExpertsAg [a, b])) $ solvingAutomata
 
 -- It's becoming time to consider what to do for a non-permitted call
--- It seems to make the most sense to just return the empty list, thus making a 
--- "non-transition" in the automata. 
--- However, we need to consider what the implications of this will be elsewhere. 
+-- It seems to make the most sense to just return the empty list, thus making a
+-- "non-transition" in the automata.
+-- However, we need to consider what the implications of this will be elsewhere.
 -- Will this be problematic for other cases
 --t3 = powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a]], Right (Call b a))
 --t4 = powersetTrans (PCon (Q [N b a]) [Q [N b a], Q [N b a], Q [N b a, S b c]], Right (Call b a))
@@ -90,6 +110,12 @@ powerset = setSuccessfulFormula (K a (allExpertsAg [a, b])) $ psaFromScratch a m
 
 psetBA :: FSM Character (PState QState)
 psetBA = setInitial [PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]]] $ setStatesReachable [PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]]] powerset
+
+solvingAutomata :: FSM Character (PState QState)
+solvingAutomata = createSolvingAutomata (allExpertsAg [a, b]) model eventModel
+
+foSA :: FSM Character (PState QState)
+foSA = createSolvingAutomata (K a (allExpertsAg [a, b])) model eventModel
 
 model :: EpistM
 model = Mo
@@ -118,6 +144,9 @@ threeModel = Mo
 
 threeEvModel :: EventModel
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
+
+saThree :: FSM Character (PState QState)
+saThree = createSolvingAutomata (K a $ allExpertsAg [a, b, c]) threeModel threeEvModel
 
 psetThree :: FSM Character (PState QState)
 psetThree = setStatesReachableInit $ 

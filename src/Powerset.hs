@@ -15,7 +15,7 @@ data PSH ch st = PSH (PState st) (History ch st)
 data PState st = PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
 
 instance Functor PState where
-    fmap f (PVar p) = PVar $ f p 
+    fmap f (PVar p) = PVar $ f p
     fmap f (PCon ps pss) = PCon (fmap f ps) (map (fmap f) pss)
 
 instance Foldable PState where
@@ -132,8 +132,9 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- For the K case, we want to perform some operation on the result of the function for phi.
 -- Most likely, we will call buildSolveRS? And then extract some information somehow
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
-createSolvingAutomata (K agent phi) ep ev = buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
-createSolvingAutomata phi           ep ev = makeP $ buildDAutomata phi ep ev
+createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
+                                                 buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
+createSolvingAutomata phi                ep ev = makeP $ buildDAutomata phi ep ev
   where
     -- lowerAuto :: FSM Character (PState QState)
     lowerAuto = createSolvingAutomata phi ep ev
