@@ -107,13 +107,9 @@ pointedWorld :: PState st -> st
 pointedWorld (PCon st _) = pointedWorld st
 pointedWorld (PVar st)   = st
 
--- To lift the transducer transition, we want to find the PStates with the
--- set of calls that are indistinguishable from one another.. 
--- This is going to entail checking the calls that we took to get to our current state, 
--- then relating them with other calls, and then taking those call steps through the
--- automata. 
--- It's unclear how we can extract the sequence of calls from the current state, 
--- so we will add the calls into the type. 
+-- Here we first want to find the set of calls that are possible at our current state.
+-- We use point pstate to get the real world, and then find the indistinguishable calls from here.
+-- Then from here, we can use the FSM given to find the other worlds we can transition to. 
 -- Note that the FSM here is the FSM from the lifted level
 liftTransition :: BiTransition (PState st) ch -> FSM ch (PState st) -> BiTransition (PState st) ch
 liftTransition trans fsm (pstate, ch) = fromSndMaybe [(ch', transition fsm (pstate, ch')) | ch' <- possCalls trans (pstate, ch)]
@@ -122,22 +118,28 @@ liftTransition trans fsm (pstate, ch) = fromSndMaybe [(ch', transition fsm (psta
     possCalls trans (pstate, ch) = fst <$> trans (point pstate, ch)
 
 -- Given that this is being called from liftTransition, it's hard to imagine a case
--- in which point will be called on a PVar; our lifted states will just be 
+-- in which point will be called on a PVar; our lifted states will just be
 -- PCons and so on.
--- Perhaps it would be worth further investigating if this is true 
+-- Perhaps it would be worth further investigating if this is true
 point :: PState st -> PState st
 point (PCon st _) = st
 point (PVar st)   = PVar st
 
 fromSndMaybe :: [(a, Maybe b)] -> [(a, b)]
-fromSndMaybe = map (\(l, r) -> (l, fromJust r)) . 
+fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
                filter (isJust . snd)
 
+-- For the K case, we want to perform some operation on the result of the function for phi.
+-- Most likely, we will call buildSolveRS? And then extract some information somehow
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
-createSolvingAutomata (K _ _) ep ev = undefined
-createSolvingAutomata f ep ev = makeP $ buildDAutomata f ep ev -- Now we want to just make a dAutomata w/ accepting state as f
+createSolvingAutomata (K agent phi) ep ev = buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
+createSolvingAutomata phi           ep ev = makeP $ buildDAutomata phi ep ev
+  where
+    -- lowerAuto :: FSM Character (PState QState)
+    lowerAuto = createSolvingAutomata phi ep ev
 
 
 
 
 
+ 
