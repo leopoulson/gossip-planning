@@ -56,7 +56,7 @@ buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
 psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto)
   where
-    dAuto = buildDAutomata ep ev
+    dAuto = buildDAutomataNoF ep ev
 
 makePTrans :: FST Character QState -> FST Character (PState QState)
 makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
@@ -79,8 +79,6 @@ makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
     trans' (PCon st sts, ch) = error "No PCon states at this point"
 
 
-setSuccessfulFormula :: EvalState st => Form -> FSM ch st -> FSM ch st
-setSuccessfulFormula f = updateAcccepting (evalState f) 
 
 findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
 findPath (K a phi) rs = undefined 
@@ -90,13 +88,13 @@ findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutoma
 -- for buildPSA, our dAutomata and our transducer are on the same "level"
 -- hence we lift the transducers to the level of dAuto. 
 -- Then our other transducers sit the level below the PSA, that is the level of dAuto
-buildSolveAutomata :: EvalState st => Form -> RegularStructure ch (PState st) -> RegularStructure ch (PState st)
-buildSolveAutomata (K ag phi) rs = RegularStructure 
-    (buildPSA (dAutomata $ buildSolveAutomata phi rs) (liftTransducer (dAutomata $ buildSolveAutomata phi rs) $ getTransducer ag rs))
-    (liftTransducers (dAutomata $ buildSolveAutomata phi rs) $ transducers rs)
-buildSolveAutomata phi rs = rs
+buildSolveRS :: EvalState st => Form -> RegularStructure ch (PState st) -> RegularStructure ch (PState st)
+buildSolveRS (K ag phi) rs = RegularStructure 
+    (buildPSA (dAutomata $ buildSolveRS phi rs) (liftTransducer (dAutomata $ buildSolveRS phi rs) $ getTransducer ag rs))
+    (liftTransducers (dAutomata $ buildSolveRS phi rs) $ transducers rs)
+buildSolveRS phi rs = rs
   where
-    dAuto = dAutomata $ buildSolveAutomata phi rs
+    dAuto = dAutomata $ buildSolveRS phi rs
 
 liftTransducers :: FSM ch (PState st) -> [(Agent, FST ch (PState st))] -> [(Agent, FST ch (PState st))]
 liftTransducers fsm = map (\(ag, tr) -> (ag, liftTransducer fsm tr))
@@ -135,6 +133,9 @@ fromSndMaybe :: [(a, Maybe b)] -> [(a, b)]
 fromSndMaybe = map (\(l, r) -> (l, fromJust r)) . 
                filter (isJust . snd)
 
+createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
+createSolvingAutomata (K _ _) ep ev = undefined
+createSolvingAutomata f ep ev = makeP $ buildDAutomata f ep ev -- Now we want to just make a dAutomata w/ accepting state as f
 
 
 

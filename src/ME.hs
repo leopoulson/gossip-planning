@@ -144,13 +144,34 @@ pUpdate' p f (Q ps)
   | p `elem` ps = True
   | otherwise   = f (Q ps)
 
-buildDAutomata :: EpistM -> EventModel -> FSM Character QState
-buildDAutomata ep ev = FSM 
+setSuccessfulFormula :: EvalState st => Form -> FSM ch st -> FSM ch st
+setSuccessfulFormula f = updateAcccepting (evalState f) 
+
+-- We know now that we can make this better.
+-- * Set initial states from the event model?
+buildDAutomataNoF :: EpistM -> EventModel -> FSM Character QState
+buildDAutomataNoF ep ev = FSM 
     (getAlphabet ep ev)
     (getQStates ep)
     (meTrans ep ev)
     [QInit]
-    simpleAccept    
+    simpleAccept
+
+buildDAutomata :: Form -> EpistM -> EventModel -> FSM Character QState
+buildDAutomata f ep ev = setStatesReachableInit $ buildDAutomataCore f ep ev
+
+-- We set states to be undefined, as they're set in BDABetter
+-- This is because they need to be done after we've set initial state
+buildDAutomataCore :: Form -> EpistM -> EventModel -> FSM Character QState
+buildDAutomataCore f ep ev = FSM
+    (getAlphabet ep ev)
+    undefined 
+    (meTrans ep ev) 
+    (getInit ep)
+    (evalState f)
+
+getInit :: EpistM -> [QState]
+getInit (Mo _ _ val _ actual) = Q . map fromForm <$> map (\st -> fromMaybe [] $ lookup st val) actual
 
 buildMEStar :: EpistM -> EventModel -> RegularStructure Character QState
 buildMEStar ep ev = RegularStructure 
@@ -158,7 +179,7 @@ buildMEStar ep ev = RegularStructure
     [(ag, buildComposedSS ag ep ev dAuto) | ag <- agents ep]
     -- (pAutomata dAuto)
   where 
-    dAuto = buildDAutomata ep ev
+    dAuto = buildDAutomataNoF ep ev
 
 
 
