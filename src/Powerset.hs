@@ -12,7 +12,7 @@ import Data.Maybe (fromJust, isJust)
 
 type History ch st = [(ch, st)]
 data PSH ch st = PSH (PState st) (History ch st)
-data PState st = PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
+data PState st = PList [PState st] | PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
 
 instance Functor PState where
     fmap f (PVar p) = PVar $ f p
@@ -32,7 +32,9 @@ instance Foldable PState where
 -}
 instance (EvalState st, Eq st) => EvalState (PState st) where  
   evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
+  evalState (K _ phi) (PList _)    = error "Can't evaluate K on a PList"
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
+  evalState (And phis) (PList ps)  = all (\pstate -> evalState (And phis) pstate) ps
   evalState (And phis) ps          = all (\phi -> evalState phi ps) phis
   evalState (Or phis) ps           = any (\phi -> evalState phi ps) phis
   evalState phi (PVar st)          = evalState phi st
@@ -146,18 +148,25 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 --         K a phi AND K b psi
 -- Can we just look at the modalities and see what it is that we need to attach on?
 -- Or is it deeper than this? Do we need to create the automata on the fly?
--- Or just when we get an and behave differently? 
+-- Or just when we get an and behave differently?
+-- This is screaming out for a typeclass. This would make all of our worries go away
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                                                  buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
---createSolvingAutomata (And phis) ep ev         = intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+createSolvingAutomata (And phis) ep ev         = toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
 createSolvingAutomata phi                ep ev = makeP $ buildDAutomata phi ep ev
   where
     -- lowerAuto :: FSM Character (PState QState)
     lowerAuto = createSolvingAutomata phi ep ev
 
-
-
-
+toPList :: FSM Character [PState QState] -> FSM Character (PState QState)
+toPList (FSM alpha states trans int accept) = FSM alpha states' trans' int' accept'
+  where
+    --alpha = FSM.alphabet fsms
+    states' = undefined
+    trans' (PList ps, ch) = PList <$> trans (ps, ch)
+    int' = PList <$> int
+    accept' (PList ps) = accept ps 
+    accept' _          = error "Can't accept a non-PList"
 
  
