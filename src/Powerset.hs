@@ -32,9 +32,11 @@ instance Foldable PState where
 -}
 instance (EvalState st, Eq st) => EvalState (PState st) where  
   evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
-  evalState phi (PCon st _)        = evalState phi st
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
+  evalState (And phis) ps          = all (\phi -> evalState phi ps) phis
+  evalState (Or phis) ps           = any (\phi -> evalState phi ps) phis
   evalState phi (PVar st)          = evalState phi st
+  evalState phi (PCon st _)        = evalState phi st
   
 -- Would it be possible to update the accepting states as we go along?
 -- We might have to set the states after we've returned the PSA
@@ -131,6 +133,11 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 
 -- For the K case, we want to perform some operation on the result of the function for phi.
 -- Most likely, we will call buildSolveRS? And then extract some information somehow
+-- We really need to consider what to do when we get a formula like
+--         K a phi AND K b psi
+-- Can we just look at the modalities and see what it is that we need to attach on?
+-- Or is it deeper than this? Do we need to create the automata on the fly?
+-- Or just when we get an and behave differently? 
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                                                  buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
