@@ -78,9 +78,9 @@ bSATests = TestList ["Check that BFS on constructed automata is fine, for 1 call
                     "Check that this is also fine for FO knowledge"
                     ~: Just [Right (Call a b)] ~=? (extractCalls . doBFS) foSA,
                     "Check that results are the same for new and old constructions"
-                    ~: extractCalls (doBFS psetThree) ~=? extractCalls (doBFS saThree),
-                    "Check that this doesn't error"
-                    ~: Nothing ~=? extractCalls (doBFS saThreeAll)
+                    ~: extractCalls (doBFS psetThree) ~=? extractCalls (doBFS saThree) --,
+                    -- "Check that this doesn't error"
+                    -- ~: Nothing ~=? extractCalls (doBFS saThreeAll)
                    ]
 
 doBSATests = runTestTT bSATests

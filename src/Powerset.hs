@@ -67,7 +67,7 @@ makeSingleton (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' acce
     int' = map (: []) int
     accept' [st] = accept st
     accept' _    = error "Can't accept a list of calls"
-    trans' ([st], ch) = [trans (st, ch)]
+    trans' ([st], ch) = (: []) <$> trans (st, ch)
     trans' (_, ch)    = error "No transition for a list"
 
 
@@ -150,7 +150,7 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                                                  buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
-createSolvingAutomata (And phis) ep ev         = intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+--createSolvingAutomata (And phis) ep ev         = intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
 createSolvingAutomata phi                ep ev = makeP $ buildDAutomata phi ep ev
   where
     -- lowerAuto :: FSM Character (PState QState)
