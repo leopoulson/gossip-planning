@@ -78,7 +78,9 @@ bSATests = TestList ["Check that BFS on constructed automata is fine, for 1 call
                     "Check that this is also fine for FO knowledge"
                     ~: Just [Right (Call a b)] ~=? (extractCalls . doBFS) foSA,
                     "Check that results are the same for new and old constructions"
-                    ~: extractCalls (doBFS psetThree) ~=? extractCalls (doBFS saThree)
+                    ~: extractCalls (doBFS psetThree) ~=? extractCalls (doBFS saThree),
+                    "Check that this doesn't error"
+                    ~: Nothing ~=? extractCalls (doBFS saThreeAll)
                    ]
 
 doBSATests = runTestTT bSATests
@@ -90,6 +92,8 @@ t2 = powersetTrans (PCon (PVar $ Q [N b a]) [PVar $ Q [N b a]], Right (Call b a)
 -- This won't work, as we don't have higher-order states here.
 -- So we try and evaluate a knowledge formula on a PVar state, which errors (as it should do).
 t3 = extractCalls . doBFS $ setSuccessfulFormula (K a (allExpertsAg [a, b])) $ solvingAutomata
+
+t4 = extractCalls $ doBFS saThreeAll
 
 -- It's becoming time to consider what to do for a non-permitted call
 -- It seems to make the most sense to just return the empty list, thus making a
@@ -148,14 +152,17 @@ threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 saThree :: FSM Character (PState QState)
 saThree = createSolvingAutomata (K a $ allExpertsAg [a, b, c]) threeModel threeEvModel
 
+saThreeAll :: FSM Character (PState QState)
+saThreeAll = createSolvingAutomata (And [K a $ allExpertsAg [a, b, c], K b $ allExpertsAg [a, b, c], K c $ allExpertsAg [a, b, c]]) threeModel threeEvModel
+
+
 psetThree :: FSM Character (PState QState)
 psetThree = setStatesReachableInit $ 
             setInitial [PCon (PVar $ Q [N a b, N b c]) [PVar $ Q [N a b, N b c]]] $
             setSuccessfulFormula (K a (allExpertsAg [a, b, c])) $ 
             psaFromScratch a threeModel threeEvModel
 
---ppset :: FSM Character (PState (PState QState))
---ppset = buildPSA psetThree (liftTransducer (buildComposedSS b threeModel threeEvModel (buildDAutomata threeModel threeEvModel)))
+-- Four -----------------------------------------------------
 
 fourModel :: EpistM 
 fourModel = Mo

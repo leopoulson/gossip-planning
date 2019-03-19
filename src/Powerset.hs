@@ -60,15 +60,16 @@ psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS a
   where
     dAuto = buildDAutomataNoF ep ev
 
-makePTrans :: FST Character QState -> FST Character (PState QState)
-makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
+makeSingleton :: FSM ch st -> FSM ch [st]
+makeSingleton (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
   where
-    sts' = map PVar sts
-    int' = map PVar int
-    accept' (PVar st) = accept st
-    accept' _         = error "Can't accept a PCon w/ a simple automata"
-    trans' (PVar st, ch)     = map (\(c, s) -> (c, PVar s)) $ trans (st, ch)
-    trans' (PCon st sts, ch) = error "No PCon states at this point"
+    sts' = map (: []) sts
+    int' = map (: []) int
+    accept' [st] = accept st
+    accept' _    = error "Can't accept a list of calls"
+    trans' ([st], ch) = [trans (st, ch)]
+    trans' (_, ch)    = error "No transition for a list"
+
 
 makeP :: FSM Character QState -> FSM Character (PState QState)
 makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
@@ -80,7 +81,15 @@ makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
     trans' (PVar st, ch)     = PVar <$> trans (st, ch)
     trans' (PCon st sts, ch) = error "No PCon states at this point"
 
-
+makePTrans :: FST Character QState -> FST Character (PState QState)
+makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
+  where
+    sts' = map PVar sts
+    int' = map PVar int
+    accept' (PVar st) = accept st
+    accept' _         = error "Can't accept a PCon w/ a simple automata"
+    trans' (PVar st, ch)     = map (\(c, s) -> (c, PVar s)) $ trans (st, ch)
+    trans' (PCon st sts, ch) = error "No PCon states at this point"
 
 findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
 findPath (K a phi) rs = undefined 
@@ -141,6 +150,7 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                                                  buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
+createSolvingAutomata (And phis) ep ev         = intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
 createSolvingAutomata phi                ep ev = makeP $ buildDAutomata phi ep ev
   where
     -- lowerAuto :: FSM Character (PState QState)

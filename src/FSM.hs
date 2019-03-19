@@ -1,6 +1,6 @@
 module FSM where
 
-import Data.Maybe (catMaybes, mapMaybe, isJust, fromJust)
+import Data.Maybe (catMaybes, mapMaybe, isJust, isNothing, fromJust)
 import Data.List (nub, union)
 
 -- Basically, this is going to have to change to be Maybe q
@@ -77,12 +77,27 @@ getNeighboursEv fsm st = map (\(st', ch) -> (fromJust st', ch)) .
                          filter (isJust . fst) . 
                          map (\ch -> (transition fsm (st, ch), ch)) $ alphabet fsm
 
+unionFSM :: [FSM ch st] -> FSM ch [st]
+unionFSM fsms = FSM alpha' states' trans' initial' accepting'
+  where
+    alpha' = alphabet $ head fsms
+    states' = undefined
+    trans' (sts, call) = undefined -- zipWith ($) (map transition fsms) $ [(st, call) | st <- sts]
+    initial' = createInits $ map initial fsms
+    accepting' sts = or $ zipWith ($) (map accepting fsms) sts
 
+createInits :: [[a]]  -> [[a]]
+createInits [] = [[]]
+createInits (i : is) = [l : ls | l <- i, ls <- createInits is]
 
+intersectionFSM :: Eq st => [FSM ch st] -> FSM ch [st]
+intersectionFSM  fsms = setStatesReachableInit $ FSM alpha' states' trans' initial' accepting'
+  where
+    alpha' = alphabet $ head fsms
+    states' = undefined
+    trans' (sts, call) = checkMaybes $ zipWith ($) (map transition fsms) $ [(st, call) | st <- sts]
+    initial' = createInits $ map initial fsms
+    accepting' sts = and $ zipWith ($) (map accepting fsms) sts
+    checkMaybes sts = if (any isNothing) sts then Nothing else Just $ map fromJust sts
 
-
-
-
-
-
-
+ 
