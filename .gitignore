@@ -22,5 +22,3 @@ cabal.project.local~
 .ghc.environment.*
 
 *.hs#
-
-*.org

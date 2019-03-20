@@ -4,7 +4,6 @@ import ME
 import Model
 import FSM
 import FST
-import SSFST
 import Tests.Tests
 
 import Test.HUnit hiding (State)
