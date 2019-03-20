@@ -1,0 +1,105 @@
+* Main Project TODOs
+
+** TODO Write program to generate gossip graphs for use in testing
+   We will have to just use the pre-defined event models, as there's no point testing using inappropriate event models.
+   Then, this just amounts to generating graphs. Perhaps we just want to generate every possible graph and see what happens from there on?
+   This is because the set of agents is fixed (we can e.g. give this as input), the accepting state is latex fixed... The initial state is the important factor. 
+   This testing strategy is probably going to be important for marking, so need to think rather heavily about this. 
+
+** TODO Change structure (use typeclass instead of QState subtypes)
+** TODO Research benchmarking
+** TODO Think about different knowledge models 
+   Muddy children? This could be really neat
+ 
+** DONE Higher-order Knowledge
+   This will consist of using our single point of entry to build an
+   automata that lets us find a path to a HO formula. This kinda just depends on the above!
+   
+** DONE Provide single point of entry
+   By this, I mean that we give a single `build` function or something that takes a certain 
+   proposition and then creates the automata w/ paths to the goal.
+   
+   This will need some thinking on what order to do certain automata processes once it's
+   open - i.e. creating states, setting winning formula, etc
+
+   This is now done for a non-knowledge formula, but we still need to get something working
+   for HO knowledge. Should just be a case of recursively doing the buildPSA process?
+   
+*** Tests
+    * Check that we get a behaviour as we did before for all of the basic cases
+    * Test that things work for FO
+    * And then Higher-order. Most likely if it works or SO, we get Higher Order
+
+*** TODO On Conjunction / Disjuncton
+    It seems that the simplest way to use a conjunction / disjunction will be to 
+    do automata union & disjunction respectively. These are very standard procedures!
+    We can just then build an automata for every knowledge formula and perform this 
+    operation on them. 
+
+    However, the subtlety might be in when we want to do this. E.g if our conjunction
+    is for not knowledge-formulas, we can just stick it all into one automata. 
+
+    We're faced with a problem when doing transitions. To fix this, it seems that 
+    we should add in a new constraint to states such that they have a "fail"; this 
+    is what we can move to in the case of a non - transition. 
+
+    Update: It's simpler to just do intersection first, as we fail if any of the states 
+    made a "no-transition". Then in order to do union we can just use de Morgan's law
+** DONE Handle OR
+   CLOSED: [2019-03-20 Wed 11:31]
+* Optimisations & Improvements
+** QState / PState
+   Essentially 
+       PVar (Q [N a b])  
+   seems really dumb; there's definitely a better way to do this. Most likely just cut out the Q in the middle and make it PVar [N a b]... 
+* Poster Talk
+  Remember that our talk should just cover how we solve the problem, and not really go into detail on *how*.
+  
+  * *First define the prolem.*
+    - The Gossip Problem regards peer to peer information sharing. We start with a group of agents, each of whom have some secret information. 
+    - Agents exchange calls through phone calls; they tell the other agent all of the information they know, which are just the secrets and phone numbers of other agents. 
+    - We want to find sequences of calls that take us to a certain winning state. For now, let this just be the state in which every agent is an expert - that is, every agent knows the secret of every other agent.
+
+  * *Now introduce how we solve it.*
+    - DEL for representation (as on the poster). 
+    - Then we construct an automata whose nodes are knowledge states and edges are telephone calls between agents. 
+    - In order to solve the problem, we just need to find a path through the automata that takes us from some initial state to an accepting state, which we update to be states at which our winning condition holds
+    - This automatic representation is really great, as it lets us perform operations like intersection and complement. 
+
+  * *Then, let's talk about Knowledge* 
+    - We can make the problem a lot more interesting if we start to look for states where agents know certain things. 
+    - We reason about this by inspecting all of the states that the agent considers possible at a given world. If a formula holds at all worlds indistinguishable from a certain world, then the agent knows that the formula holds at the world. 
+    - We then build a transducer that relates calls that are indistinguishable from one another; for example, agent a cannot distinguish between a call from agent b to c or agent d to c. 
+    - Next, we step through our automata from earlier and the transducer simulatenously; thus building up a set of the states that are indistinguishable from our current state. 
+    - This lets us evaluate a formula like "a knows that everyone is an expert" in constant time; we just need to look at all of the states that are indistinguishable from our current one and check that everyone is an expert in these. This is much quicker than if we had to find these states some other way. 
+    - We can just repeat this process for higher-order knowledge, like 'everyone knows that everyone knows that everyone is an expert'
+* Other Knowledge Models
+** Muddy Children
+
+   The muddle children problem is in which we have a bunch of children who are outside playing in the mud. They come back inside, and their mother tells them 
+     "At least one of you has mud on your head"
+
+    The children can't see their own head, but can see the mud on the foreheads of others. She asks the following question over and over: 
+     "Can you tell for sure whether or not you have mud on your head?"
+
+    This can be modelled in our system, by letting the children be agents and announcements (or, not announcements) to their mother's question be events. 
+
+* Benchmarking 
+** GHC Profiling
+
+   GHC has profiling built in; this is very nice; [[https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html][here is the link]]. 
+
+** Profiling Runs
+*** First - 20/3 
+
+    +------+-------+-----------+
+    | Size | Order | Runtime/s |
+    |------+-------+-----------|
+    |    3 |     0 |      0.00 |
+    |    4 |     1 |      68.3 |
+    |    4 |     1 |      64.2 |
+    +------+-------+-----------+
+
+    Through profiling, we clearly see that we spend most of our time in the doBFS function. This makes perfect sense.
+    Further down, we see that in here nearly all of our time is spent within updateQueue. This is a much more interesting issue to have. 
+    In this, a lot of time is spent computing the neighbours and also enqueueing information. 
