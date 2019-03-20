@@ -150,7 +150,7 @@ threeEvModel :: EventModel
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
 saThree :: FSM Character (PState QState)
-saThree = createSolvingAutomata (K a $ allExpertsAg [a, b, c]) threeModel threeEvModel
+saThree = createSolvingAutomata (K b $ allExpertsAg [a, b, c]) threeModel threeEvModel
 
 saThreeAll :: FSM Character (PState QState)
 saThreeAll = createSolvingAutomata (And [K a $ allExpertsAg [a, b, c], K b $ allExpertsAg [a, b, c], K c $ allExpertsAg [a, b, c]]) threeModel threeEvModel
@@ -174,6 +174,11 @@ fourModel = Mo
 
 fourEvModel :: EventModel
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
+
+saFour :: FSM Character (PState QState)
+saFour = createSolvingAutomata (allExpertsAg $ [a, b, c, d]) fourModel fourEvModel
+
+
 
 -- For everyone expert, Just [Right Ag c Ag d,Right Ag b Ag c,Right Ag a Ag b,Right Ag c Ag b,Right Ag d Ag c]
 -- For K_a Expert,      Just [Right Ag b Ag c,Right Ag a Ag b,Right Ag b Ag d,Right Ag d Ag a,Right Ag a Ag c]

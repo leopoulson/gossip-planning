@@ -77,14 +77,17 @@ getNeighboursEv fsm st = map (\(st', ch) -> (fromJust st', ch)) .
                          filter (isJust . fst) . 
                          map (\ch -> (transition fsm (st, ch), ch)) $ alphabet fsm
 
-unionFSM :: [FSM ch st] -> FSM ch [st]
-unionFSM fsms = FSM alpha' states' trans' initial' accepting'
+unionFSM' :: [FSM ch st] -> FSM ch [st]
+unionFSM' fsms = FSM alpha' states' trans' initial' accepting'
   where
     alpha' = alphabet $ head fsms
     states' = undefined
     trans' (sts, call) = undefined -- zipWith ($) (map transition fsms) $ [(st, call) | st <- sts]
     initial' = createInits $ map initial fsms
     accepting' sts = or $ zipWith ($) (map accepting fsms) sts
+
+unionFSM :: Eq st => [FSM ch st] -> FSM ch [st]
+unionFSM = intersectionFSM . map complementFSM
 
 createInits :: [[a]]  -> [[a]]
 createInits [] = [[]]
@@ -100,4 +103,7 @@ intersectionFSM  fsms = setStatesReachableInit $ FSM alpha' states' trans' initi
     accepting' sts = and $ zipWith ($) (map accepting fsms) sts
     checkMaybes sts = if (any isNothing) sts then Nothing else Just $ map fromJust sts
 
- 
+complementFSM :: FSM ch st -> FSM ch st
+complementFSM (FSM sts alph trans int accept) = FSM sts alph trans int accept'
+  where
+    accept' = not . accept

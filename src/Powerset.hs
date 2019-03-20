@@ -153,11 +153,20 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                                                  buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
-createSolvingAutomata (And phis) ep ev         = toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+createSolvingAutomata (And phis) ep ev         = case includesK (And phis) of
+  True -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+  False -> makeP $ buildDAutomata (And phis) ep ev
 createSolvingAutomata phi                ep ev = makeP $ buildDAutomata phi ep ev
   where
-    -- lowerAuto :: FSM Character (PState QState)
     lowerAuto = createSolvingAutomata phi ep ev
+
+includesK :: Form -> Bool
+includesK (K _ _)  = True
+includesK (And ps) = any includesK ps
+includesK (Or ps)  = any includesK ps
+includesK (Not p)  = includesK p
+includesK (P _)    = False
+includesK Top      = False
 
 toPList :: FSM Character [PState QState] -> FSM Character (PState QState)
 toPList (FSM alpha states trans int accept) = FSM alpha states' trans' int' accept'
@@ -170,3 +179,5 @@ toPList (FSM alpha states trans int accept) = FSM alpha states' trans' int' acce
     accept' _          = error "Can't accept a non-PList"
 
  
+findCallSequence :: Form -> EpistM -> EventModel -> Maybe [Character]
+findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
