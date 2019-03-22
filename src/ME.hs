@@ -16,12 +16,12 @@ type Character = Either State Event
 type Alphabet = [Character]
 
 -- This gives us state evaluation into the type
-class Eq st => EvalState st where 
+class Ord st => EvalState st where 
   evalState :: Form -> st -> Bool
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit deriving (Show)
+data QState = Q [Prop] | QInit deriving (Show, Ord)
 
 instance Eq QState where
     QInit == QInit = True

@@ -7,8 +7,9 @@ import FSM
 import Data.Maybe (mapMaybe)
 
 import Data.List (foldl')
+import Data.Set (Set, empty, insert, notMember)
 
-import Control.Applicative
+import Control.Applicative hiding (empty)
 import Data.Monoid
   
 -- can probably use a lens here !!!!!! lol
@@ -23,15 +24,15 @@ bNode a = BNode a Nothing
 bNodePred :: a -> BNode a ch -> ch -> BNode a ch
 bNodePred n p ch = BNode n (Just (p, ch))
 
-doBFS :: Eq a => FSM ch a -> Maybe [(a, Maybe ch)]
-doBFS fsm = bfs fsm (map bNode $ initial fsm) []
+doBFS :: Ord a => FSM ch a -> Maybe [(a, Maybe ch)]
+doBFS fsm = bfs fsm (map bNode $ initial fsm) empty 
 
-bfs :: Eq a => FSM ch a -> [BNode a ch] -> [a] -> Maybe [(a, Maybe ch)]
+bfs :: Ord a => FSM ch a -> [BNode a ch] -> Set a -> Maybe [(a, Maybe ch)]
 bfs fsm queue seen = case queue of 
     []     -> Nothing    -- If the queue is empty, we stop and that is that
     (q:qs) -> case accepting fsm $ node q of 
         True  -> Just $ rebuildPath q                                     -- Here construct the path 
-        False -> bfs fsm (updateQueue fsm q qs seen) (node q : seen)   -- Here we want to recurse 
+        False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse 
 
 --rebuildPath :: BNode a ch -> [(a, Maybe ch)]
 --rebuildPath (BNode a (Just (bn, ch))) = (a, Just ch) : rebuildPath bn
@@ -44,14 +45,14 @@ rebuildPath = go []
     go acc (BNode x (Just (bn, ch))) = go ((x, Just ch):acc) bn
 
 -- this takes an fsm, a state, queue and seen & returns new queue
-updateQueue :: Eq a => FSM ch a -> BNode a ch -> [BNode a ch] -> [a] -> [BNode a ch]
+updateQueue :: Ord a => FSM ch a -> BNode a ch -> [BNode a ch] -> Set a -> [BNode a ch]
 updateQueue fsm st queue seen = enqueue queue seen bNeighbours
   where
     neighbours = getNeighboursEv fsm $ node st
     bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
-enqueue :: Eq a => [BNode a ch] -> [a] -> [BNode a ch] -> [BNode a ch]
-enqueue queue seen items = queue ++ filter (\item -> not $ node item `elem` seen) items
+enqueue :: Ord a => [BNode a ch] -> Set a -> [BNode a ch] -> [BNode a ch]
+enqueue queue seen items = queue ++ filter (\item -> notMember (node item) seen) items
 
   --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> not $ node item `elem` seen) items
 

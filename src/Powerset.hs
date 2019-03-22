@@ -26,6 +26,11 @@ instance Foldable PState where
     foldMap f (PVar p) = f p
     foldMap f (PCon p ps) = foldr (mappend . foldMap f) (foldMap f p) ps
 
+instance Ord st => Ord (PState st) where
+    PList pss1 `compare` PList pss2 = compare pss1 pss2
+    PCon ps1 _ `compare` PCon ps2 _ = compare ps1 ps2
+    PVar st1   `compare` PVar st2    = compare st1 st2
+  
 {- There's a couple of things to sort out w.r.t this function.
 
  * The first is that we need some kind of guarantee that the agent whose 
@@ -33,7 +38,7 @@ instance Foldable PState where
    is constructed for. This will probably require baking the agent into
    the type of either PState or the PSA itself. 
 -}
-instance (EvalState st, Eq st) => EvalState (PState st) where  
+instance (EvalState st, Ord st) => EvalState (PState st) where  
   evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
   evalState (K _ phi) (PList _)    = error "Can't evaluate K on a PList"
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
