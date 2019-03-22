@@ -90,7 +90,24 @@
 
     - A whole 40.7% of the time is spent comparing what I think are just states, when we check if an element is in the set of seen nodes. It's kind of unclear to me how we can reduce this; there doesn't seem to be any way to reduce the time spent doing comparisons. 
       - Perhaps we can change from using a list to using a set? Sets have quicker lookup time but also longer input time. This may be advantageous though.
-      - We could also change some part of the program to guarantee that we can't revisit another state - e.g. by setting all of the visited states to be null? 
+      - We could also change some part of the program to guarantee that we can't revisit another state - e.g. by setting all of the visited states to be null?
+
+*** First Major Speedup - 22/3 
+    
+    The first huge improvement in time was the change from folding with the enqueueOne function to filtering the set of items incident on the function and just appending them on. 
+
+    The main reason for this improvement is the way that it's implemented; previously, we were concatenating the item onto the end of the list. 
+    List concatenation is linear time, as we have to walk through the whole list and then stick a pointer to the next element on at the end. Instead, we filter which is linear in the size of the items list, and then append this. This is much faster. 
+
+    After this:
+
+  +------+-------+--------+
+  | Size | Order | Time/s |
+  +------+-------+--------+
+  | 5    | 1     | 234    |
+  | 5    | 0     | 0.34   |
+  +------+-------+--------+
+    
 * Poster Talk
   Remember that our talk should just cover how we solve the problem, and not really go into detail on *how*.
   

@@ -24,18 +24,24 @@ bNodePred :: a -> BNode a ch -> ch -> BNode a ch
 bNodePred n p ch = BNode n (Just (p, ch))
 
 doBFS :: Eq a => FSM ch a -> Maybe [(a, Maybe ch)]
-doBFS fsm = reverse <$> bfs fsm (map bNode $ initial fsm) []
+doBFS fsm = bfs fsm (map bNode $ initial fsm) []
 
 bfs :: Eq a => FSM ch a -> [BNode a ch] -> [a] -> Maybe [(a, Maybe ch)]
 bfs fsm queue seen = case queue of 
     []     -> Nothing    -- If the queue is empty, we stop and that is that
     (q:qs) -> case accepting fsm $ node q of 
         True  -> Just $ rebuildPath q                                     -- Here construct the path 
-        False -> bfs fsm (updateQueue fsm q qs seen) (seen ++ [node q])   -- Here we want to recurse 
+        False -> bfs fsm (updateQueue fsm q qs seen) (node q : seen)   -- Here we want to recurse 
+
+--rebuildPath :: BNode a ch -> [(a, Maybe ch)]
+--rebuildPath (BNode a (Just (bn, ch))) = (a, Just ch) : rebuildPath bn
+--rebuildPath (BNode a Nothing)   = [(a, Nothing)]
 
 rebuildPath :: BNode a ch -> [(a, Maybe ch)]
-rebuildPath (BNode a (Just (bn, ch))) = (a, Just ch) : rebuildPath bn
-rebuildPath (BNode a Nothing)   = [(a, Nothing)]
+rebuildPath = go []
+  where
+    go acc (BNode x Nothing)         = (x, Nothing):acc
+    go acc (BNode x (Just (bn, ch))) = go ((x, Just ch):acc) bn
 
 -- this takes an fsm, a state, queue and seen & returns new queue
 updateQueue :: Eq a => FSM ch a -> BNode a ch -> [BNode a ch] -> [a] -> [BNode a ch]
@@ -45,7 +51,7 @@ updateQueue fsm st queue seen = enqueue queue seen bNeighbours
     bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
 enqueue :: Eq a => [BNode a ch] -> [a] -> [BNode a ch] -> [BNode a ch]
-enqueue queue seen items = 
+enqueue queue seen items = queue ++ filter (\item -> not $ node item `elem` seen) items
 
   --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> not $ node item `elem` seen) items
 
@@ -54,7 +60,10 @@ enqueue queue seen items =
 newtype DList a = DList ([a] -> [a])
 
 mklist :: [a] -> DList a
-mklist xs = DList (\ys -> xs ++ ys)
+mklist xs = DList (xs ++)
+
+single :: a -> DList a
+single x = DList (x:)
 
 unlist :: DList a -> [a]
 unlist (DList dxs) = dxs []
@@ -68,7 +77,7 @@ instance Monoid (DList a) where
 enqueueOne :: Eq a => [a] -> BNode a ch -> DList (BNode a ch) -> DList (BNode a ch)
 enqueueOne seen item queue
   | node item `elem` seen = queue
-  | otherwise             = queue `mappend` mklist [item]
+  | otherwise             = queue `mappend` (single item)
 
 extractCalls :: Maybe [(a, Maybe ch)] -> Maybe [ch]
 extractCalls list = mapMaybe snd <$> list

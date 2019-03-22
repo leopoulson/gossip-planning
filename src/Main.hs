@@ -10,7 +10,7 @@ import Powerset
 import RS
 
 main :: IO ()
-main = putStrLn $ show $ extractCalls $ doBFS saFour
+main = putStrLn $ show $ extractCalls $ doBFS saFive
 
 threeModel :: EpistM
 threeModel = Mo 
