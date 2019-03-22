@@ -3,6 +3,8 @@ module BFSM where
 import FSM
 import Data.Maybe (mapMaybe)
 
+import Control.Applicative
+  
 -- can probably use a lens here !!!!!! lol
 data BNode a ch = BNode {
     node   :: a,       -- The actual node that we're looking at

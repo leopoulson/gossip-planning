@@ -84,10 +84,19 @@
 
     This can be modelled in our system, by letting the children be agents and announcements (or, not announcements) to their mother's question be events. 
 
-* Benchmarking 
+* Benchmarking and Testing
+
+  Remember that Steven said that Meng likes automated testing; it would be cool to have an automated way to test all of these things.  
+  Perhaps we should just run all of the generated graphs, somehow check that they are correct (e.g. against Malvin gattinger's?) and then use the total profiling information to analyse. 
+
+** Comparisons
+
+   It would be good to find some other examples of software that does the same job as we're trying to do, and then compare our runtime and space usage against theirs. Even if this means just to compare against our own previous times.
+
 ** GHC Profiling
 
    GHC has profiling built in; this is very nice; [[https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html][here is the link]]. 
+   It gives us a breakdown of where most of the time is spent during the tests. This means we can improve the program by making the bottlenecked areas more efficient. 
 
 ** Profiling Runs
 *** First - 20/3 

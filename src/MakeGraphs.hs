@@ -5,11 +5,11 @@ import Model
 import Data.List (subsequences)
 
 
-generateModels :: [Agent] -> EpistM
-generateModels ags = undefined
+generateModels :: [Agent] -> [(EpistM, EventModel)]
+generateModels ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validKnowledgeStates ags
 
 validKnowledgeStates :: [Agent] -> [[Prop]]
-validKnowledgeStates ags = filter isValid . subsequences . allKnowledge $ ags
+validKnowledgeStates = filter isValid . subsequences . allKnowledge 
 
 isValid :: [Prop] -> Bool
 isValid ps = all (\q -> possible q ps) ps

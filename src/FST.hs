@@ -1,5 +1,7 @@
 module FST where
 
+import Control.Applicative
+
 type BiTransition q e = (q, e) -> [(e, q)]
 type SSTransition ch = ch -> [ch]
 

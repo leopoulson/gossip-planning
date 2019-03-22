@@ -117,6 +117,14 @@ standardEventModel ags = EvMo calls (callRel calls ags)
     callRel evs ags = [(ag, unrel ag evs) | ag <- ags]
     unrel ag evs = [[ev] | ev <- evs, callIncludes ev ag] ++ [[ev | ev <- evs, not $ callIncludes ev ag]]
 
+standardEpistModel :: [Agent] -> [Prop] -> EpistM
+standardEpistModel ags fs = Mo
+  [State (0, [])]
+  ags
+  [(State (0, []), map P fs)]
+  (map (\ag -> (ag, [[State (0, [])]])) ags)
+  [State (0, [])]
+
 anyCall :: Precondition
 anyCall (Call i j) = P (N i j)
 

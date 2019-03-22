@@ -9,7 +9,10 @@ import BFSM
 
 import Data.List (nub)
 import Data.Maybe (fromJust, isJust)
-
+import Data.Foldable hiding (concatMap, all, foldr, any)
+import Data.Monoid
+import Control.Applicative
+   
 type History ch st = [(ch, st)]
 data PSH ch st = PSH (PState st) (History ch st)
 data PState st = PList [PState st] | PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
