@@ -1,17 +1,22 @@
-	Fri Mar 22 16:23 2019 Time and Allocation Profiling Report  (Final)
+	Fri Mar 22 17:10 2019 Time and Allocation Profiling Report  (Final)
 
 	   Main +RTS -p -RTS
 
-	total time  =      234.91 secs   (234910 ticks @ 1000 us, 1 processor)
-	total alloc = 236,480,451,880 bytes  (excludes profiling overheads)
+	total time  =        8.12 secs   (8125 ticks @ 1000 us, 1 processor)
+	total alloc = 10,506,692,024 bytes  (excludes profiling overheads)
 
-COST CENTRE MODULE   %time %alloc
+COST CENTRE     MODULE  %time %alloc
 
-==          ME        47.7   95.6
-compare     Model     45.6    0.0
-enqueue     BFSM       2.1    4.0
-==          Model      1.8    0.0
-==          Powerset   1.4    0.0
+enqueue         BFSM     63.9   90.6
+models          ME       12.0    0.2
+==              Model     9.2    0.0
+compare         Model     2.6    0.0
+meTrans         ME        2.5    2.0
+produceAllProps Model     1.9    2.4
+compare         ME        1.6    0.0
+idProps         ME        1.6    1.3
+postUpdate      Model     1.5    1.9
+meTrans.psID    ME        0.7    1.3
 
 
                                                                            individual     inherited
@@ -42,64 +47,66 @@ MAIN                             MAIN                     53           0    0.0 
     buildDAutomataCore           ME                      121           1    0.0    0.0     0.0    0.0
     includesK                    Powerset                115          21    0.0    0.0     0.0    0.0
   main                           Main                    106           1    0.0    0.0   100.0  100.0
-   show                          Model                   187           7    0.0    0.0     0.0    0.0
-    show                         Model                   188          14    0.0    0.0     0.0    0.0
+   show                          Model                   190           7    0.0    0.0     0.0    0.0
+    show                         Model                   191          14    0.0    0.0     0.0    0.0
    doBFS                         BFSM                    109           1    0.0    0.0   100.0  100.0
     bNode                        BFSM                    136           1    0.0    0.0     0.0    0.0
     initial                      FSM                     111           1    0.0    0.0     0.0    0.0
-    bfs                          BFSM                    110       20849    0.0    0.0   100.0  100.0
-     rebuildPath                 BFSM                    185           0    0.0    0.0     0.0    0.0
-      rebuildPath.go             BFSM                    186           8    0.0    0.0     0.0    0.0
-     updateQueue                 BFSM                    144       20848    0.0    0.0    99.9  100.0
-      updateQueue.bNeighbours    BFSM                    170        4556    0.0    0.0     0.0    0.0
-       updateQueue.bNeighbours.\ BFSM                    173       62109    0.0    0.0     0.0    0.0
-      updateQueue.neighbours     BFSM                    146        4556    0.0    0.0     1.0    0.4
+    bfs                          BFSM                    110       20849    0.2    0.0   100.0  100.0
+     rebuildPath                 BFSM                    188           0    0.0    0.0     0.0    0.0
+      rebuildPath.go             BFSM                    189           8    0.0    0.0     0.0    0.0
+     compare                     Powerset                184       33211    0.0    0.0     0.2    0.0
+      compare                    ME                      185       33211    0.0    0.0     0.2    0.0
+       compare                   Model                   186      383222    0.1    0.0     0.1    0.0
+     updateQueue                 BFSM                    144       20848    0.0    0.0    98.4  100.0
+      updateQueue.bNeighbours    BFSM                    170        4556    0.1    0.1     0.2    0.1
+       updateQueue.bNeighbours.\ BFSM                    174       62109    0.0    0.0     0.0    0.0
+      updateQueue.neighbours     BFSM                    146        4556    0.0    0.0    29.4    9.2
        node                      BFSM                    157        4556    0.0    0.0     0.0    0.0
-       getNeighboursEv           FSM                     147        4556    0.0    0.0     1.0    0.4
-        getNeighboursEv.\        FSM                     172       62109    0.0    0.0     0.0    0.0
-        getNeighboursEv.\        FSM                     151       95658    0.0    0.0     1.0    0.4
-         saFive                  Main                    153           0    0.0    0.0     1.0    0.4
-          createSolvingAutomata  Powerset                154           0    0.0    0.0     1.0    0.4
-           buildDAutomata        ME                      158           0    0.0    0.0     1.0    0.4
-            buildDAutomataCore   ME                      159           0    0.0    0.0     1.0    0.4
-             meTrans             ME                      160       95658    0.1    0.1     1.0    0.4
-              postUpdate         Model                   176     2484360    0.0    0.1     0.1    0.1
-               callIncludes      Model                   177     2484360    0.0    0.0     0.0    0.0
-              post               Model                   175     2484360    0.0    0.0     0.0    0.0
-              produceAllProps    Model                   174       62109    0.1    0.1     0.1    0.1
-              meTrans.psID       ME                      168       91102    0.0    0.1     0.1    0.1
-               idProps           ME                      178       91102    0.1    0.1     0.1    0.1
-              models             ME                      167     3823217    0.4    0.0     0.7    0.0
-               ==                Model                   169    62921186    0.3    0.0     0.3    0.0
+       getNeighboursEv           FSM                     147        4556    0.2    0.1    29.4    9.2
+        getNeighboursEv.\        FSM                     173       62109    0.0    0.0     0.0    0.0
+        getNeighboursEv.\        FSM                     151       95658    0.0    0.0    29.3    9.2
+         saFive                  Main                    153           0    0.0    0.0    29.2    9.1
+          createSolvingAutomata  Powerset                154           0    0.0    0.0    29.2    9.1
+           buildDAutomata        ME                      158           0    0.0    0.0    29.1    9.1
+            buildDAutomataCore   ME                      159           0    0.1    0.0    29.1    9.1
+             meTrans             ME                      160       95658    2.5    2.0    29.0    9.1
+              postUpdate         Model                   177     2484360    1.5    1.9     1.7    1.9
+               callIncludes      Model                   178     2484360    0.2    0.0     0.2    0.0
+              post               Model                   176     2484360    0.3    0.0     0.3    0.0
+              produceAllProps    Model                   175       62109    1.9    2.4     1.9    2.4
+              meTrans.psID       ME                      168       91102    0.7    1.3     2.3    2.6
+               idProps           ME                      179       91102    1.6    1.3     1.6    1.3
+              models             ME                      167     3823217   11.3    0.2    20.1    0.2
+               ==                Model                   169    62921186    8.8    0.0     8.8    0.0
               anyCall            Model                   166       91102    0.0    0.0     0.0    0.0
-              pre                Model                   165       91102    0.0    0.0     0.0    0.0
-           makeP                 Powerset                155           0    0.0    0.0     0.0    0.0
-            makeP.trans'         Powerset                156       95658    0.0    0.0     0.0    0.0
+              pre                Model                   165       91102    0.1    0.0     0.1    0.0
+           makeP                 Powerset                155           0    0.0    0.0     0.1    0.0
+            makeP.trans'         Powerset                156       95658    0.1    0.0     0.1    0.0
          transition              FSM                     152       95658    0.0    0.0     0.0    0.0
         alphabet                 FSM                     148        4556    0.0    0.0     0.0    0.0
-      enqueue                    BFSM                    145       20848    2.1    4.0    98.9   99.6
-       enqueue.\                 BFSM                    171       62109    0.6    0.0    96.9   95.6
-        node                     BFSM                    180       62105    0.0    0.0     0.0    0.0
-        ==                       Powerset                179    51267960    1.4    0.0    96.2   95.6
-         ==                      ME                      181    51267960   47.7   95.6    94.8   95.6
-          ==                     Model                   183   182098305    1.6    0.0     1.6    0.0
-          compare                Model                   182  3244626599   45.6    0.0    45.6    0.0
+      enqueue                    BFSM                    145       20848   63.9   90.6    68.8   90.7
+       enqueue.\                 BFSM                    171       62109    0.5    0.0     4.9    0.0
+        compare                  Powerset                180      474726    0.3    0.0     4.4    0.0
+         compare                 ME                      182      474726    1.6    0.0     4.0    0.0
+          compare                Model                   183     5223559    2.5    0.0     2.5    0.0
+        node                     BFSM                    172       62109    0.0    0.0     0.0    0.0
      node                        BFSM                    135       25404    0.0    0.0     0.0    0.0
-     saFive                      Main                    131           0    0.0    0.0     0.0    0.0
-      createSolvingAutomata      Powerset                132           0    0.0    0.0     0.0    0.0
-       buildDAutomata            ME                      137           0    0.0    0.0     0.0    0.0
-        buildDAutomataCore       ME                      138           0    0.0    0.0     0.0    0.0
-         evalState               ME                      139       20849    0.0    0.0     0.0    0.0
-          models                 ME                      140      150156    0.0    0.0     0.0    0.0
-           ==                    Model                   142     3049280    0.0    0.0     0.0    0.0
+     saFive                      Main                    131           0    0.0    0.0     1.1    0.0
+      createSolvingAutomata      Powerset                132           0    0.0    0.0     1.1    0.0
+       buildDAutomata            ME                      137           0    0.0    0.0     1.1    0.0
+        buildDAutomataCore       ME                      138           0    0.0    0.0     1.1    0.0
+         evalState               ME                      139       20849    0.0    0.0     1.1    0.0
+          models                 ME                      140      150156    0.7    0.0     1.1    0.0
+           ==                    Model                   142     3049280    0.4    0.0     0.4    0.0
        makeP                     Powerset                133           0    0.0    0.0     0.0    0.0
         makeP.accept'            Powerset                134       20849    0.0    0.0     0.0    0.0
      accepting                   FSM                     130       20849    0.0    0.0     0.0    0.0
    extractCalls                  BFSM                    108           1    0.0    0.0     0.0    0.0
  CAF                             BFSM                    104           0    0.0    0.0     0.0    0.0
-  rebuildPath                    BFSM                    184           1    0.0    0.0     0.0    0.0
+  rebuildPath                    BFSM                    187           1    0.0    0.0     0.0    0.0
  CAF                             Model                    99           0    0.0    0.0     0.0    0.0
-  show                           Model                   189           0    0.0    0.0     0.0    0.0
+  show                           Model                   192           0    0.0    0.0     0.0    0.0
   e                              Model                   120           1    0.0    0.0     0.0    0.0
   d                              Model                   119           1    0.0    0.0     0.0    0.0
   c                              Model                   118           1    0.0    0.0     0.0    0.0
