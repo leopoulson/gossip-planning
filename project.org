@@ -112,3 +112,8 @@
     Through profiling, we clearly see that we spend most of our time in the doBFS function. This makes perfect sense.
     Further down, we see that in here nearly all of our time is spent within updateQueue. This is a much more interesting issue to have. 
     In this, a lot of time is spent computing the neighbours and also enqueueing information. 
+
+    - A whole 40.7% of the time is spent comparing what I think are just states, when we check if an element is in the set of seen nodes. It's kind of unclear to me how we can reduce this; there doesn't seem to be any way to reduce the time spent doing comparisons. 
+      - Perhaps we can change from using a list to using a set? Sets have quicker lookup time but also longer input time. This may be advantageous though.
+      - We could also change some part of the program to guarantee that we can't revisit another state - e.g. by setting all of the visited states to be null? 
+    
