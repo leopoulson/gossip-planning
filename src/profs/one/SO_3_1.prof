@@ -1,0 +1,152 @@
+	Wed Mar 20 12:51 2019 Time and Allocation Profiling Report  (Final)
+
+	   Main +RTS -p -RTS
+
+	total time  =        0.00 secs   (2 ticks @ 1000 us, 1 processor)
+	total alloc =   1,825,512 bytes  (excludes profiling overheads)
+
+COST CENTRE     MODULE            %time %alloc
+
+compare         Model              50.0    0.0
+models          ME                 50.0    7.3
+CAF             GHC.IO.Handle.FD    0.0    1.9
+==              Powerset            0.0    1.2
+==              Model               0.0   19.1
+postUpdate      Model               0.0    5.5
+callIncludes    Model               0.0    3.3
+produceAllProps Model               0.0    6.6
+==              ME                  0.0   31.8
+meTrans         ME                  0.0    6.5
+meTrans.psID    ME                  0.0    2.3
+idProps         ME                  0.0    5.0
+getNeighboursEv FSM                 0.0    1.6
+
+
+                                                                                individual      inherited
+COST CENTRE                            MODULE                no.     entries  %time %alloc   %time %alloc
+
+MAIN                                   MAIN                  138          0    0.0    0.0   100.0  100.0
+ CAF                                   Main                  275          0    0.0    0.1   100.0   97.8
+  threeEvModel                         Main                  342          1    0.0    0.0     0.0    0.2
+   standardEventModel                  Model                 343          1    0.0    0.0     0.0    0.1
+    standardEventModel.callRel         Model                 370          1    0.0    0.0     0.0    0.1
+     standardEventModel.unrel          Model                 371          1    0.0    0.1     0.0    0.1
+      callIncludes                     Model                 372         12    0.0    0.0     0.0    0.0
+    standardEventModel.calls           Model                 344          1    0.0    0.0     0.0    0.0
+  threeModel                           Main                  303          1    0.0    0.0     0.0    0.0
+  saThree                              Main                  281          1    0.0    0.0     0.0    0.3
+   allExpertsAg                        Model                 290          1    0.0    0.0     0.0    0.0
+   createSolvingAutomata               Powerset              282          3    0.0    0.0     0.0    0.3
+    buildComposedSS                    ME                    358          1    0.0    0.0     0.0    0.0
+     identityTransducer                ME                    361          1    0.0    0.0     0.0    0.0
+     buildSSTransducer                 ME                    360          1    0.0    0.0     0.0    0.0
+     composeSS                         FST                   359          1    0.0    0.0     0.0    0.0
+    buildDAutomata                     ME                    297          2    0.0    0.0     0.0    0.1
+     buildDAutomataCore                ME                    300          2    0.0    0.0     0.0    0.1
+      getAlphabet                      ME                    326          1    0.0    0.0     0.0    0.0
+       events                          Model                 341          1    0.0    0.0     0.0    0.0
+       states                          Model                 327          1    0.0    0.0     0.0    0.0
+      getInit                          ME                    302          1    0.0    0.0     0.0    0.0
+       fromForm                        ME                    317          2    0.0    0.0     0.0    0.0
+       getInit.\                       ME                    314          1    0.0    0.0     0.0    0.0
+     setStatesReachableInit            FSM                   298          2    0.0    0.0     0.0    0.0
+      setStatesReachable               FSM                   299          2    0.0    0.0     0.0    0.0
+    makeP                              Powerset              296          2    0.0    0.0     0.0    0.0
+     makeP.int'                        Powerset              301          1    0.0    0.0     0.0    0.0
+    includesK                          Powerset              291         14    0.0    0.1     0.0    0.1
+    buildPSA                           Powerset              287          1    0.0    0.0     0.0    0.0
+     buildPSA.alphabet'                Powerset              324          1    0.0    0.0     0.0    0.0
+      alphabet                         FSM                   325          1    0.0    0.0     0.0    0.0
+     buildPSA.initial'                 Powerset              288          1    0.0    0.0     0.0    0.0
+      initial                          FSM                   289          1    0.0    0.0     0.0    0.0
+    setSuccessfulFormula               ME                    285          1    0.0    0.0     0.0    0.0
+     updateAcccepting                  FSM                   286          1    0.0    0.0     0.0    0.0
+    setStatesReachableInit             FSM                   283          1    0.0    0.0     0.0    0.0
+     setStatesReachable                FSM                   284          1    0.0    0.0     0.0    0.0
+  main                                 Main                  276          1    0.0    0.8   100.0   97.3
+   show                                Model                 387          3    0.0    0.1     0.0    0.2
+    show                               Model                 388          6    0.0    0.1     0.0    0.1
+   doBFS                               BFSM                  278          1    0.0    0.0   100.0   96.3
+    bNode                              BFSM                  310          1    0.0    0.0     0.0    0.0
+    initial                            FSM                   280          1    0.0    0.0     0.0    0.0
+    bfs                                BFSM                  279         13    0.0    0.3   100.0   96.3
+     rebuildPath                       BFSM                  386          4    0.0    0.0     0.0    0.0
+     updateQueue                       BFSM                  318         12    0.0    0.0   100.0   95.2
+      updateQueue.neighbours           BFSM                  321         12    0.0    0.0    50.0   59.0
+       node                            BFSM                  334         12    0.0    0.0     0.0    0.0
+       getNeighboursEv                 FSM                   322         12    0.0    1.6    50.0   59.0
+        getNeighboursEv.\              FSM                   353         50    0.0    0.0     0.0    0.0
+        getNeighboursEv.\              FSM                   328         84    0.0    0.1    50.0   57.3
+         saThree                       Main                  330          0    0.0    0.0    50.0   57.2
+          createSolvingAutomata        Powerset              331          0    0.0    0.0    50.0   57.2
+           buildComposedSS             ME                    362          0    0.0    0.0     0.0    1.8
+            identityTransducer         ME                    374          0    0.0    0.0     0.0    0.1
+             identityTransducer.trans' ME                    375         29    0.0    0.1     0.0    0.1
+            buildSSTransducer          ME                    365          0    0.0    0.0     0.0    1.4
+             buildSSTransducer.trans   ME                    366         27    0.0    0.2     0.0    1.4
+              evrel                    Model                 369         27    0.0    0.0     0.0    0.0
+              relatedWorldsAgent       Model                 367         27    0.0    0.2     0.0    1.1
+               relatedWorlds           Model                 368         27    0.0    0.4     0.0    1.0
+                ==                     Model                 373        160    0.0    0.6     0.0    0.6
+            composeSS                  FST                   363          0    0.0    0.0     0.0    0.3
+             composeSS.trans'          FST                   364         27    0.0    0.3     0.0    0.3
+           buildDAutomata              ME                    338          0    0.0    0.0    50.0   53.4
+            buildDAutomataCore         ME                    339          0    0.0    0.0    50.0   53.4
+             meTrans                   ME                    340        113    0.0    6.5    50.0   53.4
+              postUpdate               Model                 378        924    0.0    5.5     0.0    8.8
+               callIncludes            Model                 379        924    0.0    3.2     0.0    3.2
+              post                     Model                 377        924    0.0    0.0     0.0    0.0
+              produceAllProps          Model                 376         77    0.0    6.6     0.0    6.6
+              meTrans.psID             ME                    348        101    0.0    2.3     0.0    7.3
+               idProps                 ME                    352        101    0.0    5.0     0.0    5.0
+              anyCall                  Model                 347        101    0.0    0.2     0.0    0.2
+              pre                      Model                 346        101    0.0    0.0     0.0    0.0
+              models                   ME                    345       1796   50.0    7.3    50.0   24.0
+               ==                      Model                 349       9122    0.0   16.7     0.0   16.7
+           makeP                       Powerset              336          0    0.0    0.0     0.0    0.7
+            makeP.trans'               Powerset              337        113    0.0    0.7     0.0    0.7
+           buildPSA                    Powerset              332          0    0.0    0.0     0.0    1.3
+            buildPSA.transition'       Powerset              333         84    0.0    0.4     0.0    1.3
+             buildPSA.getPossStates    Powerset              355         27    0.0    0.7     0.0    0.9
+              buildPSA.getPossStates.\ Powerset              356         27    0.0    0.2     0.0    0.2
+               bitransition            FST                   357         27    0.0    0.0     0.0    0.0
+             transition                FSM                   335         84    0.0    0.0     0.0    0.0
+         transition                    FSM                   329         84    0.0    0.0     0.0    0.0
+        alphabet                       FSM                   323         12    0.0    0.0     0.0    0.0
+      updateQueue.bNeighbours          BFSM                  320         12    0.0    0.4     0.0    0.4
+       updateQueue.bNeighbours.\       BFSM                  354         50    0.0    0.0     0.0    0.0
+      enqueue                          BFSM                  319         12    0.0    0.1    50.0   35.8
+       enqueueOne                      BFSM                  351         50    0.0    0.6    50.0   35.7
+        node                           BFSM                  381         48    0.0    0.0     0.0    0.0
+        ==                             Powerset              380        543    0.0    1.2    50.0   35.1
+         ==                            ME                    382        279    0.0   31.8    50.0   33.9
+          ==                           Model                 385        655    0.0    2.1     0.0    2.1
+          compare                      Model                 383       5041   50.0    0.0    50.0    0.0
+     node                              BFSM                  309         24    0.0    0.0     0.0    0.0
+     saThree                           Main                  305          0    0.0    0.0     0.0    0.8
+      createSolvingAutomata            Powerset              306          0    0.0    0.0     0.0    0.8
+       setSuccessfulFormula            ME                    307          0    0.0    0.0     0.0    0.8
+        evalState                      Powerset              308         63    0.0    0.4     0.0    0.8
+         evalState                     ME                    312         37    0.0    0.0     0.0    0.3
+          models                       ME                    313         37    0.0    0.0     0.0    0.3
+           ==                          Model                 316        280    0.0    0.3     0.0    0.3
+         evalState.\                   Powerset              311         37    0.0    0.0     0.0    0.0
+     accepting                         FSM                   304         13    0.0    0.0     0.0    0.0
+   extractCalls                        BFSM                  277          1    0.0    0.0     0.0    0.0
+ CAF                                   ME                    270          0    0.0    0.0     0.0    0.0
+ CAF                                   Model                 269          0    0.0    0.0     0.0    0.0
+  compare                              Model                 384          1    0.0    0.0     0.0    0.0
+  ==                                   Model                 350          1    0.0    0.0     0.0    0.0
+  ==                                   Model                 315          1    0.0    0.0     0.0    0.0
+  c                                    Model                 295          1    0.0    0.0     0.0    0.0
+  b                                    Model                 294          1    0.0    0.0     0.0    0.0
+  a                                    Model                 293          1    0.0    0.0     0.0    0.0
+  /=                                   Model                 292          1    0.0    0.0     0.0    0.0
+ CAF                                   Powerset              268          0    0.0    0.0     0.0    0.0
+ CAF                                   Data.Either           252          0    0.0    0.0     0.0    0.0
+ CAF                                   GHC.Conc.Signal       225          0    0.0    0.0     0.0    0.0
+ CAF                                   GHC.IO.Encoding       207          0    0.0    0.2     0.0    0.2
+ CAF                                   GHC.IO.Encoding.Iconv 205          0    0.0    0.0     0.0    0.0
+ CAF                                   GHC.IO.Handle.FD      196          0    0.0    1.9     0.0    1.9
+ CAF                                   GHC.IO.Handle.Text    194          0    0.0    0.0     0.0    0.0
+ CAF                                   GHC.Show              180          0    0.0    0.0     0.0    0.0

@@ -4,14 +4,12 @@ module BFSM where
 
 
 import FSM
-import Data.Maybe (mapMaybe)
 
+import Data.Maybe (mapMaybe)
 import Data.List (foldl')
 import Data.Set (Set, empty, insert, notMember)
 
-import Control.Applicative hiding (empty)
-import Data.Monoid
-  
+
 -- can probably use a lens here !!!!!! lol
 data BNode a ch = BNode {
     node   :: !a,       -- The actual node that we're looking at
@@ -52,8 +50,10 @@ updateQueue fsm st queue seen = enqueue queue seen bNeighbours
     bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
 enqueue :: Ord a => [BNode a ch] -> Set a -> [BNode a ch] -> [BNode a ch]
-enqueue queue seen items = unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> notMember (node item) seen) items
+enqueue queue seen items = queue ++ filter (\item -> notMember (node item) seen) items
 
+
+  --queue ++ filter (\item -> notMember (node item) seen) items
   --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) 
 
   --foldr (enqueueOne seen) queue items

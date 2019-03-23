@@ -7,8 +7,6 @@ import RS
 import Data.Maybe
 import Data.List (sort)
 
-import Control.Applicative
-
 -- data Character = World State | Call Agent Agent deriving (Eq, Show)
 -- type Alphabet = [Character]
 

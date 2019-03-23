@@ -9,9 +9,9 @@ import BFSM
 
 import Data.List (nub)
 import Data.Maybe (fromJust, isJust)
-import Data.Foldable hiding (concatMap, all, foldr, any)
-import Data.Monoid
-import Control.Applicative
+--import Data.Foldable hiding (concatMap, all, foldr, any)
+--import Data.Monoid
+--import Control.Applicative
    
 type History ch st = [(ch, st)]
 data PSH ch st = PSH (PState st) (History ch st)
@@ -29,8 +29,9 @@ instance Foldable PState where
 instance Ord st => Ord (PState st) where
     PList pss1 `compare` PList pss2 = compare pss1 pss2
     PCon ps1 _ `compare` PCon ps2 _ = compare ps1 ps2
-    PVar st1   `compare` PVar st2    = compare st1 st2
-  
+    PVar st1   `compare` PVar st2   = compare st1 st2
+    compare _ _                     = error "Cannot compare items of different types"
+    
 {- There's a couple of things to sort out w.r.t this function.
 
  * The first is that we need some kind of guarantee that the agent whose 
@@ -78,7 +79,7 @@ makeSingleton (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' acce
     accept' [st] = accept st
     accept' _    = error "Can't accept a list of calls"
     trans' ([st], ch) = (: []) <$> trans (st, ch)
-    trans' (_, ch)    = error "No transition for a list"
+    trans' _    = error "No transition for a list"
 
 
 makeP :: FSM Character QState -> FSM Character (PState QState)
@@ -89,7 +90,7 @@ makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
     accept' (PVar st) = accept st
     accept' _         = error "Can't accept a PCon w/ a simple automata"
     trans' (PVar st, ch)     = PVar <$> trans (st, ch)
-    trans' (PCon st sts, ch) = error "No PCon states at this point"
+    trans' _ = error "No PCon states at this point"
 
 makePTrans :: FST Character QState -> FST Character (PState QState)
 makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
@@ -98,11 +99,11 @@ makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept'
     int' = map PVar int
     accept' (PVar st) = accept st
     accept' _         = error "Can't accept a PCon w/ a simple automata"
-    trans' (PVar st, ch)     = map (\(c, s) -> (c, PVar s)) $ trans (st, ch)
-    trans' (PCon st sts, ch) = error "No PCon states at this point"
+    trans' (PVar st, ch)  = map (\(c, s) -> (c, PVar s)) $ trans (st, ch)
+    trans' _              = error "No PCon states at this point"
 
 findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
-findPath (K a phi) rs = undefined 
+findPath (K _ _) _    = error "Can't find a path thru a regular structure with K"
 findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutomata rs)
 
 -- -- lens time
@@ -178,11 +179,12 @@ includesK (P _)    = False
 includesK Top      = False
 
 toPList :: FSM Character [PState QState] -> FSM Character (PState QState)
-toPList (FSM alpha states trans int accept) = FSM alpha states' trans' int' accept'
+toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
   where
     --alpha = FSM.alphabet fsms
     states' = undefined
     trans' (PList ps, ch) = PList <$> trans (ps, ch)
+    trans' _              = error "Only transition for PLists"
     int' = PList <$> int
     accept' (PList ps) = accept ps 
     accept' _          = error "Can't accept a non-PList"

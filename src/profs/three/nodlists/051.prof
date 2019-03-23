@@ -1,0 +1,124 @@
+	Sat Mar 23 14:20 2019 Time and Allocation Profiling Report  (Final)
+
+	   Main +RTS -p -RTS
+
+	total time  =        9.18 secs   (9184 ticks @ 1000 us, 1 processor)
+	total alloc = 10,390,321,520 bytes  (excludes profiling overheads)
+
+COST CENTRE     MODULE  %time %alloc
+
+enqueue         BFSM     63.1   91.7
+models          ME       11.9    0.0
+==              Model    10.5    0.0
+compare         Model     3.1    0.0
+compare         ME        2.4    0.0
+idProps         ME        1.7    1.2
+meTrans         ME        1.5    1.6
+produceAllProps Model     1.5    2.3
+postUpdate      Model     0.9    1.6
+meTrans.psID    ME        0.5    1.3
+
+
+                                                                          individual      inherited
+COST CENTRE                      MODULE                no.     entries  %time %alloc   %time %alloc
+
+MAIN                             MAIN                  137          0    0.0    0.0   100.0  100.0
+ main                            Main                  275          0    0.0    0.0     0.0    0.0
+ CAF                             Main                  273          0    0.0    0.0   100.0  100.0
+  fiveEvModel                    Main                  333          1    0.0    0.0     0.0    0.0
+   standardEventModel            Model                 334          1    0.0    0.0     0.0    0.0
+    standardEventModel.calls     Model                 335          1    0.0    0.0     0.0    0.0
+  fiveModel                      Main                  296          1    0.0    0.0     0.0    0.0
+  saFive                         Main                  280          1    0.0    0.0     0.0    0.0
+   allExpertsAg                  Model                 282          1    0.0    0.0     0.0    0.0
+   createSolvingAutomata         Powerset              281          1    0.0    0.0     0.0    0.0
+    makeP                        Powerset              294          1    0.0    0.0     0.0    0.0
+     makeP.int'                  Powerset              295          1    0.0    0.0     0.0    0.0
+    buildDAutomata               ME                    290          1    0.0    0.0     0.0    0.0
+     setStatesReachableInit      FSM                   292          1    0.0    0.0     0.0    0.0
+      setStatesReachable         FSM                   293          1    0.0    0.0     0.0    0.0
+     buildDAutomataCore          ME                    291          1    0.0    0.0     0.0    0.0
+      getAlphabet                ME                    320          1    0.0    0.0     0.0    0.0
+       events                    Model                 332          1    0.0    0.0     0.0    0.0
+       states                    Model                 321          1    0.0    0.0     0.0    0.0
+      getInit                    ME                    297          1    0.0    0.0     0.0    0.0
+       fromForm                  ME                    314          4    0.0    0.0     0.0    0.0
+       getInit.\                 ME                    309          1    0.0    0.0     0.0    0.0
+    includesK                    Powerset              283         21    0.0    0.0     0.0    0.0
+  main                           Main                  274          1    0.0    0.0   100.0  100.0
+   show                          Model                 362          7    0.0    0.0     0.0    0.0
+    show                         Model                 363         14    0.0    0.0     0.0    0.0
+   doBFS                         BFSM                  277          1    0.0    0.0   100.0  100.0
+    bNode                        BFSM                  304          1    0.0    0.0     0.0    0.0
+    initial                      FSM                   279          1    0.0    0.0     0.0    0.0
+    bfs                          BFSM                  278      20849    0.2    0.0   100.0  100.0
+     rebuildPath                 BFSM                  360          0    0.0    0.0     0.0    0.0
+      rebuildPath.go             BFSM                  361          8    0.0    0.0     0.0    0.0
+     compare                     Powerset              356      33211    0.0    0.0     0.4    0.0
+      compare                    ME                    357      33211    0.1    0.0     0.4    0.0
+       compare                   Model                 358     383222    0.3    0.0     0.3    0.0
+     updateQueue                 BFSM                  315      20848    0.0    0.0    98.0  100.0
+      updateQueue.bNeighbours    BFSM                  342       4556    0.1    0.1     0.1    0.1
+       updateQueue.bNeighbours.\ BFSM                  346      62109    0.0    0.0     0.0    0.0
+      updateQueue.neighbours     BFSM                  317       4556    0.0    0.0    29.0    8.2
+       node                      BFSM                  328       4556    0.0    0.0     0.0    0.0
+       getNeighboursEv           FSM                   318       4556    0.1    0.1    28.9    8.2
+        getNeighboursEv.\        FSM                   345      62109    0.0    0.0     0.0    0.0
+        getNeighboursEv.\        FSM                   322      95658    0.1    0.0    28.8    8.2
+         saFive                  Main                  324          0    0.0    0.0    28.7    8.1
+          createSolvingAutomata  Powerset              325          0    0.0    0.0    28.7    8.1
+           buildDAutomata        ME                    329          0    0.0    0.0    28.6    8.1
+            buildDAutomataCore   ME                    330          0    0.1    0.0    28.6    8.1
+             meTrans             ME                    331      95658    1.5    1.6    28.5    8.1
+              postUpdate         Model                 349    2484360    0.9    1.6     1.5    1.6
+               callIncludes      Model                 350    2484360    0.6    0.0     0.6    0.0
+              post               Model                 348    2484360    0.2    0.0     0.2    0.0
+              produceAllProps    Model                 347      62109    1.5    2.3     1.5    2.3
+              meTrans.psID       ME                    339      91102    0.5    1.3     2.3    2.5
+               idProps           ME                    351      91102    1.7    1.2     1.7    1.2
+              models             ME                    338    3823217   11.3    0.0    21.4    0.0
+               ==                Model                 340   62921186   10.1    0.0    10.1    0.0
+              anyCall            Model                 337      91102    0.0    0.0     0.0    0.0
+              pre                Model                 336      91102    0.1    0.0     0.1    0.0
+           makeP                 Powerset              326          0    0.0    0.0     0.1    0.0
+            makeP.trans'         Powerset              327      95658    0.1    0.0     0.1    0.0
+         transition              FSM                   323      95658    0.0    0.0     0.0    0.0
+        alphabet                 FSM                   319       4556    0.0    0.0     0.0    0.0
+      enqueue                    BFSM                  316      20848   63.1   91.7    68.9   91.7
+       enqueue.\                 BFSM                  343      62109    0.4    0.0     5.8    0.0
+        compare                  Powerset              352     474726    0.3    0.0     5.5    0.0
+         compare                 ME                    353     474726    2.3    0.0     5.2    0.0
+          compare                Model                 354    5223559    2.9    0.0     2.9    0.0
+        node                     BFSM                  344      62109    0.0    0.0     0.0    0.0
+     node                        BFSM                  303      25404    0.1    0.0     0.1    0.0
+     saFive                      Main                  299          0    0.0    0.0     1.2    0.0
+      createSolvingAutomata      Powerset              300          0    0.0    0.0     1.2    0.0
+       buildDAutomata            ME                    305          0    0.0    0.0     1.1    0.0
+        buildDAutomataCore       ME                    306          0    0.1    0.0     1.1    0.0
+         evalState               ME                    307      20849    0.0    0.0     1.1    0.0
+          models                 ME                    308     150156    0.7    0.0     1.1    0.0
+           ==                    Model                 312    3049280    0.4    0.0     0.4    0.0
+       makeP                     Powerset              301          0    0.0    0.0     0.1    0.0
+        makeP.accept'            Powerset              302      20849    0.1    0.0     0.1    0.0
+     accepting                   FSM                   298      20849    0.1    0.0     0.1    0.0
+   extractCalls                  BFSM                  276          1    0.0    0.0     0.0    0.0
+ CAF                             BFSM                  272          0    0.0    0.0     0.0    0.0
+  rebuildPath                    BFSM                  359          1    0.0    0.0     0.0    0.0
+ CAF                             Model                 267          0    0.0    0.0     0.0    0.0
+  show                           Model                 364          0    0.0    0.0     0.0    0.0
+  compare                        Model                 355          1    0.0    0.0     0.0    0.0
+  ==                             Model                 341          1    0.0    0.0     0.0    0.0
+  ==                             Model                 310          1    0.0    0.0     0.0    0.0
+  e                              Model                 289          1    0.0    0.0     0.0    0.0
+  d                              Model                 288          1    0.0    0.0     0.0    0.0
+  c                              Model                 287          1    0.0    0.0     0.0    0.0
+  b                              Model                 286          1    0.0    0.0     0.0    0.0
+  a                              Model                 285          1    0.0    0.0     0.0    0.0
+  /=                             Model                 284          1    0.0    0.0     0.0    0.0
+ CAF                             Data.Either           250          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.Conc.Signal       224          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Encoding       206          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Encoding.Iconv 204          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Handle.FD      195          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Handle.Text    193          0    0.0    0.0     0.0    0.0
+ CAF                             GHC.Show              179          0    0.0    0.0     0.0    0.0

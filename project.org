@@ -1,9 +1,12 @@
 * Main Project TODOs
 
-** TODO Look at running Haskell on blue crystal
-   Mainly to the end of just getting it off my machine. Probs way quicker ...
+** TODO Fix bug w/ H-O knowledge
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
+** TODO Look at running Haskell on blue crystal
+   Mainly to the end of just getting it off my machine. Probs way quicker ...
+   This really doesn't seem like a good idea any more. . . 
+
 ** TODO Think about different knowledge models 
    Muddy children? This could be really neat
 
@@ -50,11 +53,6 @@
     made a "no-transition". Then in order to do union we can just use de Morgan's law
 ** DONE Handle OR
    CLOSED: [2019-03-20 Wed 11:31]
-* Optimisations & Improvements
-** QState / PState
-   Essentially 
-       PVar (Q [N a b])  
-   seems really dumb; there's definitely a better way to do this. Most likely just cut out the Q in the middle and make it PVar [N a b]... 
 * Benchmarking and Testing
 
   Remember that Steven said that Meng likes automated testing; it would be cool to have an automated way to test all of these things.  
@@ -67,14 +65,21 @@
 
    Either we can check results as we go along, or we can store the results in another file and then put them into the other checkers. The latter is a bit preferable, as it means we can just profile the first on its own and then not time the comparison in with it. However the latter is inevitably more difficult. 
 
-
 ** GHC Profiling
 
    GHC has profiling built in; this is very nice; [[https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html][here is the link]]. 
-   It gives us a breakdown of where most of the time is spent during the tests. This means we can improve the program by making the bottlenecked areas more efficient. 
+   It gives us a breakdown of where most of the time is spent during the tests. This means we can improve the program by making the bottlenecked areas more efficient.
+
+   To save time in the future:
+   
+   - Compile with 
+         `ghc -prof -fprof-auto -O2 -w -rtsopts Main.hs`
+     -w removes all the pesky warnings
+   - Run with 
+         `./Main +RTS -p -RTS`
 
 ** Profiling Runs
-*** First - 20/3 
+*** One - First - 20/3 
 
     +------+-------+-----------+
     | Size | Order | Runtime/s |
@@ -92,7 +97,7 @@
       - Perhaps we can change from using a list to using a set? Sets have quicker lookup time but also longer input time. This may be advantageous though.
       - We could also change some part of the program to guarantee that we can't revisit another state - e.g. by setting all of the visited states to be null?
 
-*** First Major Speedup - 22/3 
+*** Two - First Major Speedup - 22/3 
     
     The first huge improvement in time was the change from folding with the enqueueOne function to filtering the set of items incident on the function and just appending them on. 
 
@@ -103,15 +108,52 @@
 
   +------+-------+--------+
   | Size | Order | Time/s |
-  +------+-------+--------+
-  | 5    | 1     | 234    |
-  | 5    | 0     | 0.34   |
+  |------+-------+--------|
+  |    5 |     1 |    234 |
+  |    5 |     0 |   0.34 |
+  |      |       |        |
   +------+-------+--------+
 
-*** Second speedup - 22/3, Later
+*** Three - Second speedup - 22/3, Later
     
     Next big old speedup was changing use of lists to using Sets. Much faster than list. Should document speedup when I get around to it 
-    
+    This happened because membership checking on lists is O(n) time. This is obviously not very good. Furthermore, list appending is O(n). Insertion and membership checks for Sets are always O(log n). So we get a big speedup nearly for free!
+
+   It seems that for now the main bottleneck of time is the function models. As for memory, it seems that produceAllProps is causing 23.4% of the memory allocation; perhaps we can do this lazily?
+
+*** Four - DLists vs No Dlists - 23/3
+
+   *These are for using dlists in BFSM*
+  +------+-------+--------+--------+
+  | Size | Order | Time/s | Memory |
+  |------+-------+--------+--------|
+  |      |       |        |        |
+  |    5 |     0 |   4.34 | 2Gb    |
+  |    5 |     1 |  27.44 | 15.4Gb |
+  |    4 |     1 |   0.12 | 51Mb   |
+  +------+-------+--------+--------+
+
+  *And these are for without DLists*
+  +------+-------+--------+--------+
+  | Size | Order | Time/s | Memory |
+  |------+-------+--------+--------|
+  |    6 |     0 |        |        |
+  |    5 |     0 |   9.18 | 10.4Gb |
+  |    5 |     1 |  11.44 | 11Gb   |
+  |    4 |     1 |   0.04 | 15Mb   |
+  +------+-------+--------+--------+
+
+  Regardless of this, one bottleneck for sure is the `models` function. 
+  To speed this up, we can also change this to a set. Again, `elem` is O(n), 
+  and we can afford to take a hit on the speed of insertion to speed up lookups.
+
+*** Five - Changing to Sets - 23/3
+
+* Optimisations & Improvements
+** QState / PState
+   Essentially 
+       PVar (Q [N a b])  
+   seems really dumb; there's definitely a better way to do this. Most likely just cut out the Q in the middle and make it PVar [N a b]... 
 * Poster Talk
   Remember that our talk should just cover how we solve the problem, and not really go into detail on *how*.
   

@@ -53,6 +53,21 @@ fiveModel = Mo
     [State (0, [])]
 
 saFive :: FSM Character (PState QState)
-saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
-  
-                       
+saFive = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
+
+f :: Agent
+f = Ag 1
+
+sixEvModel :: EventModel
+sixEvModel = standardEventModel [a, b, c, d, e, f] anyCall postUpdate
+
+sixModel :: EpistM
+sixModel = Mo
+    [State (0, [])]
+    [a, b, c, d, e, f]
+    [(State (0, []), [P (N a b), P (N b c), P (N c d), P (N e d), P (N a f)])]
+    [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]]), (e, [[State (0, [])]]), (f, [[State (0, [])]])]
+    [State (0, [])]
+
+saSix :: FSM Character (PState QState)
+saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
