@@ -107,6 +107,10 @@
   | 5    | 1     | 234    |
   | 5    | 0     | 0.34   |
   +------+-------+--------+
+
+*** Second speedup - 22/3, Later
+    
+    Next big old speedup was changing use of lists to using Sets. Much faster than list. Should document speedup when I get around to it 
     
 * Poster Talk
   Remember that our talk should just cover how we solve the problem, and not really go into detail on *how*.

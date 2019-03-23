@@ -52,9 +52,9 @@ updateQueue fsm st queue seen = enqueue queue seen bNeighbours
     bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
 enqueue :: Ord a => [BNode a ch] -> Set a -> [BNode a ch] -> [BNode a ch]
-enqueue queue seen items = queue ++ filter (\item -> notMember (node item) seen) items
+enqueue queue seen items = unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> notMember (node item) seen) items
 
-  --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> not $ node item `elem` seen) items
+  --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) 
 
   --foldr (enqueueOne seen) queue items
 
@@ -75,10 +75,10 @@ instance Monoid (DList a) where
 
 -- We really want to try and reduce the amount of times we make this
 -- Comparison below. This is absolutely the most costly part of the program. 
-enqueueOne :: Eq a => [a] -> BNode a ch -> DList (BNode a ch) -> DList (BNode a ch)
+enqueueOne :: Ord a => Set a -> BNode a ch -> DList (BNode a ch) -> DList (BNode a ch)
 enqueueOne seen item queue
-  | node item `elem` seen = queue
-  | otherwise             = queue `mappend` (single item)
+  | notMember (node item) seen = queue `mappend` (single item)
+  | otherwise                  = queue
 
 extractCalls :: Maybe [(a, Maybe ch)] -> Maybe [ch]
 extractCalls list = mapMaybe snd <$> list
