@@ -6,6 +6,8 @@ import FSM
 import FST
 import Tests.Tests
 
+import Data.Set (Set, fromList)
+
 import Test.HUnit hiding (State)
 
 allTests :: [Test]
@@ -22,15 +24,15 @@ tStates = "Check that the states are enumerated correctly"
 
 tTrans1 :: Test
 tTrans1 = "Check that transition is working as it should, from initial state"
-       ~: Just (Q [S a b, N a b]) ~=? transition dAutomata (QInit, Left (State (0, []))) 
+       ~: Just (Q (fromList ([S a b, N a b]))) ~=? transition dAutomata (QInit, Left (State (0, []))) 
 
 tTrans2 :: Test
 tTrans2 = "Test transition updated by call"
-       ~: Just (Q [S a b, S b a, N a b, N b a]) ~=? transition dAutomata (Q [S a b, N a b], Right (Call a b))
+       ~: Just (Q (fromList [S a b, S b a, N a b, N b a])) ~=? transition dAutomata (Q (fromList [S a b, N a b]), Right (Call a b))
 
 tTrans3 :: Test
 tTrans3 = "Test transition updated by call when everyone knows everything"
-       ~: Just (Q [S a b, S b a, N a b, N b a]) ~=? transition dAutomata (Q [S a b, S b a, N a b, N b a], Right (Call a b))
+       ~: Just (Q (fromList [S a b, S b a, N a b, N b a])) ~=? transition dAutomata (Q (fromList [S a b, S b a, N a b, N b a]), Right (Call a b))
 
 meTests :: Test
 meTests = test [tStates, tTrans1, tTrans2, tTrans3]
@@ -57,7 +59,7 @@ relUpdate :: EpistM
 relUpdate = update exampleModel eventModel
 
 dAutomata :: FSM Character QState
-dAutomata = buildDAutomata exampleModel eventModel
+dAutomata = buildDAutomataNoF exampleModel eventModel
 
 -- Tests for one-state transducer construction
 
@@ -109,11 +111,11 @@ trans = buildTransducer a transModel transEv
 
 idTT1 :: Test
 idTT1 = "Check id Transducer working correctly from QInit"
-     ~: [(Left (State (0, [])), Q [S a b, N a b])] ~=? bitransition idT (QInit, Left (State (0, [])))
+     ~: [(Left (State (0, [])), Q (fromList [S a b, N a b]))] ~=? bitransition idT (QInit, Left (State (0, [])))
 
 idTT2 :: Test
 idTT2 = "Check id Transducer working fine for some call"
-     ~: [(Right (Call a b), Q [S a b, S b a, N a b, N b a])] ~=? bitransition idT (Q [S a b, N a b], Right (Call a b)) 
+     ~: [(Right (Call a b), Q (fromList [S a b, S b a, N a b, N b a]))] ~=? bitransition idT (Q (fromList [S a b, N a b]), Right (Call a b)) 
 
 idTests :: Test
 idTests = TestList [idTT1, idTT2]
@@ -127,21 +129,21 @@ idT = identityTransducer dAutomata
 -- Tests for composition transducer construction
 
 t1 :: [(Character, ((QState, QState), QState))]
-t1 = biT (((Q [N a b], QInit), Q [N a b]), Right (Call a b))
+t1 = biT (((Q (fromList [N a b]), QInit), Q $ fromList [N a b]), Right (Call a b))
 
 t2 :: [(Character, ((QState, QState), QState))]
-t2 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call b a))
+t2 = biT (((Q $ fromList [N b a], QInit), Q $ fromList [N b a]), Right (Call b a))
 
 t7 :: [(Character, ((QState, QState), QState))]
-t7 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
+t7 = biT (((Q $ fromList [N b a], QInit), Q $ fromList [N b a]), Right (Call a a))
 
 ctT1 :: Test
 ctT1 = "Testing the way the transition works for composed transducers"
-    ~: [(Right (Call a b),((Q [N a b, N b a, S a b, S b a], QInit), Q [N a b, N b a, S a b, S b a]))] ~=? t1
+    ~: [(Right (Call a b),((Q (fromList [N a b, N b a, S a b, S b a]), QInit), Q (fromList [N a b, N b a, S a b, S b a])))] ~=? t1
 
 ctT2 :: Test
 ctT2 = "Testing the way it works for indistinguishable events"
-    ~: [(Right (Call b a),((Q [N a b, N b a, S a b, S b a], QInit),Q [N a b, N b a, S a b, S b a])),(Right (Call a a),((Q [N a b, N b a, S a b, S b a], QInit),Q [N b a]))] ~=? t2
+    ~: [(Right (Call b a),((Q (fromList [N a b, N b a, S a b, S b a]), QInit),Q (fromList [N a b, N b a, S a b, S b a]))),(Right (Call a a),((Q (fromList [N a b, N b a, S a b, S b a]), QInit),Q (fromList [N b a])))] ~=? t2
 
 cTransTests :: Test
 cTransTests = TestList [ctT1, ctT2]
@@ -165,7 +167,7 @@ cTransEv = EvMo
     postUpdate
 
 cTrans :: FST Character ((QState, QState), QState)
-cTrans = buildComposedTransducers a cTransModel cTransEv (buildDAutomata cTransModel cTransEv)
+cTrans = buildComposedTransducers a cTransModel cTransEv (buildDAutomataNoF cTransModel cTransEv)
 
 biT :: BiTransition ((QState, QState), QState) Character
 biT = bitransition cTrans
@@ -173,10 +175,10 @@ biT = bitransition cTrans
 concat1 :: FST Character (QState, QState)
 concat1 = composeFST (identityTransducer transAuto) (buildTransducer a cTransModel cTransEv)
 
-t3 = bitransition concat1 $ ((Q [N b a], QInit), Right (Call a a))
+t3 = bitransition concat1 $ ((Q $ fromList [N b a], QInit), Right (Call a a))
 
 t4 :: [(Character, ((QState, QState), QState))]
-t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
+t4 = biT (((Q $ fromList [N b a], QInit), Q $ fromList [N b a]), Right (Call a a))
 
 -- Testing SSFST
 
@@ -196,15 +198,15 @@ t4 = biT (((Q [N b a], QInit), Q [N b a]), Right (Call a a))
 
 ssTest1 :: Test
 ssTest1 = "Check that for single relations, behaves as expected"
-       ~: [(Right (Call a b), Q [S a b, S b a, N a b, N b a])] ~=? tripleTransFn (Q [N a b], Right (Call a b))
+       ~: [(Right (Call a b), Q (fromList [S a b, S b a, N a b, N b a]))] ~=? tripleTransFn (Q (fromList [N a b]), Right (Call a b))
 
 ssTest2 :: Test
 ssTest2 = "Checl that it also works for non-single ones"
-       ~: [(Right (Call b a), Q [S a b, S b a, N a b, N b a]), (Right (Call a a), Q [N b a])] ~=? tripleTransFn (Q [N b a], Right (Call b a))     
+       ~: [(Right (Call b a), Q (fromList [S a b, S b a, N a b, N b a])), (Right (Call a a), Q (fromList [N b a]))] ~=? tripleTransFn (Q (fromList [N b a]), Right (Call b a))     
 
 ssTest3 :: Test
 ssTest3 = "Check that it's the same for two indistinguishable calls"
-       ~: tripleTransFn (Q [N b a], Right (Call b a)) ~=? tripleTransFn (Q [N b a], Right (Call a a))
+       ~: tripleTransFn (Q (fromList [N b a]), Right (Call b a)) ~=? tripleTransFn (Q (fromList [N b a]), Right (Call a a))
 
 ssTests :: Test
 ssTests = TestList [ssTest1, ssTest2, ssTest3]
@@ -219,7 +221,7 @@ idTrans :: FST Character QState
 idTrans = identityTransducer transAuto
 
 transAuto :: FSM Character QState
-transAuto = buildDAutomata cTransModel cTransEv
+transAuto = buildDAutomataNoF cTransModel cTransEv
 
 tripleTrans :: FST Character QState
 tripleTrans = buildComposedSS a cTransModel cTransEv transAuto
@@ -228,13 +230,13 @@ tripleTransFn :: BiTransition QState Character
 tripleTransFn = bitransition tripleTrans
 
 ttTest1 :: [(Character, QState)]
-ttTest1 = tripleTransFn (Q [N a b], Right (Call a b))
+ttTest1 = tripleTransFn (Q $ fromList [N a b], Right (Call a b))
 
 ttTest2 :: [(Character, QState)]
-ttTest2 = tripleTransFn (Q [N b a], Right (Call b a))
+ttTest2 = tripleTransFn (Q $ fromList [N b a], Right (Call b a))
 
 ttTest3 :: [(Character, QState)]
-ttTest3 = tripleTransFn (Q [N b a], Right (Call a a))
+ttTest3 = tripleTransFn (Q $ fromList [N b a], Right (Call a a))
 
 
 

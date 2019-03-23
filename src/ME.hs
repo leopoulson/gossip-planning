@@ -6,6 +6,7 @@ import FST
 import RS
 import Data.Maybe
 import Data.List (sort)
+import qualified Data.Set as Set
 
 -- data Character = World State | Call Agent Agent deriving (Eq, Show)
 -- type Alphabet = [Character]
@@ -19,11 +20,11 @@ class Ord st => EvalState st where
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
-data QState = Q [Prop] | QInit deriving (Show, Ord)
+data QState = Q (Set.Set Prop) | QInit deriving (Show, Ord)
 
 instance Eq QState where
     QInit == QInit = True
-    Q ps1 == Q ps2 = sort ps1 == sort ps2
+    Q ps1 == Q ps2 = ps1 == ps2
     QInit == _     = False   
     Q _   == _     = False 
 
@@ -44,7 +45,7 @@ powerList [] = [[]]
 powerList (x : xs) = powerList xs ++ map (x:) (powerList xs)
 
 getFStates :: EpistM -> [QState]
-getFStates (Mo _ ags _ _ _ ) = fmap Q $ powerList $ produceAllProps ags
+getFStates (Mo _ ags _ _ _ ) = fmap Q $ fmap Set.fromList $ powerList $ produceAllProps ags
 
 simpleAccept :: QState -> Bool
 simpleAccept (Q _)      = True
@@ -67,27 +68,27 @@ fromForm f = error ("From form received " ++ show f)
 getForms :: [Form] -> [Prop]
 getForms = map fromForm . filter isForm
 
-idProps :: [Agent] -> [Prop]
-idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
+idProps :: [Agent] -> Set.Set Prop
+idProps ags = Set.fromList $ [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM -> EventModel -> Transition QState Character
-meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . getForms $ fromMaybe undefined (lookup state v)
+meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
-meTrans (Mo _ ags _ _ _) evm (Q ps , Right ev) 
+meTrans (Mo _ ags _ _ _)  evm              (Q ps , Right ev) 
     | not $ psID `models` pre evm ev                             = Nothing
-    | otherwise                                                  = Just $  Q [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
+    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
     where
-        psID = ps ++ idProps ags        
+        psID = ps `Set.union` idProps ags        
 
 evalQState :: Form -> QState -> Bool
 evalQState form (Q ps) = models ps form
 evalQState _ QInit          = error "Cannot evaluate QInit"
 
-models :: [Prop] -> Form -> Bool
+models :: Set.Set Prop -> Form -> Bool
 models _  Top         = True
 models ps (Not form)  = not $ models ps form
-models ps (P form)    = form `elem` ps
+models ps (P form)    = Set.member form ps
 models ps (Or forms)  = any (models ps) forms
 models ps (And forms) = all (models ps) forms
 models _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
@@ -171,7 +172,7 @@ buildDAutomataCore f ep ev = FSM
     (evalState f)
 
 getInit :: EpistM -> [QState]
-getInit (Mo _ _ val _ actual) = Q . map fromForm <$> map (\st -> fromMaybe [] $ lookup st val) actual
+getInit (Mo _ _ val _ actual) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
 
 buildMEStar :: EpistM -> EventModel -> RegularStructure Character QState
 buildMEStar ep ev = RegularStructure 

@@ -3,7 +3,7 @@ module Model where
 import Data.Maybe
 import Control.Applicative (liftA2)
 
-newtype Agent = Ag Int deriving (Eq, Ord)
+newtype Agent = Ag Int deriving (Eq)
 
 type World = Int
 newtype State = State (World, [Event]) 
@@ -15,7 +15,7 @@ type Valuation = [(State, [Form])]
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
 
-data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show, Ord)
+data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
 data EpistM = Mo {
     states :: [State],             -- Set of possible worlds
@@ -28,7 +28,7 @@ data EpistM = Mo {
 type PointedEpM = (EpistM, State)  -- This is a pointed model. 
 
 -- So we want to be able to describe events; for us, we only have calls.
-data Event = Call Agent Agent deriving (Eq, Ord)
+data Event = Call Agent Agent deriving (Eq)
 
 -- We have event models = (E, R^E, pre, post).
 -- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
@@ -68,6 +68,19 @@ instance Show EpistM where
         "Valuation: " ++ show valuation ++ "\n" ++ 
         "Relations: " ++ show erel ++ "\n" ++ 
         "Initial: " ++ show initial ++ "\n"
+
+instance Ord Agent where
+    Ag n `compare` Ag m = n `compare` m
+
+instance Ord Prop where
+    (S a1 a2) `compare` (S b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
+    (N a1 a2) `compare` (N b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
+    (N _ _)   `compare` (S _ _)   = LT
+    (S _ _)   `compare` (N _ _)   = GT
+
+instance Ord Event where
+    (Call a1 a2) `compare` (Call b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
+
 
 -- This lets us access the relations for a given agent
 rel :: EpistM -> Agent -> Rel State
