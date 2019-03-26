@@ -31,7 +31,7 @@ fourModel :: EpistM
 fourModel = Mo
     [State (0, [])]
     [a, b, c, d]
-    [(State (0, []), [P (N a b), P (N b c), P (N c d)])]
+    [(State (0, []), [P (N a b), P (N d c), P (N d a)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
     [State (0, [])]
 
@@ -39,7 +39,7 @@ fourEvModel :: EventModel
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saFour :: FSM Character (PState QState)
-saFour = createSolvingAutomata (K a $ allExpertsAg $ [a, b, c, d]) fourModel fourEvModel
+saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourEvModel
 
 fiveEvModel :: EventModel
 fiveEvModel = standardEventModel [a, b, c, d, e] anyCall postUpdate
@@ -53,10 +53,10 @@ fiveModel = Mo
     [State (0, [])]
 
 saFive :: FSM Character (PState QState)
-saFive = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
+saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
 
 f :: Agent
-f = Ag 1
+f = Ag 6
 
 sixEvModel :: EventModel
 sixEvModel = standardEventModel [a, b, c, d, e, f] anyCall postUpdate

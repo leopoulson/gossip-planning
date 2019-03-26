@@ -181,7 +181,7 @@ fourModel :: EpistM
 fourModel = Mo
     [State (0, [])]
     [a, b, c, d]
-    [(State (0, []), [P (N a b), P (N d c), P (N d a)])]
+    [(State (0, []), [P (N a b), P (N b c), P (N d c), P (N d a)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
     [State (0, [])]
 
@@ -195,7 +195,7 @@ st4 = FSM.transition saFour $ (head $ FSM.initial saFour, Right (Call d c))
 st42 = FSM.transition saFour $ (fromJust st4, Right (Call c a))
 st43 = FSM.transition saFour $ (fromJust st42, Right (Call a b))
 st44 = FSM.transition saFour $ (fromJust st43, Right (Call b c))
-
+st45 = FSM.transition saFour $ (fromJust st44, Right (Call c a))
 
 {-
 Just

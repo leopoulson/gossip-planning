@@ -5,6 +5,7 @@ module BFSM where
 
 import FSM
 
+import qualified Data.Sequence as Seq
 import Data.Maybe (mapMaybe)
 import Data.List (foldl')
 import Data.Set (Set, empty, insert, notMember)
@@ -23,14 +24,22 @@ bNodePred :: a -> BNode a ch -> ch -> BNode a ch
 bNodePred n p ch = BNode n (Just (p, ch))
 
 doBFS :: Ord a => FSM ch a -> Maybe [(a, Maybe ch)]
-doBFS fsm = bfs fsm (map bNode $ initial fsm) empty 
+doBFS fsm = bfs' fsm (Seq.fromList $ map bNode $ initial fsm) empty 
 
 bfs :: Ord a => FSM ch a -> [BNode a ch] -> Set a -> Maybe [(a, Maybe ch)]
 bfs fsm queue seen = case queue of 
     []     -> Nothing    -- If the queue is empty, we stop and that is that
     (q:qs) -> case accepting fsm $ node q of 
         True  -> Just $ rebuildPath q                                     -- Here construct the path 
-        False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse 
+        False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse
+
+bfs' :: Ord a => FSM ch a -> Seq.Seq (BNode a ch) -> Set a -> Maybe [(a, Maybe ch)]
+bfs' fsm queue seen = case Seq.viewl queue of
+    Seq.EmptyL  -> Nothing
+    q Seq.:< qs -> case accepting fsm $ node q of
+        True  -> Just $ rebuildPath q                                     -- Here construct the path 
+        False -> bfs' fsm (updateQueue' fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse
+
 
 --rebuildPath :: BNode a ch -> [(a, Maybe ch)]
 --rebuildPath (BNode a (Just (bn, ch))) = (a, Just ch) : rebuildPath bn
@@ -52,6 +61,19 @@ updateQueue fsm st queue seen = enqueue queue seen bNeighbours
 enqueue :: Ord a => [BNode a ch] -> Set a -> [BNode a ch] -> [BNode a ch]
 enqueue queue seen items = queue ++ filter (\item -> notMember (node item) seen) items
 
+updateQueue' :: Ord a => FSM ch a -> BNode a ch -> Seq.Seq (BNode a ch) -> Set a -> Seq.Seq (BNode a ch)
+updateQueue' fsm st queue seen = enqueue' queue seen bNeighbours
+  where
+    neighbours = getNeighboursEv fsm $ node st
+    bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
+
+enqueue' :: Ord a => Seq.Seq (BNode a ch) -> Set a -> [BNode a ch] -> Seq.Seq (BNode a ch)
+enqueue' queue seen items = foldr (enqueueOne' seen) queue items
+
+enqueueOne' :: Ord a => Set a -> BNode a ch -> Seq.Seq (BNode a ch) -> Seq.Seq (BNode a ch)
+enqueueOne' seen item queue
+  | notMember (node item) seen = queue Seq.|> item --What now?
+  | otherwise                  = queue
 
   --queue ++ filter (\item -> notMember (node item) seen) items
   --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) 

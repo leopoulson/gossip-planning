@@ -14,7 +14,7 @@
 
    There may be a better alternative; for example, [[http://hackage.haskell.org/package/containers-0.6.0.1/docs/Data-Sequence.html][sequences]]. These have constant-time appending -> O(m) append. This is obviously better than O(m log n), but it won't always be better than O(n). . .
 
-  *OR* We can just use a normal Queue? You dummy !!!!
+  *OR* We can just use a normal Queue? You dummy !!!! *UPDATE*: Normal queues were deprecated for sequences.
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
 ** TODO Look at running Haskell on blue crystal
@@ -168,7 +168,21 @@
 |    5 |     1 |  16.77 | 12.7Gb |
 |    5 |     0 |  11.51 | 11.4Gb |
 |      |       |        |        |
+*** Six - Change models to ListModels - 26/3
+| Size | Order | Time/s | Memory |
+|------+-------+--------+--------|
+|    5 |     1 |  10.86 | 12.4Gb |
+|      |       |        |        |
+|      |       |        |        |
+*** Seven - Change queue to Sequence - 26/3
 
+| Size | Order | Time/s | Memory |
+|------+-------+--------+--------|
+|    5 |     1 |  20.38 | 12.0Gb |
+|    5 |     0 |  18.44 | 10.9Gb |
+|      |       |        |        |
+
+This is a weird result, as we suddenly lose all of the enqueue time from the profile, yet total time increases. 
 
 * Optimisations & Improvements
 ** QState / PState

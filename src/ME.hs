@@ -68,18 +68,19 @@ fromForm f = error ("From form received " ++ show f)
 getForms :: [Form] -> [Prop]
 getForms = map fromForm . filter isForm
 
-idProps :: [Agent] -> Set.Set Prop
-idProps ags = Set.fromList $ [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
+idProps :: [Agent] -> [Prop]
+idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM -> EventModel -> Transition QState Character
 meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
-meTrans (Mo _ ags _ _ _)  evm              (Q ps , Right ev) 
-    | not $ psID `models` pre evm ev                             = Nothing
-    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- produceAllProps ags, psID `models` post evm (ev, p)]         
+meTrans (Mo _ ags _ _ _)  evm              (Q ps , Right ev)
+    | not $ psID `listModels` pre evm ev                             = Nothing
+    -- This is quite bad. Doing Set.fromList here is very costly. Must find another way to do this. 
+    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- produceAllProps ags, psID `listModels` post evm (ev, p)]
     where
-        psID = ps `Set.union` idProps ags        
+        psID = Set.toList ps ++ idProps ags
 
 evalQState :: Form -> QState -> Bool
 evalQState form (Q ps) = models ps form
@@ -92,6 +93,17 @@ models ps (P form)    = Set.member form ps
 models ps (Or forms)  = any (models ps) forms
 models ps (And forms) = all (models ps) forms
 models _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
+
+
+listModels :: [Prop] -> Form -> Bool
+listModels _  Top         = True
+listModels ps (Not form)  = not $ listModels ps form
+listModels ps (P form)    = form `elem` ps
+listModels ps (Or forms)  = any (listModels ps) forms
+listModels ps (And forms) = all (listModels ps) forms
+listModels _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
+
+
 
 buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
