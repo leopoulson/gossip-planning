@@ -10,7 +10,7 @@ import Powerset
 import RS
 import MakeGraphs
 
-import Malvin.Verify
+import Verify
 
 main :: IO ()
 main = putStrLn $ show $ t
