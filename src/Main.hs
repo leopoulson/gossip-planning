@@ -12,10 +12,14 @@ import MakeGraphs
 
 import Verify
 
-main :: IO ()
-main = putStrLn $ show $ t
+import Data.Maybe (fromJust)
+import Data.Either (rights)
 
---putStrLn $ show $ extractCalls $ doBFS saThree
+main :: IO ()
+main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
+
+threeCalls :: Maybe [Either State Event]
+threeCalls = extractCalls $ doBFS saThree
 
 threeModel :: EpistM
 threeModel = Mo
@@ -29,7 +33,7 @@ threeEvModel :: EventModel
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
 saThree :: FSM Character (PState QState)
-saThree = createSolvingAutomata (K a $ allExpertsAg [a, b, c]) threeModel threeEvModel
+saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
 
 
 fourModel :: EpistM 

@@ -13,10 +13,10 @@ graph3 = exampleFromList [[0, 1], [1, 2], [2]]
 t = eval (graph3, [(0, 1), (0, 2), (0, 1)]) (K 0 anyCall allExperts)
 
 verifyCalls :: Model.EpistM -> [Model.Event] -> Form ->  Bool
-verifyCalls ep calls f = verify (exampleFromList $ graphToGattinger ep) (changeCalls calls) f
+verifyCalls ep calls f = verify (exampleFromList $ graphToGattinger ep) (callsToGattinger calls) f
 
-changeCalls :: [Model.Event] -> Sequence
-changeCalls calls = undefined
+verifyAllExperts :: Model.EpistM -> [Model.Event] -> Bool
+verifyAllExperts ep evs = verifyCalls ep evs allExperts
 
 verify :: Graph -> Sequence -> Form -> Bool
 verify g sigma f = eval (g, sigma) f
