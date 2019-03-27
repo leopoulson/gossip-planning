@@ -8,9 +8,10 @@ import ME
 import Model
 import Powerset
 import RS
+import MakeGraphs
 
 main :: IO ()
-main = putStrLn $ show $ extractCalls $ doBFS saFive
+main = putStrLn $ show $ extractCalls $ doBFS saThree
 
 threeModel :: EpistM
 threeModel = Mo 
@@ -24,7 +25,7 @@ threeEvModel :: EventModel
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
 saThree :: FSM Character (PState QState)
-saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
+saThree = createSolvingAutomata (K a $ allExpertsAg [a, b, c]) threeModel threeEvModel
 
 
 fourModel :: EpistM 

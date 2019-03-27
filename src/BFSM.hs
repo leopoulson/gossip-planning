@@ -68,11 +68,11 @@ updateQueue' fsm st queue seen = enqueue' queue seen bNeighbours
     bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
 enqueue' :: Ord a => Seq.Seq (BNode a ch) -> Set a -> [BNode a ch] -> Seq.Seq (BNode a ch)
-enqueue' queue seen items = foldr (enqueueOne' seen) queue items
+enqueue' queue seen items = foldl' (flip $ enqueueOne' seen) queue items
 
 enqueueOne' :: Ord a => Set a -> BNode a ch -> Seq.Seq (BNode a ch) -> Seq.Seq (BNode a ch)
 enqueueOne' seen item queue
-  | notMember (node item) seen = queue Seq.|> item --What now?
+  | notMember (node item) seen = queue Seq.|> item 
   | otherwise                  = queue
 
   --queue ++ filter (\item -> notMember (node item) seen) items

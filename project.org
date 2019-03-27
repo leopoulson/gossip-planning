@@ -1,5 +1,18 @@
 * Main Project TODOs
 
+** TODO Add in automated testing
+   It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
+   
+*** TODO Conversion to Gattinger style
+    It should be fairly straightforward to convert to and from the style that Malvin uses for his Gossip checker. His stores the initial states as just lists of lists of numbers; e.g. 
+
+   [[0,1],[1,2],[2],[1,3]
+
+   means that a and d know b's number, b knows c's number, and c knows no-ones number. 
+   We can then convert our calls in a very similar way; his are just pairs of numbers. Finally, we can use his update function to verify that the winning condition is satisfied after the set of calls we provide. 
+
+*** Using QuickCheck 
+    It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
 ** TODO Fix bug w/ H-O knowledge
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 
      So to fix this, we need to change the way that the automata transitions work? 
@@ -7,14 +20,6 @@
    * It looks like maybe we get a negative response when we can't ever know for sure that the thing holds. For the test case P (N a b), P (N d c), P (N d a)] we are successful; it clearly just depends on if we can actually get to a position that is successful. This is good news for us!
 
    * TODO: Investigate why we are successful for {N a b, N d c, N d a} but not {N a b, N b c, N d c, N d a}. 
-** TODO Look into using a priority queue for the queue
-   The memory bottleneck is still enqueue. PQueues will give us O(log n) delete-min and O(log n) insert; this is better than the O(1) deletion and O(n) insertion currently.
-
-   Will this really be cheaper though? We need to perform m insertions, where m is the length of the new items list. Then We perform O(m * logn) operations, whereas for appending the list we just do O(n). 
-
-   There may be a better alternative; for example, [[http://hackage.haskell.org/package/containers-0.6.0.1/docs/Data-Sequence.html][sequences]]. These have constant-time appending -> O(m) append. This is obviously better than O(m log n), but it won't always be better than O(n). . .
-
-  *OR* We can just use a normal Queue? You dummy !!!! *UPDATE*: Normal queues were deprecated for sequences.
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
 ** TODO Look at running Haskell on blue crystal
@@ -25,6 +30,18 @@
    Muddy children? This could be really neat
 
 
+
+
+
+** DONE Look into using a priority queue for the queue               :search:
+   CLOSED: [2019-03-26 Tue 14:33]
+   The memory bottleneck is still enqueue. PQueues will give us O(log n) delete-min and O(log n) insert; this is better than the O(1) deletion and O(n) insertion currently.
+
+   Will this really be cheaper though? We need to perform m insertions, where m is the length of the new items list. Then We perform O(m * logn) operations, whereas for appending the list we just do O(n). 
+
+   There may be a better alternative; for example, [[http://hackage.haskell.org/package/containers-0.6.0.1/docs/Data-Sequence.html][sequences]]. These have constant-time appending -> O(m) append. This is obviously better than O(m log n), but it won't always be better than O(n). . .
+
+  *OR* We can just use a normal Queue? You dummy !!!! *UPDATE*: Normal queues were deprecated for sequences.
 ** DONE Write program to generate gossip graphs for use in testing
    We will have to just use the pre-defined event models, as there's no point testing using inappropriate event models.
    Then, this just amounts to generating graphs. Perhaps we just want to generate every possible graph and see what happens from there on?
@@ -184,11 +201,35 @@
 
 This is a weird result, as we suddenly lose all of the enqueue time from the profile, yet total time increases. 
 
+* Existing Software
+** Gattinger - Gossip
+   Gattinger's software will generate the set of possible call strings through a gossip graph. It then checks which of these are successful or not. This is a slightly different function to ours of course, but at its heart is the same. 
+
+   A key thing to check is to see whether or not it works for epistemic winning conditions; and if so, if it's performant doing this. Not only would this be good software to compare against, but also to see test with. 
+
+   It seems that we can, and in a very straightforward way! A query looks like this;
+
+   eval (graph3, [(0, 1), (0, 2), (0, 1)]) (K 0 anyCall allExperts)
+
+   Weirdly we need to put the protocol into the epistemic operator, but that is okay!
+   
+
 * Optimisations & Improvements
 ** QState / PState
    Essentially 
        PVar (Q [N a b])  
    seems really dumb; there's definitely a better way to do this. Most likely just cut out the Q in the middle and make it PVar [N a b]... 
+* Other Knowledge Models
+** Muddy Children
+
+   The muddle children problem is in which we have a bunch of children who are outside playing in the mud. They come back inside, and their mother tells them 
+     "At least one of you has mud on your head"
+
+    The children can't see their own head, but can see the mud on the foreheads of others. She asks the following question over and over: 
+     "Can you tell for sure whether or not you have mud on your head?"
+
+    This can be modelled in our system, by letting the children be agents and announcements (or, not announcements) to their mother's question be events. 
+    
 * Poster Talk
   Remember that our talk should just cover how we solve the problem, and not really go into detail on *how*.
   
@@ -210,14 +251,3 @@ This is a weird result, as we suddenly lose all of the enqueue time from the pro
     - Next, we step through our automata from earlier and the transducer simulatenously; thus building up a set of the states that are indistinguishable from our current state. 
     - This lets us evaluate a formula like "a knows that everyone is an expert" in constant time; we just need to look at all of the states that are indistinguishable from our current one and check that everyone is an expert in these. This is much quicker than if we had to find these states some other way. 
     - We can just repeat this process for higher-order knowledge, like 'everyone knows that everyone knows that everyone is an expert'
-* Other Knowledge Models
-** Muddy Children
-
-   The muddle children problem is in which we have a bunch of children who are outside playing in the mud. They come back inside, and their mother tells them 
-     "At least one of you has mud on your head"
-
-    The children can't see their own head, but can see the mud on the foreheads of others. She asks the following question over and over: 
-     "Can you tell for sure whether or not you have mud on your head?"
-
-    This can be modelled in our system, by letting the children be agents and announcements (or, not announcements) to their mother's question be events. 
-    
