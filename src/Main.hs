@@ -10,11 +10,15 @@ import Powerset
 import RS
 import MakeGraphs
 
+import Malvin.Verify
+
 main :: IO ()
-main = putStrLn $ show $ extractCalls $ doBFS saThree
+main = putStrLn $ show $ t
+
+--putStrLn $ show $ extractCalls $ doBFS saThree
 
 threeModel :: EpistM
-threeModel = Mo 
+threeModel = Mo
     [State (0, [])]
     [a, b, c]
     [(State (0, []), [P (N a b), P (N b c)])]

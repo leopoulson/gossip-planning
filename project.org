@@ -1,16 +1,21 @@
 * Main Project TODOs
-
+  
 ** TODO Add in automated testing
    It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
    
-*** TODO Conversion to Gattinger style
+*** DONE Conversion to Gattinger style
+    CLOSED: [2019-03-27 Wed 14:21]
     It should be fairly straightforward to convert to and from the style that Malvin uses for his Gossip checker. His stores the initial states as just lists of lists of numbers; e.g. 
 
    [[0,1],[1,2],[2],[1,3]
 
    means that a and d know b's number, b knows c's number, and c knows no-ones number. 
    We can then convert our calls in a very similar way; his are just pairs of numbers. Finally, we can use his update function to verify that the winning condition is satisfied after the set of calls we provide. 
-
+*** TODO Connect the two projects
+    Next, we need to find out how we can use Malvin's package from ours.
+    This might be a bit tricky. There may not be a straightforward way to just stick in the part that we want ... 
+*** TODO Open Issue & PR on Malvin's Gossip GH page
+    This will fix the issue I had about restrictKey not building. 
 *** Using QuickCheck 
     It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
 ** TODO Fix bug w/ H-O knowledge
@@ -22,16 +27,17 @@
    * TODO: Investigate why we are successful for {N a b, N d c, N d a} but not {N a b, N b c, N d c, N d a}. 
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
-** TODO Look at running Haskell on blue crystal
-   Mainly to the end of just getting it off my machine. Probs way quicker ...
-   This really doesn't seem like a good idea any more. . . 
-
 ** TODO Think about different knowledge models 
    Muddy children? This could be really neat
 
 
 
 
+
+** DONE Look at running Haskell on blue crystal
+   CLOSED: [2019-03-27 Wed 14:22]
+   Mainly to the end of just getting it off my machine. Probs way quicker ...
+   This really doesn't seem like a good idea any more. . . 
 
 ** DONE Look into using a priority queue for the queue               :search:
    CLOSED: [2019-03-26 Tue 14:33]
