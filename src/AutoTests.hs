@@ -16,7 +16,7 @@ type PSA = FSM Character (PState QState)
 -- TODO: A lot of this could probably have been done with zip.
 -- Perhaps it would be nice to update it to use this at a later date.
 
-runTests size n = prettyPrintResults $ verifyResults $ getModelResults size n
+runTests size n = prettyPrintResults $ getWithNothings size n
 
 prettyPrintResults :: [Bool] -> [Char]
 prettyPrintResults ress = "Did " ++ show (length ress) ++ " tests, and " ++ show (trues ress) ++ " were True."
@@ -29,6 +29,9 @@ verifyResults = map (\(ep, evs) -> verifyAllExperts ep evs)
 getModelResults :: Int -> Int -> [(EpistM, [Event])]
 getModelResults size n = getCalls . getJusts . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n 
 
+getWithNothings :: Int -> Int -> [Bool]
+getWithNothings size n = map verify . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n 
+
 -- This function takes the size of the graphs and the count, and then generates
 -- a bunch of PSAs.
 getGraphs :: Int -> Int -> [PSA]
@@ -39,6 +42,10 @@ getCalls = map (\(e, c) -> (e, rights c))
 
 getJusts :: [(EpistM, Maybe [Character])] -> [(EpistM, [Character])]
 getJusts = map (\(a, b) -> (a, fromJust b)) . filter (isJust . snd) 
+
+verify :: (EpistM, Maybe [Character]) -> Bool
+verify (ep, Nothing)    = verifyEmpty ep
+verify (ep, Just calls) = verifyAllExperts ep (rights calls)
 
 getModelCalls :: [(EpistM, PSA)] -> [(EpistM, Maybe [Character])]
 getModelCalls = map (\(ep, psa) -> (ep, extractCalls . doBFS $ psa))

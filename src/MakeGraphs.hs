@@ -19,7 +19,7 @@ generateModels :: [Agent] -> [(EpistM, EventModel)]
 generateModels ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validKnowledgeStates ags
 
 validPhonebooks :: [Agent] -> [[Prop]]
-validPhonebooks = filter isPhonebook . validKnowledgeStates
+validPhonebooks = subsequences . allPhonebooks
 
 validKnowledgeStates :: [Agent] -> [[Prop]]
 validKnowledgeStates = filter isValid . subsequences . allKnowledge 
@@ -33,6 +33,9 @@ isPhonebook ps = all isN ps
 possible :: Prop -> [Prop] -> Bool
 possible (S i j) ps = (N i j) `elem` ps
 possible (N _ _) _  = True
+
+allPhonebooks :: [Agent] -> [Prop]
+allPhonebooks ags = [N i j | i <- ags, j <- ags, i /= j]
 
 allKnowledge :: [Agent] -> [Prop]
 allKnowledge ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]

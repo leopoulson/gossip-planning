@@ -15,7 +15,8 @@
     CLOSED: [2019-03-27 Wed 17:00]
     Next, we need to find out how we can use Malvin's package from ours.
     This might be a bit tricky. There may not be a straightforward way to just stick in the part that we want ... 
-*** TODO Add in automated testing framework
+*** DONE Add in automated testing framework
+    CLOSED: [2019-03-28 Thu 20:23]
     We want it to generate all of the possible gossip graphs, and then verify them in Malvin's software. 
     What will this consist of? 
 
@@ -26,6 +27,11 @@
 
     We also can't forget that we need to be able to test that our negative responses are truly negative; this can be done by using Malvin's 
     statistics function and checking that he says that there are no incorrect paths. 
+*** TODO Add in emptiness testing
+    Essentially, we just want a way to check that when we cannot find a path, we truly cannot find a path. 
+    To do this, we can use Malvin's code. Most likely, we want to use *`sequences`* to find the set of all sequences; then, we want to use *`statistics`* to check that none of these sequences are successful.
+
+    An issue is that Malvin's code is very happy to produce endless sequences. This is no good for verification. To this end, we should stop sequences from being too long and just cut them off at a certain point. This is also a nice way to show off laziness ... 
 *** TODO Convert between the two ways of encoding winning conditions. 
 *** TODO Open Issue & PR on Malvin's Gossip GH page
     This will fix the issue I had about restrictKey not building. 

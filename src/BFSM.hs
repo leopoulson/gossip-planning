@@ -24,12 +24,12 @@ bNodePred :: a -> BNode a ch -> ch -> BNode a ch
 bNodePred n p ch = BNode n (Just (p, ch))
 
 doBFS :: Ord a => FSM ch a -> Maybe [(a, Maybe ch)]
-doBFS fsm = bfs' fsm (Seq.fromList $ map bNode $ initial fsm) empty 
+doBFS fsm = bfs fsm (map bNode $ initial fsm) empty
 
 bfs :: Ord a => FSM ch a -> [BNode a ch] -> Set a -> Maybe [(a, Maybe ch)]
-bfs fsm queue seen = case queue of 
+bfs fsm queue seen = case queue of
     []     -> Nothing    -- If the queue is empty, we stop and that is that
-    (q:qs) -> case accepting fsm $ node q of 
+    (q:qs) -> case accepting fsm $ node q of
         True  -> Just $ rebuildPath q                                     -- Here construct the path 
         False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse
 

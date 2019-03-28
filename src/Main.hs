@@ -35,8 +35,7 @@ threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 saThree :: FSM Character (PState QState)
 saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
 
-
-fourModel :: EpistM 
+fourModel :: EpistM
 fourModel = Mo
     [State (0, [])]
     [a, b, c, d]
