@@ -10,15 +10,25 @@ type CallM = (Int, Int)
 type SequenceM = [CallM]
 type Phonebook = [[Int]]
 
+-- This is just like generateModels, except we only have phone number knowledge;
+-- no one knows each others secret already
+generateModelsPhonebook :: [Agent] -> [(EpistM, EventModel)]
+generateModelsPhonebook ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validPhonebooks ags
 
 generateModels :: [Agent] -> [(EpistM, EventModel)]
 generateModels ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validKnowledgeStates ags
+
+validPhonebooks :: [Agent] -> [[Prop]]
+validPhonebooks = filter isPhonebook . validKnowledgeStates
 
 validKnowledgeStates :: [Agent] -> [[Prop]]
 validKnowledgeStates = filter isValid . subsequences . allKnowledge 
 
 isValid :: [Prop] -> Bool
 isValid ps = all (\q -> possible q ps) ps
+
+isPhonebook :: [Prop] -> Bool
+isPhonebook ps = all isN ps
 
 possible :: Prop -> [Prop] -> Bool
 possible (S i j) ps = (N i j) `elem` ps

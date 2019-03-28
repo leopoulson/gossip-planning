@@ -1,5 +1,5 @@
 * Main Project TODOs
-  
+ 
 ** TODO Add in automated testing
    It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
    
@@ -11,13 +11,28 @@
 
    means that a and d know b's number, b knows c's number, and c knows no-ones number. 
    We can then convert our calls in a very similar way; his are just pairs of numbers. Finally, we can use his update function to verify that the winning condition is satisfied after the set of calls we provide. 
-*** TODO Connect the two projects
+*** DONE Connect the two projects
+    CLOSED: [2019-03-27 Wed 17:00]
     Next, we need to find out how we can use Malvin's package from ours.
     This might be a bit tricky. There may not be a straightforward way to just stick in the part that we want ... 
+*** TODO Add in automated testing framework
+    We want it to generate all of the possible gossip graphs, and then verify them in Malvin's software. 
+    What will this consist of? 
+
+    - We want to give it the *size* and the *number of tests*.
+    - Then it finds a load of graphs that we can use. Possibly this could be random? But for now, let's just use `take`.  
+    - Then finally we just want to find a call path that takes us to the end, and then validate that this works using Malvin's code. 
+    - We also need to be able to convert the winning conditions betwen the two different languages. This could perhaps come second though.
+
+    We also can't forget that we need to be able to test that our negative responses are truly negative; this can be done by using Malvin's 
+    statistics function and checking that he says that there are no incorrect paths. 
+*** TODO Convert between the two ways of encoding winning conditions. 
 *** TODO Open Issue & PR on Malvin's Gossip GH page
     This will fix the issue I had about restrictKey not building. 
 *** Using QuickCheck 
     It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
+    This might be a bit of overkill though; plus, with ours, we can easily specify the size of the graph we want. 
+** TODO Add some kind of copyright thing regarding Malvin's stuff 
 ** TODO Fix bug w/ H-O knowledge
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 
      So to fix this, we need to change the way that the automata transitions work? 
