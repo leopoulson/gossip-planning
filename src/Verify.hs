@@ -10,7 +10,9 @@ import Malvin.Gossip.General
 graph3 :: Graph
 graph3 = exampleFromList [[0, 1], [1, 2], [2]]
 
-t = eval (graph3, [(0, 1), (0, 2), (0, 1)]) (K 0 anyCall allExperts)
+precon = anyCall
+
+t = eval (graph3, [(0, 1), (0, 2), (0, 1)]) (K 0 precon allExperts)
 
 verifyCalls :: Model.EpistM -> [Model.Event] -> Form ->  Bool
 verifyCalls ep calls f = verifyE (exampleFromList $ graphToGattinger ep) (callsToGattinger calls) f
@@ -23,8 +25,9 @@ verifyE g sigma f = eval (g, sigma) f
 
 -- of course, we need to fill the hole that null creates
 -- we can use isSuccSequence, but it seems there's something he provides too 
-verifyEmptyG :: Graph -> Bool
-verifyEmptyG g = not $ any (isSuccSequence (g, [])) $ sequences anyCall (g, [])
+verifyEmptyG :: Int -> Graph -> Bool
+verifyEmptyG agents g = not $ any (isSuccSequence (g, [])) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
 
 verifyEmpty :: Model.EpistM -> Bool
-verifyEmpty = verifyEmptyG . exampleFromList . graphToGattinger
+verifyEmpty model = verifyEmptyG (length $ Model.agents model) . exampleFromList . graphToGattinger $ model
+

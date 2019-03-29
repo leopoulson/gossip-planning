@@ -1,6 +1,6 @@
 * Main Project TODOs
  
-** TODO Add in automated testing
+** TODO Add in autobmated testing
    It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
    
 *** DONE Conversion to Gattinger style
@@ -27,7 +27,8 @@
 
     We also can't forget that we need to be able to test that our negative responses are truly negative; this can be done by using Malvin's 
     statistics function and checking that he says that there are no incorrect paths. 
-*** TODO Add in emptiness testing
+*** DONE Add in emptiness testing
+    CLOSED: [2019-03-29 Fri 10:40]
     Essentially, we just want a way to check that when we cannot find a path, we truly cannot find a path. 
     To do this, we can use Malvin's code. Most likely, we want to use *`sequences`* to find the set of all sequences; then, we want to use *`statistics`* to check that none of these sequences are successful.
 

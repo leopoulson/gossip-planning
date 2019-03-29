@@ -12,11 +12,11 @@ type Phonebook = [[Int]]
 
 -- This is just like generateModels, except we only have phone number knowledge;
 -- no one knows each others secret already
-generateModelsPhonebook :: [Agent] -> [(EpistM, EventModel)]
-generateModelsPhonebook ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validPhonebooks ags
+generateModelsPhonebook :: [Agent] -> Precondition -> [(EpistM, EventModel)]
+generateModelsPhonebook ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validPhonebooks ags
 
-generateModels :: [Agent] -> [(EpistM, EventModel)]
-generateModels ags = map (\ps -> (standardEpistModel ags ps, standardEventModel ags anyCall postUpdate)) $ validKnowledgeStates ags
+generateModels :: [Agent] -> Precondition -> [(EpistM, EventModel)]
+generateModels ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validKnowledgeStates ags
 
 validPhonebooks :: [Agent] -> [[Prop]]
 validPhonebooks = subsequences . allPhonebooks
