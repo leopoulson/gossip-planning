@@ -10,7 +10,9 @@ import BFSM
 import Data.List (nub, intersperse)
 import Data.Maybe (fromJust, isJust)
 
-import Data.Set (toList)
+import Debug.Trace
+
+import qualified Data.Set as Set (toList, filter, fromList)
 
 --import Data.Foldable hiding (concatMap, all, foldr, any)
 --import Data.Monoid
@@ -59,7 +61,7 @@ ppPState (Just p) = putStr (prettyPrintPState p 0)
 ppPState Nothing  = putStr "Nothing"
 
 prettyPrintPState :: PState QState -> Int -> String
-prettyPrintPState (PVar (Q set)) n = concat (replicate n "    ") ++ "Var: " ++ (show $ toList set) ++ "\n"
+prettyPrintPState (PVar (Q set)) n = concat (replicate n "    ") ++ "Var: " ++ (show $ Set.toList set) ++ "\n"
 prettyPrintPState (PCon p ps)    n = concat (replicate n "    ") ++ "Con: \n" ++ prettyPrintPState p (n + 1) ++
                                      concat (replicate n "    ") ++ "Accessibles: \n" ++ concatMap (\p -> prettyPrintPState p (n+1)) ps
 prettyPrintPState (PList ps)     n = concat (replicate n "    ") ++ "List: \n" ++
@@ -70,21 +72,37 @@ prettyPrintPState (PList ps)     n = concat (replicate n "    ") ++ "List: \n" +
 -- We might have to set the states after we've returned the PSA
 -- Likewise for accepting; we don't know what the accepting states are
 -- However, working with initial states here is perfect
-buildPSA :: EvalState st => FSM ch (PState st) -> FST ch (PState st) -> FSM ch (PState st)
-buildPSA fsm fstr = FSM alphabet' states' transition' initial' accepting' where
+buildPSA :: (EvalState st, Show st, Show ch) => FSM ch (PState st) -> FST ch (PState st) -> TransFilter (PState st) ch -> FSM ch (PState st)
+buildPSA fsm fstr filter = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting'               = error "Accepting not defined"
-    states'                  = error "No states defined" -- hmmm what to do here? explicitly list the states? give a 'well-formed' function?
+    states'                  = error "No states defined" 
     initial'                 = [PCon st [st] | st <- FSM.initial fsm]
     transition' (PCon state possStates, ch) = 
-                case FSM.transition fsm (state, ch) of   --Probably update this to fmap eventually 
-                        Just st -> Just $ PCon st (getPossStates ch possStates)
+                case FSM.transition fsm (state, ch) of
+                        Just st -> Just $ PCon st (getPossStates (st, ch) filter (bitransition fstr) possStates)
                         Nothing -> Nothing 
     transition' (PVar state, ch) = FSM.transition fsm (PVar state, ch)
-    getPossStates ch = nub . concatMap (\st -> map snd $ bitransition fstr (st, ch))
+    -- getPossStates ch = nub . concatMap (\st -> map snd $ bitransition fstr (st, ch))
+
+getPossStates :: (Show st, Show ch, Eq st) => (st, ch) -> TransFilter st ch -> BiTransition st ch -> [st] -> [st]
+getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
+                                   (tfilter (st, ch))) $ bitrans (stin, ch)) $ possStates
+-- getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
+                                   -- \(ch', st') -> trace ("\ncalling tfilter with\n" ++ show (st, ch) ++ "\n" ++ show (ch', st')) (tfilter (st, ch) (ch', st'))) $ bitrans (stin, ch)) $ possStates
+--getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\st -> map snd $ bitrans (st, ch)) $ possStates
+
+
+-- applyFilter :: EvalState st => Agent -> TransFilter ch st -> FSM ch (PState st) -> FSM ch (PState st)
+-- applyFilter ag filter (FSM al st trans int acc) = FSM al st trans' int acc
+  -- where
+    -- trans' (PVar state, ch) = trans (PVar state, ch)
+    -- trans' (PCon state possStates, ch) 
+
+
 
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
-psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto)
+psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
   where
     dAuto = buildDAutomataNoF ep ev
 
@@ -126,13 +144,13 @@ findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutoma
 -- for buildPSA, our dAutomata and our transducer are on the same "level"
 -- hence we lift the transducers to the level of dAuto. 
 -- Then our other transducers sit the level below the PSA, that is the level of dAuto
-buildSolveRS :: EvalState st => Form -> RegularStructure ch (PState st) -> RegularStructure ch (PState st)
-buildSolveRS (K ag phi) rs = RegularStructure 
-    (buildPSA (dAutomata $ buildSolveRS phi rs) (liftTransducer (dAutomata $ buildSolveRS phi rs) $ getTransducer ag rs))
-    (liftTransducers (dAutomata $ buildSolveRS phi rs) $ transducers rs)
-buildSolveRS phi rs = rs
-  where
-    dAuto = dAutomata $ buildSolveRS phi rs
+-- buildSolveRS :: Form -> RegularStructure ch (PState QState) -> RegularStructure ch (PState QState)
+-- buildSolveRS (K ag phi) rs = RegularStructure 
+    -- (buildPSA (dAutomata $ buildSolveRS phi rs) (liftTransducer (dAutomata $ buildSolveRS phi rs) $ getTransducer ag rs) (knowFilter ag))
+    -- (liftTransducers (dAutomata $ buildSolveRS phi rs) $ transducers rs)
+-- buildSolveRS phi rs = rs
+  -- where
+    -- dAuto = dAutomata $ buildSolveRS phi rs
 
 liftTransducers :: FSM ch (PState st) -> [(Agent, FST ch (PState st))] -> [(Agent, FST ch (PState st))]
 liftTransducers fsm = map (\(ag, tr) -> (ag, liftTransducer fsm tr))
@@ -181,7 +199,7 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- This is screaming out for a typeclass. This would make all of our worries go away
 createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
-                                                 buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev))
+                          buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev)) (knowFilter agent)
 createSolvingAutomata (And phis) ep ev         = case includesK (And phis) of
   True  -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
   False -> makeP $ buildDAutomata (And phis) ep ev
@@ -212,3 +230,22 @@ toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
 
 findCallSequence :: Form -> EpistM -> EventModel -> Maybe [Character]
 findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
+
+knowFilter :: Agent -> TransFilter (PState QState) Character
+knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
+  | i == i' && j == j' && (i == ag || j == ag) =
+      Set.filter (propIncludes ag) qs `setEq` Set.filter (propIncludes ag) ps
+  | i == ag || j == ag = error "knowFilter: If I or J are the agent, the calls must be equal"
+  | i /= ag && j /= ag = True
+  | otherwise          = error ("Unmatched case in knowFilter: " ++ show ((Call i j)) ++ " " ++ show ((Call i' j')))
+
+
+
+t1 = knowFilter d (PVar $ Q $ Set.fromList [N d c], Right (Call d a)) (Right (Call d a), PVar $ Q $ Set.fromList [N d c])
+-- t2 = knowFilter d (Q $ Set.fromList [N d c, N d a], Right (Call d a)) (Right (Call d a), Q $ Set.fromList [N d c, N a b])
+-- t3 = knowFilter d (Q $ Set.fromList [N d c, N d a], Right (Call d a)) (Right (Call d a), Q $ Set.fromList [N d c, N a b])
+
+-- t1 = knowFilter d (Q $ Set.fromList )
+
+t2 = knowFilter d (PVar $ Q $ Set.fromList [N a c, N b a, N b c, N b d, N c a, N d a, N d b, N d c, S b d, S d b], Right (Call b d))
+                  (Right (Call b d), PVar $ Q $ Set.fromList [N a c, N b a, N b c, N b d, N c a, N d a, N d b, N d c, S b d, S d b])

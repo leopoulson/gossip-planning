@@ -52,6 +52,8 @@
    The thing seems to be that we should only let two states be related after a call if the knowledge states for each call member were the same before we started the call. Intuitively, this is because an agent b *can* distinguish between two worlds where he knows different things, or the callee knows two different things. 
 
    The question now is how to implement this. We use the transducer approach to relate calls, which just tells us the calls that are indistinguishable from our current state. Do we perhaps need to look at the true state more?  
+
+   We need to change the single-state transducer to only relate a state-call pair with another state-call pair iff the states have the same knowledge for the agents involved in the call. The best way to do this is most likely to give our PSA some "special case" function for inputs (q, e) x (q, e). This will tell them if the transition we want to make is acceptable under some special rule we enforce; for example, here it would be that if the agent is involved in the call, we better have that the knowledge states for each agent in the call are identical.  
 ** TODO Add some kind of copyright thing regarding Malvin's stuff 
 ** TODO Fix bug w/ H-O knowledge
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 

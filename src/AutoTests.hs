@@ -50,7 +50,7 @@ ot1 = oddTransition (fromPState $ head $ FSM.initial oddPSA, Right (Call a c))
 (Right Ag b Ag a,Q (fromList [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,S Ag a Ag b,S Ag b Ag a])),
 (Right Ag b Ag c,Q (fromList [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,S Ag b Ag c,S Ag c Ag b]))]-}
 
-s1 = fromJust $ FSM.transition oddPSA $ (head $ FSM.initial oddPSA, Right (Call a c)) 
+s1 = fromJust $ FSM.transition oddPSA $ (head $ FSM.initial oddPSA, Right (Call b d)) 
 {-
 Con:
     Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,S Ag a Ag c,S Ag c Ag a]

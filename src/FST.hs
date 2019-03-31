@@ -5,6 +5,8 @@ import Control.Applicative
 type BiTransition q e = (q, e) -> [(e, q)]
 type SSTransition ch = ch -> [ch]
 
+type TransFilter q e = (q, e) -> (e, q) -> Bool
+
 data FST ch st = FST {
     alphabet :: [ch],                      -- Alphabet
     states :: [st],                        -- Set of states
