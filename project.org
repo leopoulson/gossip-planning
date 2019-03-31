@@ -1,8 +1,10 @@
 * Main Project TODOs
  
-** TODO Add in autobmated testing
+** TODO Add in automated testing
    It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
    
+*** TODO Open Issue & PR on Malvin's Gossip GH page
+    This will fix the issue I had about restrictKey not building. 
 *** DONE Conversion to Gattinger style
     CLOSED: [2019-03-27 Wed 14:21]
     It should be fairly straightforward to convert to and from the style that Malvin uses for his Gossip checker. His stores the initial states as just lists of lists of numbers; e.g. 
@@ -34,11 +36,22 @@
 
     An issue is that Malvin's code is very happy to produce endless sequences. This is no good for verification. To this end, we should stop sequences from being too long and just cut them off at a certain point. This is also a nice way to show off laziness ... 
 *** TODO Convert between the two ways of encoding winning conditions. 
-*** TODO Open Issue & PR on Malvin's Gossip GH page
-    This will fix the issue I had about restrictKey not building. 
 *** Using QuickCheck 
     It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
     This might be a bit of overkill though; plus, with ours, we can easily specify the size of the graph we want. 
+** TODO Fix bug with accessibility
+   SCHEDULED: <2019-03-31 Sun>
+
+   The problem seems to be that our relation does not care about the protocol we are using; i.e., it will let an agent perceive that a call happens which cannot actually happen. This is especially noticeable when using the protocol LNS. 
+
+   We should be able to fix this. We can either:
+   - Change the way the call transducer works; that is, pass in the protocol into the transducer composition function. This is not particularly appealing. 
+   - Check that a call is permissible by the protocol before we make it. This is a bit nicer as we have access to the protocol when constructing the PSA and so can use it in the definition of the transitition function.
+   
+
+   The thing seems to be that we should only let two states be related after a call if the knowledge states for each call member were the same before we started the call. Intuitively, this is because an agent b *can* distinguish between two worlds where he knows different things, or the callee knows two different things. 
+
+   The question now is how to implement this. We use the transducer approach to relate calls, which just tells us the calls that are indistinguishable from our current state. Do we perhaps need to look at the true state more?  
 ** TODO Add some kind of copyright thing regarding Malvin's stuff 
 ** TODO Fix bug w/ H-O knowledge
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 

@@ -68,8 +68,8 @@ allExperts :: Form
 allExperts = ForallAg expert
 
 -- all agents know all are experts
-allKnowExperts :: Form
-allKnowExperts = ForallAg (\ag -> K ag anyCall allExperts)
+-- allKnowExperts :: Form
+-- allKnowExperts = ForallAg (\ag -> K ag anyCall allExperts)
 
 -- agent knows no other secrets than their own
 knowsOnlyOwn :: Agent -> Form

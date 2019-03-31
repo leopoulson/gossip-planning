@@ -144,7 +144,7 @@ anyCall (Call i j) = P (N i j)
 
 -- We may only call someone if we do not know
 lns :: Precondition
-lns (Call i j) = Not (P (S i j))
+lns (Call i j) = And [Not (P (S i j)), P (N i j)]
 
 callIncludes :: Event -> Agent -> Bool
 callIncludes (Call i j) ag = (i == ag) || (j == ag)

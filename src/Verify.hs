@@ -2,7 +2,8 @@ module Verify where
 
 import MakeGraphs
 
-import qualified Model 
+import qualified Model
+import ME
 import Malvin.Gossip
 import Malvin.Gossip.General
 
@@ -40,6 +41,12 @@ verifyWinning ep evs = verifyCalls ep evs winningFormula
 
 verifyE :: Graph -> Sequence -> Form -> Bool
 verifyE g sigma f = eval (g, sigma) f
+
+findSequence :: (Model.EpistM, Maybe [ME.Character]) -> Sequence
+findSequence (ep, _) = findNonEmpty (length $ Model.agents ep) (exampleFromList $ graphToGattinger ep)
+
+findSequences :: [(Model.EpistM, Maybe [ME.Character])] -> [(Model.EpistM, Sequence)]
+findSequences es = zip (map fst es) (map findSequence es)
 
 -- of course, we need to fill the hole that null creates
 -- we can use isSuccSequence, but it seems there's something he provides too 

@@ -79,3 +79,21 @@ sixModel = Mo
 
 saSix :: FSM Character (PState QState)
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
+
+
+diaModel :: EpistM
+diaModel = Mo
+    [State (0, [])]
+    [a, b, c, d]
+    [(State (0, []), [P (N c a), P (N c b), P (N d a), P (N d b)])]
+    [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
+    [State (0, [])]
+
+saDia :: FSM Character (PState QState)
+saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel
+
+allKnowAllExperts' :: [Agent] -> Form
+allKnowAllExperts' ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
+
+diaEvModel :: EventModel
+diaEvModel = standardEventModel [a, b, c, d] lns postUpdate
