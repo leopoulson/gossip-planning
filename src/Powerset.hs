@@ -7,8 +7,11 @@ import ME
 import RS
 import BFSM
 
-import Data.List (nub)
+import Data.List (nub, intersperse)
 import Data.Maybe (fromJust, isJust)
+
+import Data.Set (toList)
+
 --import Data.Foldable hiding (concatMap, all, foldr, any)
 --import Data.Monoid
 --import Control.Applicative
@@ -48,7 +51,21 @@ instance (EvalState st, Ord st) => EvalState (PState st) where
   evalState (Or phis) ps           = any (\phi -> evalState phi ps) phis
   evalState phi (PVar st)          = evalState phi st
   evalState phi (PCon st _)        = evalState phi st
-  
+
+
+
+ppPState :: Maybe (PState QState) -> IO ()
+ppPState (Just p) = putStr (prettyPrintPState p 0)
+ppPState Nothing  = putStr "Nothing"
+
+prettyPrintPState :: PState QState -> Int -> String
+prettyPrintPState (PVar (Q set)) n = concat (replicate n "    ") ++ "Var: " ++ (show $ toList set) ++ "\n"
+prettyPrintPState (PCon p ps)    n = concat (replicate n "    ") ++ "Con: \n" ++ prettyPrintPState p (n + 1) ++
+                                     concat (replicate n "    ") ++ "Accessibles: \n" ++ concatMap (\p -> prettyPrintPState p (n+1)) ps
+prettyPrintPState (PList ps)     n = concat (replicate n "    ") ++ "List: \n" ++
+                                     concatMap (\p -> prettyPrintPState p (n + 1)) ps
+
+
 -- Would it be possible to update the accepting states as we go along?
 -- We might have to set the states after we've returned the PSA
 -- Likewise for accepting; we don't know what the accepting states are
@@ -106,7 +123,6 @@ findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
 findPath (K _ _) _    = error "Can't find a path thru a regular structure with K"
 findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutomata rs)
 
--- -- lens time
 -- for buildPSA, our dAutomata and our transducer are on the same "level"
 -- hence we lift the transducers to the level of dAuto. 
 -- Then our other transducers sit the level below the PSA, that is the level of dAuto
@@ -146,6 +162,10 @@ liftTransition trans fsm (pstate, ch) = fromSndMaybe [(ch', transition fsm (psta
 point :: PState st -> PState st
 point (PCon st _) = st
 point (PVar st)   = PVar st
+
+fromPState :: PState st -> st
+fromPState (PVar st) = st
+fromPState (PCon st _) = fromPState st
 
 fromSndMaybe :: [(a, Maybe b)] -> [(a, b)]
 fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
