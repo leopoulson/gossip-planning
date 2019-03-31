@@ -83,23 +83,10 @@ buildPSA fsm fstr filter = FSM alphabet' states' transition' initial' accepting'
                         Just st -> Just $ PCon st (getPossStates (st, ch) filter (bitransition fstr) possStates)
                         Nothing -> Nothing 
     transition' (PVar state, ch) = FSM.transition fsm (PVar state, ch)
-    -- getPossStates ch = nub . concatMap (\st -> map snd $ bitransition fstr (st, ch))
 
 getPossStates :: (Show st, Show ch, Eq st) => (st, ch) -> TransFilter st ch -> BiTransition st ch -> [st] -> [st]
 getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
                                    (tfilter (st, ch))) $ bitrans (stin, ch)) $ possStates
--- getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
-                                   -- \(ch', st') -> trace ("\ncalling tfilter with\n" ++ show (st, ch) ++ "\n" ++ show (ch', st')) (tfilter (st, ch) (ch', st'))) $ bitrans (stin, ch)) $ possStates
---getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\st -> map snd $ bitrans (st, ch)) $ possStates
-
-
--- applyFilter :: EvalState st => Agent -> TransFilter ch st -> FSM ch (PState st) -> FSM ch (PState st)
--- applyFilter ag filter (FSM al st trans int acc) = FSM al st trans' int acc
-  -- where
-    -- trans' (PVar state, ch) = trans (PVar state, ch)
-    -- trans' (PCon state possStates, ch) 
-
-
 
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
 psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
@@ -239,13 +226,3 @@ knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
   | i /= ag && j /= ag = True
   | otherwise          = error ("Unmatched case in knowFilter: " ++ show ((Call i j)) ++ " " ++ show ((Call i' j')))
 
-
-
-t1 = knowFilter d (PVar $ Q $ Set.fromList [N d c], Right (Call d a)) (Right (Call d a), PVar $ Q $ Set.fromList [N d c])
--- t2 = knowFilter d (Q $ Set.fromList [N d c, N d a], Right (Call d a)) (Right (Call d a), Q $ Set.fromList [N d c, N a b])
--- t3 = knowFilter d (Q $ Set.fromList [N d c, N d a], Right (Call d a)) (Right (Call d a), Q $ Set.fromList [N d c, N a b])
-
--- t1 = knowFilter d (Q $ Set.fromList )
-
-t2 = knowFilter d (PVar $ Q $ Set.fromList [N a c, N b a, N b c, N b d, N c a, N d a, N d b, N d c, S b d, S d b], Right (Call b d))
-                  (Right (Call b d), PVar $ Q $ Set.fromList [N a c, N b a, N b c, N b d, N c a, N d a, N d b, N d c, S b d, S d b])

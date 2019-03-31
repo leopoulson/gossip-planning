@@ -43,57 +43,6 @@ oddCalls = Just [Right (Call a c), Right (Call b d), Right (Call b a), Right (Ca
 oddTrans = getTransducer d (buildMEStar oddModel oddEvModel)
 oddTransition = FST.bitransition oddTrans
 
-ot1 = oddTransition (fromPState $ head $ FSM.initial oddPSA, Right (Call a c))
-
-{-[
-(Right Ag a Ag c,Q (fromList [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,S Ag a Ag c,S Ag c Ag a])),
-(Right Ag b Ag a,Q (fromList [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,S Ag a Ag b,S Ag b Ag a])),
-(Right Ag b Ag c,Q (fromList [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,S Ag b Ag c,S Ag c Ag b]))]-}
-
-s1 = fromJust $ FSM.transition oddPSA $ (head $ FSM.initial oddPSA, Right (Call b d)) 
-{-
-Con:
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,S Ag a Ag c,S Ag c Ag a]
-Accessibles:
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,S Ag a Ag c,S Ag c Ag a]                           ac
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,S Ag a Ag b,S Ag b Ag a]               ba
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,S Ag b Ag c,S Ag c Ag b]   bc
--}
-
-s2 = fromJust $ FSM.transition oddPSA $ (s1, Right (Call b d))
-
-{-Con: 
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag c,S Ag b Ag d,S Ag c Ag a,S Ag d Ag b]
-Accessibles: 
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag c,S Ag b Ag d,S Ag c Ag a,S Ag d Ag b]       ac, bd
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag b Ag a,S Ag b Ag d,S Ag d Ag a,S Ag d Ag b]     ba, bd
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag b Ag c,S Ag b Ag d,S Ag c Ag b,S Ag d Ag b,S Ag d Ag c]     bc, bd
--}
-
-s3 = fromJust $ FSM.transition oddPSA $ (s2, Right (Call b a))
-
-{-
-Con: 
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag a Ag d,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag d Ag b]
-Accessibles: 
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag a Ag d,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag d Ag b]
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag c,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag b]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag b Ag a,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag d Ag a,S Ag d Ag b]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag d Ag b,S Ag d Ag c]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag a Ag d,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag b,S Ag d Ag b,S Ag d Ag c]
--}
-
-s4 = fromJust $ FSM.transition oddPSA $ (s3, Right (Call d c))
-
-{-Con: 
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag a Ag d,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b,S Ag d Ag c]
-Accessibles: 
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag a Ag d,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b,S Ag d Ag c]
-    Var: [N Ag a Ag c,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag c,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b,S Ag d Ag c]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag a Ag c,S Ag b Ag a,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b,S Ag d Ag c]
-    Var: [N Ag a Ag b,N Ag a Ag c,N Ag a Ag d,N Ag b Ag a,N Ag b Ag c,N Ag b Ag d,N Ag c Ag a,N Ag c Ag b,N Ag c Ag d,N Ag d Ag a,N Ag d Ag b,N Ag d Ag c,S Ag a Ag b,S Ag b Ag a,S Ag b Ag c,S Ag b Ag d,S Ag c Ag a,S Ag c Ag b,S Ag c Ag d,S Ag d Ag a,S Ag d Ag b,S Ag d Ag c]-}
-
 
 getIncorrects :: Int -> Int -> [(EpistM, Maybe [Character])]
 getIncorrects size n = getIncorrectsIn . getModelPSAPairs size . getPhonebookModels size $ n

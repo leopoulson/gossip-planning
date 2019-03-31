@@ -39,8 +39,18 @@
 *** Using QuickCheck 
     It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
     This might be a bit of overkill though; plus, with ours, we can easily specify the size of the graph we want. 
-** TODO Fix bug with accessibility
-   SCHEDULED: <2019-03-31 Sun>
+** TODO Add some kind of copyright thing regarding Malvin's stuff 
+** TODO Change structure (use typeclass instead of QState subtypes)
+   This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
+** TODO Think about different knowledge models 
+   Muddy children? This could be really neat
+
+
+
+
+
+** DONE Fix bug with accessibility
+   CLOSED: [2019-03-31 Sun 17:42] 
 
    The problem seems to be that our relation does not care about the protocol we are using; i.e., it will let an agent perceive that a call happens which cannot actually happen. This is especially noticeable when using the protocol LNS. 
 
@@ -54,23 +64,14 @@
    The question now is how to implement this. We use the transducer approach to relate calls, which just tells us the calls that are indistinguishable from our current state. Do we perhaps need to look at the true state more?  
 
    We need to change the single-state transducer to only relate a state-call pair with another state-call pair iff the states have the same knowledge for the agents involved in the call. The best way to do this is most likely to give our PSA some "special case" function for inputs (q, e) x (q, e). This will tell them if the transition we want to make is acceptable under some special rule we enforce; for example, here it would be that if the agent is involved in the call, we better have that the knowledge states for each agent in the call are identical.  
-** TODO Add some kind of copyright thing regarding Malvin's stuff 
-** TODO Fix bug w/ H-O knowledge
+** DONE Fix bug w/ H-O knowledge
+   CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 
      So to fix this, we need to change the way that the automata transitions work? 
    * It seems that now this isn't the problem; calls were going along fine, but the initial setup did not allow for any other calls to occur. This leads us to the realisation that, in order to reasonably work, *the agents will have complete knowledge of the graph layout before starting*. This is definitiely in need of being mentioned in report.
    * It looks like maybe we get a negative response when we can't ever know for sure that the thing holds. For the test case P (N a b), P (N d c), P (N d a)] we are successful; it clearly just depends on if we can actually get to a position that is successful. This is good news for us!
 
    * TODO: Investigate why we are successful for {N a b, N d c, N d a} but not {N a b, N b c, N d c, N d a}. 
-** TODO Change structure (use typeclass instead of QState subtypes)
-   This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
-** TODO Think about different knowledge models 
-   Muddy children? This could be really neat
-
-
-
-
-
 ** DONE Look at running Haskell on blue crystal
    CLOSED: [2019-03-27 Wed 14:22]
    Mainly to the end of just getting it off my machine. Probs way quicker ...
