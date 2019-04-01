@@ -6,42 +6,43 @@ import Control.Applicative (liftA2)
 newtype Agent = Ag Int deriving (Eq)
 
 type World = Int
-newtype State = State (World, [Event]) 
+
+newtype State ev = State (World, [ev]) 
     deriving (Eq, Ord)
+type StateC = State Call
+
 type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]
-type Valuation st = [(st, [Form])]
+type Valuation st prp = [(st, [Form prp])]
 
--- TODO: Find a better way to do this
-data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
+data Form prp = Top | P prp | Not (Form prp) | And [(Form prp)] | Or [(Form prp)] | K Agent (Form prp) deriving (Eq, Show)
 
-data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
-data EpistM st = Mo {
+data EpistM st p = Mo {
     states :: [st],                  -- Set of possible worlds
     agents :: [Agent],               -- Set of agents in model
-    val :: Valuation st,             -- Valuation function; \pi : World -> Set of props.
+    val :: Valuation st p,             -- Valuation function; \pi : World -> Set of props.
     eprel :: AgentRel st,            -- Epistemic relation between worlds
     actual :: [st]                   -- Set of pointed worlds. 
     }
 
-type PointedEpM st = (EpistM st, st)  -- This is a pointed model. 
+type PointedEpM st p = (EpistM st p, st)  -- This is a pointed model. 
 
 -- So we want to be able to describe events; for us, we only have calls.
-data Event = Call Agent Agent deriving (Eq)
+data Call = Call Agent Agent deriving (Eq)
 
 -- We have event models = (E, R^E, pre, post).
 -- pre is a function Event -> Form, whilst post is a function (Event, Prop) -> Form
-data EventModel = EvMo {
-    events :: [Event], 
-    evrel :: AgentRel Event, 
-    pre :: Precondition, 
-    post :: Postcondition
+data EventModel ev prp = EvMo {
+    events :: [ev],
+    evrel :: AgentRel ev,
+    pre :: Precondition ev prp,
+    post :: Postcondition ev prp
 }
 
-type PointedEvM = (EventModel, Event)
-type Precondition  = Event -> Form
-type Postcondition = (Event, Prop) -> Form
+type PointedEvM ev prp = (EventModel ev prp, ev)
+type Precondition ev prp = ev -> Form prp
+type Postcondition ev prp = (ev, prp) -> Form prp
 
 -- We have an infinite amount of possible agents
 -- But the first five get names!
@@ -54,14 +55,14 @@ instance Show Agent where
     show (Ag 4) = "Ag e"
     show (Ag n) = "Ag " ++ show n
 
-instance Show Event where
+instance Show Call where
     show (Call i j) = show i ++ " " ++ show j 
 
-instance Show State where
+instance Show ev => Show (State ev) where
     show (State (w, [])) = "S " ++ show w
     show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
 
-instance Show st => Show (EpistM st)where
+instance (Show st, Show p) => Show (EpistM st p) where
     show (Mo sts ags valuation erel initial) = 
         "States: " ++ show sts ++ "\n" ++
         "Agents: " ++ show ags ++ "\n" ++
@@ -72,18 +73,32 @@ instance Show st => Show (EpistM st)where
 instance Ord Agent where
     Ag n `compare` Ag m = n `compare` m
 
-instance Ord Prop where
+instance Ord GosProp where
     (S a1 a2) `compare` (S b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
     (N a1 a2) `compare` (N b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
     (N _ _)   `compare` (S _ _)   = LT
     (S _ _)   `compare` (N _ _)   = GT
 
-instance Ord Event where
+instance Ord Call where
     (Call a1 a2) `compare` (Call b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
+
+-- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
+class Prop p where
+  evalProp :: Eq st => p -> EpistM st p -> st -> Bool
+
+data GosProp = S Agent Agent | N Agent Agent deriving (Eq, Show)
+
+instance Prop GosProp where
+    evalProp (N i j) m w 
+      | i == j    = True
+      | otherwise = P (N i j) `elem` tval m w
+    evalProp (S i j) m w 
+      | i == j    = True
+      | otherwise = P (S i j) `elem` tval m w
 
 
 -- This lets us access the relations for a given agent
-rel :: EpistM st -> Agent -> Rel st
+rel :: EpistM st p -> Agent -> Rel st
 rel (Mo _ _ _ rels _) = table2fn rels
 
 -- This gets the worlds related to world w
@@ -94,28 +109,17 @@ relatedWorlds r w = concat $ filter (elem w) r
 relatedWorldsAgent :: Eq a => AgentRel a -> Agent -> a -> [a]
 relatedWorldsAgent r ag = relatedWorlds (fromMaybe [] (lookup ag r))
 
-tval :: Eq st => EpistM st -> st -> [Form]
+tval :: Eq st => EpistM st p -> st -> [Form p]
 tval (Mo _ _ vals _ _) = table2fn vals
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
 table2fn t ag = fromMaybe [] (lookup ag t)
 
--- We need to change this so it's parametric in both state and props
-evaluateProp :: Eq st => Prop -> EpistM st -> st -> Bool
-evaluateProp (N i j) m w 
-    | i == j    = True
-    | otherwise = P (N i j) `elem` tval m w
-evaluateProp (S i j) m w 
-    | i == j    = True
-    | otherwise = P (S i j) `elem` tval m w
-
-
-
--- Give a semantics!
-satisfies :: Eq st => PointedEpM st -> Form -> Bool
+-- well nice, now we don't need to worrya bout what it particularly "is"
+satisfies :: (Eq st, Prop p) => PointedEpM st p -> Form p -> Bool 
 satisfies _ Top = True
-satisfies (m, w) (P n) = evaluateProp n m w
+satisfies (m, w) (P n) = evalProp n m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
 satisfies (m, w) (And ps) = all (satisfies (m, w)) ps 
 satisfies (m, w) (Or ps) = any (satisfies (m, w)) ps
@@ -124,7 +128,7 @@ satisfies (m, w) (K ag p) = all (\v -> satisfies (m, v) p) rw
     r = rel m ag
     rw = relatedWorlds r w
 
-standardEventModel :: [Agent] -> Precondition -> Postcondition -> EventModel
+standardEventModel :: [Agent] -> Precondition Call GosProp -> Postcondition Call GosProp -> EventModel Call GosProp
 standardEventModel ags = EvMo calls (callRel calls ags)
   where
     calls = [Call i j | i <- ags, j <- ags, i /= j]
@@ -132,7 +136,7 @@ standardEventModel ags = EvMo calls (callRel calls ags)
     unrel ag evs = [[ev] | ev <- evs, callIncludes ev ag] ++ [[ev | ev <- evs, not $ callIncludes ev ag]]
 
 
-standardEpistModel :: [Agent] -> [Prop] -> EpistM State
+standardEpistModel :: [Agent] -> [GosProp] -> EpistM StateC GosProp
 standardEpistModel ags fs = Mo
   [State (0, [])]
   ags
@@ -140,18 +144,18 @@ standardEpistModel ags fs = Mo
   (map (\ag -> (ag, [[State (0, [])]])) ags)
   [State (0, [])]
 
-anyCall :: Precondition
+anyCall :: Precondition Call GosProp
 anyCall (Call i j) = P (N i j)
 
 -- We may only call someone if we do not know
-lns :: Precondition
+lns :: Precondition Call GosProp
 lns (Call i j) = And [Not (P (S i j)), P (N i j)]
 
-callIncludes :: Event -> Agent -> Bool
+callIncludes :: Call -> Agent -> Bool
 callIncludes (Call i j) ag = (i == ag) || (j == ag)
 -- callIncludes _ ag = False   -- In the case that we have any other events, what do we do? 
 
-postUpdate :: Postcondition
+postUpdate :: Postcondition Call GosProp
 postUpdate (Call i j, S n m) 
     | callIncludes (Call i j) n = Or [P (S i m), P (S j m)]
     | otherwise                 = P (S n m)
@@ -159,10 +163,10 @@ postUpdate (Call i j, N n m)
     | callIncludes (Call i j) n = Or [P (N i m), P (N j m)]
     | otherwise                 = P (N n m)
 
-produceAllProps :: [Agent] -> [Prop]
+produceAllProps :: [Agent] -> [GosProp]
 produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
 
-update :: EpistM State-> EventModel -> EpistM State
+update :: EpistM StateC GosProp -> EventModel Call GosProp -> EpistM StateC GosProp
 update epm evm = 
     Mo states' (agents epm) val' rels' (actual epm)
     where
@@ -177,31 +181,31 @@ update epm evm =
 
 
 
-ptUpdate :: PointedEpM State -> PointedEvM -> PointedEpM State
+ptUpdate :: PointedEpM StateC GosProp -> PointedEvM Call GosProp -> PointedEpM StateC GosProp
 ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
 
 filterRel :: Eq a => [a] -> Rel a -> Rel a
 filterRel as = filter (not . null) . map (filter (`elem` as))
 
-stateUpdate :: State -> Event -> State
+stateUpdate :: State ev -> ev -> State ev
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 
-allExperts :: EpistM State -> Form 
+allExperts :: EpistM StateC GosProp -> Form GosProp
 allExperts (Mo _ ag _ _ _) = allExpertsAg ag
 
-allExpertsAg :: [Agent] -> Form
+allExpertsAg :: [Agent] -> Form GosProp
 allExpertsAg ag = And [P (S i j) | i <- ag, j <- ag, i /= j] 
 
-lastEv :: State -> Event
+lastEv :: State ev -> ev
 lastEv (State (_, es)) = last es
 
-trimLast :: State -> State
+trimLast :: State ev -> State ev
 trimLast (State (w, es)) = State (w, init es)
 
-stateRelPairs :: EpistM st -> Agent -> [(st, st)]
+stateRelPairs :: EpistM st pr -> Agent -> [(st, st)]
 stateRelPairs (Mo _ _ _ arel _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
 
-eventRelPairs :: EventModel -> Agent -> [(Event, Event)]
+eventRelPairs :: EventModel ev p -> Agent -> [(ev, ev)]
 eventRelPairs ev ag = relPairs $ fromMaybe [] (lookup ag (evrel ev)) 
 
 relPairs :: Rel a -> [(a, a)]
