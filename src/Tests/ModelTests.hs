@@ -45,7 +45,7 @@ tev7 = "Check that possible calls do yield an updated state"
 tevTests :: Test
 tevTests = test [tev1, tev2, tev3, tev4, tev5, tev6, tev7]
 
-exampleModel1 :: EpistM
+exampleModel1 :: EpistM State
 exampleModel1 = Mo 
     [State (0, [])]
     [a, b]
@@ -60,7 +60,7 @@ eventModel1 = EvMo
     anyCall 
     postUpdate
 
-updateModel :: EpistM
+updateModel :: EpistM State
 updateModel = update exampleModel1 eventModel1
 
 -- Testing Relations
@@ -75,7 +75,7 @@ relTests = test [
             ~=? (showRel relUpdate !! 1)
             ]
 
-relModel :: EpistM
+relModel :: EpistM State
 relModel = Mo 
     [State (0, []), State (1, [])]
     [a, b]
@@ -90,10 +90,10 @@ relEvent = EvMo
     anyCall
     postUpdate
 
-relUpdate :: EpistM
+relUpdate :: EpistM State
 relUpdate = update relModel relEvent
 
-showRel :: EpistM -> [(Agent, Rel State)]
+showRel :: EpistM State -> [(Agent, Rel State)]
 showRel (Mo _ _ _ r _) = r
 
 

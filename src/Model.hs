@@ -10,22 +10,22 @@ newtype State = State (World, [Event])
     deriving (Eq, Ord)
 type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]
-type Valuation = [(State, [Form])]
+type Valuation st = [(st, [Form])]
 
 -- TODO: Find a better way to do this
 data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deriving (Eq, Show)
 
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
-data EpistM = Mo {
-    states :: [State],             -- Set of possible worlds
+data EpistM st = Mo {
+    states :: [st],             -- Set of possible worlds
     agents :: [Agent],             -- Set of agents in model
-    val :: Valuation,              -- Valuation function; \pi : World -> Set of props.
-    eprel :: AgentRel State,     -- Epistemic relation between worlds
-    actual :: [State]        -- Set of pointed worlds. 
+    val :: Valuation st,              -- Valuation function; \pi : World -> Set of props.
+    eprel :: AgentRel st,     -- Epistemic relation between worlds
+    actual :: [st]        -- Set of pointed worlds. 
     }
 
-type PointedEpM = (EpistM, State)  -- This is a pointed model. 
+type PointedEpM st = (EpistM st, st)  -- This is a pointed model. 
 
 -- So we want to be able to describe events; for us, we only have calls.
 data Event = Call Agent Agent deriving (Eq)
@@ -61,7 +61,7 @@ instance Show State where
     show (State (w, [])) = "S " ++ show w
     show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
 
-instance Show EpistM where
+instance Show st => Show (EpistM st)where
     show (Mo sts ags valuation erel initial) = 
         "States: " ++ show sts ++ "\n" ++
         "Agents: " ++ show ags ++ "\n" ++
@@ -83,7 +83,7 @@ instance Ord Event where
 
 
 -- This lets us access the relations for a given agent
-rel :: EpistM -> Agent -> Rel State
+rel :: EpistM st -> Agent -> Rel st
 rel (Mo _ _ _ rels _) = table2fn rels
 
 -- This gets the worlds related to world w
@@ -94,14 +94,15 @@ relatedWorlds r w = concat $ filter (elem w) r
 relatedWorldsAgent :: Eq a => AgentRel a -> Agent -> a -> [a]
 relatedWorldsAgent r ag = relatedWorlds (fromMaybe [] (lookup ag r))
 
-tval :: EpistM -> State -> [Form]
+tval :: Eq st => EpistM st -> st -> [Form]
 tval (Mo _ _ vals _ _) = table2fn vals
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
 table2fn t ag = fromMaybe [] (lookup ag t)
 
-evaluateProp :: Prop -> EpistM -> State -> Bool
+-- We need to change this so it's parametric in both state and props
+evaluateProp :: Eq st => Prop -> EpistM st -> st -> Bool
 evaluateProp (N i j) m w 
     | i == j    = True
     | otherwise = P (N i j) `elem` tval m w
@@ -112,7 +113,7 @@ evaluateProp (S i j) m w
 
 
 -- Give a semantics!
-satisfies :: PointedEpM -> Form -> Bool
+satisfies :: Eq st => PointedEpM st -> Form -> Bool
 satisfies _ Top = True
 satisfies (m, w) (P n) = evaluateProp n m w
 satisfies (m, w) (Not p) = not $ satisfies (m, w) p
@@ -131,7 +132,7 @@ standardEventModel ags = EvMo calls (callRel calls ags)
     unrel ag evs = [[ev] | ev <- evs, callIncludes ev ag] ++ [[ev | ev <- evs, not $ callIncludes ev ag]]
 
 
-standardEpistModel :: [Agent] -> [Prop] -> EpistM
+standardEpistModel :: [Agent] -> [Prop] -> EpistM State
 standardEpistModel ags fs = Mo
   [State (0, [])]
   ags
@@ -161,7 +162,7 @@ postUpdate (Call i j, N n m)
 produceAllProps :: [Agent] -> [Prop]
 produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
 
-update :: EpistM -> EventModel -> EpistM
+update :: EpistM State-> EventModel -> EpistM State
 update epm evm = 
     Mo states' (agents epm) val' rels' (actual epm)
     where
@@ -176,7 +177,7 @@ update epm evm =
 
 
 
-ptUpdate :: PointedEpM -> PointedEvM -> PointedEpM
+ptUpdate :: PointedEpM State -> PointedEvM -> PointedEpM State
 ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
 
 filterRel :: Eq a => [a] -> Rel a -> Rel a
@@ -185,7 +186,7 @@ filterRel as = filter (not . null) . map (filter (`elem` as))
 stateUpdate :: State -> Event -> State
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 
-allExperts :: EpistM -> Form 
+allExperts :: EpistM State -> Form 
 allExperts (Mo _ ag _ _ _) = allExpertsAg ag
 
 allExpertsAg :: [Agent] -> Form
@@ -197,7 +198,7 @@ lastEv (State (_, es)) = last es
 trimLast :: State -> State
 trimLast (State (w, es)) = State (w, init es)
 
-stateRelPairs :: EpistM -> Agent -> [(State, State)]
+stateRelPairs :: EpistM st -> Agent -> [(st, st)]
 stateRelPairs (Mo _ _ _ arel _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
 
 eventRelPairs :: EventModel -> Agent -> [(Event, Event)]
