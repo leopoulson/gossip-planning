@@ -80,13 +80,17 @@ buildPSA fsm fstr filter = FSM alphabet' states' transition' initial' accepting'
     initial'                 = [PCon st [st] | st <- FSM.initial fsm]
     transition' (PCon state possStates, ch) = 
                 case FSM.transition fsm (state, ch) of
-                        Just st -> Just $ PCon st (getPossStates (st, ch) filter (bitransition fstr) possStates)
+                        Just st -> Just $ PCon st (getPossStates (state, ch) filter (bitransition fstr) possStates)
                         Nothing -> Nothing 
     transition' (PVar state, ch) = FSM.transition fsm (PVar state, ch)
 
 getPossStates :: (Show st, Show ch, Eq st) => (st, ch) -> TransFilter st ch -> BiTransition st ch -> [st] -> [st]
-getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
-                                   (tfilter (st, ch))) $ bitrans (stin, ch)) $ possStates
+-- getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ filter (
+                                   -- (tfilter (st, ch))) $ bitrans (stin, ch)) $ possStates
+-- getPossStates (st, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ bitrans (stin, ch)) $ possStates
+getPossStates (stbefore, ch) tfilter bitrans possStates = nub . concatMap (\stin -> map snd $ bitrans (stin, ch)) $
+                                                          -- trace ("PossStates " ++ show possStates ++ "\n Filtered to " ++ show (filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates) ++ "\n\n")
+                                                          filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates
 
 psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
 psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
@@ -218,11 +222,25 @@ toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
 findCallSequence :: Form -> EpistM -> EventModel -> Maybe [Character]
 findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
 
+propIncludes :: Agent -> Prop -> Bool
+propIncludes ag (N i j) = i == ag || j == ag
+propIncludes ag (S i j) = i == ag || j == ag
+
+isKnowledge :: Agent -> Prop -> Bool
+isKnowledge ag (N i j) = i == ag
+isKnowledge ag (S i j) = i == ag
+
 knowFilter :: Agent -> TransFilter (PState QState) Character
 knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
-  | i == i' && j == j' && (i == ag || j == ag) =
-      Set.filter (propIncludes ag) qs `setEq` Set.filter (propIncludes ag) ps
+  -- | i == i' && j == j' && (i == ag || j == ag) =
+      -- Set.filter (isKnowledge ag) qs `setEq` Set.filter (isKnowledge ag) ps
+  | i == i' && j == j' && (i == ag) =
+      Set.filter (isKnowledge j) qs `setEq` Set.filter (isKnowledge j) ps
+  | i == i' && j == j' && (j == ag) =
+      Set.filter (isKnowledge i) qs `setEq` Set.filter (isKnowledge i) ps
   | i == ag || j == ag = error "knowFilter: If I or J are the agent, the calls must be equal"
   | i /= ag && j /= ag = True
   | otherwise          = error ("Unmatched case in knowFilter: " ++ show ((Call i j)) ++ " " ++ show ((Call i' j')))
-
+-- I haven't really thought about what to do here yet.
+-- Perhaps mimic something similar to above, where we just scope down into the underlying truth?
+knowFilter ag (PCon sta stas, ca) (cb, PCon stb stbs) = knowFilter ag (point sta, ca) (cb, point stb)

@@ -17,16 +17,17 @@ graph4 = exampleFromList [[0, 2, 3], [0, 1], [2], [3]]
 precon = lns
 
 allKnowExperts :: Form
-allKnowExperts = ForallAg (\ag -> K ag precon allExperts)
+-- allKnowExperts = ForallAg (\ag -> K ag precon allExperts)
+allKnowExperts = Conj [K 0 precon allExperts, K 1 precon allExperts, K 2 precon allExperts, K 3 precon allExperts]
 
 aKnowsExperts :: Form
-aKnowsExperts = K 0 precon allExperts
+aKnowsExperts = K 3 precon allExperts
 
 dKnowsExperts :: Form
-dKnowsExperts = K 3 precon allExperts
+dKnowsExperts = K 2 precon allExperts
 
 winningFormula :: Form
-winningFormula = dKnowsExperts
+winningFormula = allKnowExperts
 
 t = eval (graph4, [(0, 2), (1, 0), (0, 3), (1, 3), (2, 3)]) winningFormula
 
@@ -51,10 +52,10 @@ findSequences es = zip (map fst es) (map findSequence es)
 -- of course, we need to fill the hole that null creates
 -- we can use isSuccSequence, but it seems there's something he provides too 
 verifyEmptyG :: Int -> Graph -> Bool
-verifyEmptyG agents g = not $ any (isSuccSequence (g, [])) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
+verifyEmptyG agents g = not $ any (\s -> verifyE g s winningFormula) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
 
 findNonEmpty :: Int -> Graph -> Sequence
-findNonEmpty agents g = head $ filter (isSuccSequence (g, [])) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
+findNonEmpty agents g = head $ filter (\s -> verifyE g s winningFormula) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
 
 verifyEmpty :: Model.EpistM -> Bool
 verifyEmpty model = verifyEmptyG (length $ Model.agents model) . exampleFromList . graphToGattinger $ model

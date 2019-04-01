@@ -1,5 +1,28 @@
 * Main Project TODOs
- 
+** TODO Fix bug with transducer intersection 
+   It seems that there's something not going right with conjunctions. 
+   We are getting a false negative, when there is indeed a path that we can take. 
+** TODO Fix bug with accessibility, for H-O knowledge
+
+   Looks like the beast is back but in a different form. I think the problem is is that we're comparing knowledge *after* the call has been made, when 
+   we really want to compare it before. This is a bit difficult.... 
+   Actually it seems that we should just be able to filter the set of possible states based on the predicate we give it. Hence we only look at the states 
+   satisfy the predicate ??? 
+*** S-O Knowledge
+   The problem seems to be that our relation does not care about the protocol we are using; i.e., it will let an agent perceive that a call happens which cannot actually happen. This is especially noticeable when using the protocol LNS. 
+
+   We should be able to fix this. We can either:
+   - Change the way the call transducer works; that is, pass in the protocol into the transducer composition function. This is not particularly appealing. 
+   - Check that a call is permissible by the protocol before we make it. This is a bit nicer as we have access to the protocol when constructing the PSA and so can use it in the definition of the transitition function.
+   
+
+   The thing seems to be that we should only let two states be related after a call if the knowledge states for each call member were the same before we started the call. Intuitively, this is because an agent b *can* distinguish between two worlds where he knows different things, or the callee knows two different things. 
+
+   The question now is how to implement this. We use the transducer approach to relate calls, which just tells us the calls that are indistinguishable from our current state. Do we perhaps need to look at the true state more?  
+
+   We need to change the single-state transducer to only relate a state-call pair with another state-call pair iff the states have the same knowledge for the agents involved in the call. The best way to do this is most likely to give our PSA some "special case" function for inputs (q, e) x (q, e). This will tell them if the transition we want to make is acceptable under some special rule we enforce; for example, here it would be that if the agent is involved in the call, we better have that the knowledge states for each agent in the call are identical.  
+*** H-O Knowledge
+    Okay, so here we have the same issue as before. Some false positives are happening. Probably we can just do as before, by getting the world pointed to and checking that this transition is OK to make.  
 ** TODO Add in automated testing
    It feels like we need to try and use an automated system to profile the code; it looks like certain solutions take longer to reach than others. 
    
@@ -49,21 +72,6 @@
 
 
 
-** DONE Fix bug with accessibility
-   CLOSED: [2019-03-31 Sun 17:42] 
-
-   The problem seems to be that our relation does not care about the protocol we are using; i.e., it will let an agent perceive that a call happens which cannot actually happen. This is especially noticeable when using the protocol LNS. 
-
-   We should be able to fix this. We can either:
-   - Change the way the call transducer works; that is, pass in the protocol into the transducer composition function. This is not particularly appealing. 
-   - Check that a call is permissible by the protocol before we make it. This is a bit nicer as we have access to the protocol when constructing the PSA and so can use it in the definition of the transitition function.
-   
-
-   The thing seems to be that we should only let two states be related after a call if the knowledge states for each call member were the same before we started the call. Intuitively, this is because an agent b *can* distinguish between two worlds where he knows different things, or the callee knows two different things. 
-
-   The question now is how to implement this. We use the transducer approach to relate calls, which just tells us the calls that are indistinguishable from our current state. Do we perhaps need to look at the true state more?  
-
-   We need to change the single-state transducer to only relate a state-call pair with another state-call pair iff the states have the same knowledge for the agents involved in the call. The best way to do this is most likely to give our PSA some "special case" function for inputs (q, e) x (q, e). This will tell them if the transition we want to make is acceptable under some special rule we enforce; for example, here it would be that if the agent is involved in the call, we better have that the knowledge states for each agent in the call are identical.  
 ** DONE Fix bug w/ H-O knowledge
    CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 

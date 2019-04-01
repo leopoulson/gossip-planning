@@ -194,10 +194,6 @@ buildMEStar ep ev = RegularStructure
   where 
     dAuto = buildDAutomataNoF ep ev
 
-propIncludes :: Agent -> Prop -> Bool
-propIncludes ag (N i j) = i == ag || j == ag
-propIncludes ag (S i j) = i == ag || j == ag
-
 setEq :: Ord a => Set.Set a -> Set.Set a -> Bool
 setEq m n = (m `Set.isSubsetOf` n) && (n `Set.isSubsetOf` m)
 
