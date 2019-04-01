@@ -92,7 +92,7 @@ getPossStates (stbefore, ch) tfilter bitrans possStates = nub . concatMap (\stin
                                                           -- trace ("PossStates " ++ show possStates ++ "\n Filtered to " ++ show (filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates) ++ "\n\n")
                                                           filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates
 
-psaFromScratch :: Agent -> EpistM -> EventModel -> FSM Character (PState QState)
+psaFromScratch :: Agent -> EpistM State -> EventModel -> FSM Character (PState QState)
 psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
   where
     dAuto = buildDAutomataNoF ep ev
@@ -128,9 +128,9 @@ makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept'
     trans' (PVar st, ch)  = map (\(c, s) -> (c, PVar s)) $ trans (st, ch)
     trans' _              = error "No PCon states at this point"
 
-findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
-findPath (K _ _) _    = error "Can't find a path thru a regular structure with K"
-findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutomata rs)
+-- findPath :: EvalState st => Form -> RegularStructure ch st -> Maybe [ch]
+-- findPath (K _ _) _    = error "Can't find a path thru a regular structure with K"
+-- findPath phi rs       = extractCalls . doBFS $ setSuccessfulFormula phi (dAutomata rs)
 
 -- for buildPSA, our dAutomata and our transducer are on the same "level"
 -- hence we lift the transducers to the level of dAuto. 
@@ -188,7 +188,7 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- Or is it deeper than this? Do we need to create the automata on the fly?
 -- Or just when we get an and behave differently?
 -- This is screaming out for a typeclass. This would make all of our worries go away
-createSolvingAutomata :: Form -> EpistM -> EventModel -> FSM Character (PState QState)
+createSolvingAutomata :: Form -> EpistM State -> EventModel -> FSM Character (PState QState)
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                           buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev)) (knowFilter agent)
 createSolvingAutomata (And phis) ep ev         = case includesK (And phis) of
@@ -219,7 +219,7 @@ toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
     accept' _          = error "Can't accept a non-PList"
 
 
-findCallSequence :: Form -> EpistM -> EventModel -> Maybe [Character]
+findCallSequence :: Form -> EpistM State -> EventModel -> Maybe [Character]
 findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
 
 propIncludes :: Agent -> Prop -> Bool
@@ -244,3 +244,4 @@ knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
 -- I haven't really thought about what to do here yet.
 -- Perhaps mimic something similar to above, where we just scope down into the underlying truth?
 knowFilter ag (PCon sta stas, ca) (cb, PCon stb stbs) = knowFilter ag (point sta, ca) (cb, point stb)
+knowFilter ag (PList a, ca) (cb, PList b) = True

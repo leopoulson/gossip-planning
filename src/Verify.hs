@@ -14,39 +14,41 @@ graph3 = exampleFromList [[0, 1], [1, 2], [2]]
 graph4 :: Graph
 graph4 = exampleFromList [[0, 2, 3], [0, 1], [2], [3]]
 
-precon = lns
+precon = anyCall
 
 allKnowExperts :: Form
 -- allKnowExperts = ForallAg (\ag -> K ag precon allExperts)
 allKnowExperts = Conj [K 0 precon allExperts, K 1 precon allExperts, K 2 precon allExperts, K 3 precon allExperts]
 
+abKnowExperts = Conj [K 2 precon allExperts, K 3 precon allExperts]
+
 aKnowsExperts :: Form
 aKnowsExperts = K 3 precon allExperts
 
 dKnowsExperts :: Form
-dKnowsExperts = K 2 precon allExperts
+dKnowsExperts = K 3 precon allExperts
 
 winningFormula :: Form
-winningFormula = allKnowExperts
+winningFormula = K 1 lns dKnowsExperts
 
 t = eval (graph4, [(0, 2), (1, 0), (0, 3), (1, 3), (2, 3)]) winningFormula
 
-verifyCalls :: Model.EpistM -> [Model.Event] -> Form ->  Bool
+verifyCalls :: Model.EpistM Model.State -> [Model.Event] -> Form ->  Bool
 verifyCalls ep calls f = verifyE (exampleFromList $ graphToGattinger ep) (callsToGattinger calls) f
 
-verifyAllExperts :: Model.EpistM -> [Model.Event] -> Bool
+verifyAllExperts :: Model.EpistM Model.State -> [Model.Event] -> Bool
 verifyAllExperts ep evs = verifyCalls ep evs allExperts
 
-verifyWinning :: Model.EpistM -> [Model.Event] -> Bool
+verifyWinning :: Model.EpistM Model.State -> [Model.Event] -> Bool
 verifyWinning ep evs = verifyCalls ep evs winningFormula
 
 verifyE :: Graph -> Sequence -> Form -> Bool
 verifyE g sigma f = eval (g, sigma) f
 
-findSequence :: (Model.EpistM, Maybe [ME.Character]) -> Sequence
+findSequence :: (Model.EpistM Model.State, Maybe [ME.Character]) -> Sequence
 findSequence (ep, _) = findNonEmpty (length $ Model.agents ep) (exampleFromList $ graphToGattinger ep)
 
-findSequences :: [(Model.EpistM, Maybe [ME.Character])] -> [(Model.EpistM, Sequence)]
+findSequences :: [(Model.EpistM Model.State, Maybe [ME.Character])] -> [(Model.EpistM Model.State, Sequence)]
 findSequences es = zip (map fst es) (map findSequence es)
 
 -- of course, we need to fill the hole that null creates
@@ -57,6 +59,6 @@ verifyEmptyG agents g = not $ any (\s -> verifyE g s winningFormula) $ filter ((
 findNonEmpty :: Int -> Graph -> Sequence
 findNonEmpty agents g = head $ filter (\s -> verifyE g s winningFormula) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
 
-verifyEmpty :: Model.EpistM -> Bool
+verifyEmpty :: Model.EpistM Model.State -> Bool
 verifyEmpty model = verifyEmptyG (length $ Model.agents model) . exampleFromList . graphToGattinger $ model
 

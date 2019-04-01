@@ -11,17 +11,19 @@ import RS
 import MakeGraphs
 
 import Verify
+import AutoTests
 
 import Data.Maybe (fromJust)
 import Data.Either (rights)
 
 main :: IO ()
-main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
+-- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
+main = runTests 4 100
 
 threeCalls :: Maybe [Either State Event]
 threeCalls = extractCalls $ doBFS saThree
 
-threeModel :: EpistM
+threeModel :: EpistM State
 threeModel = Mo
     [State (0, [])]
     [a, b, c]
@@ -35,7 +37,7 @@ threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 saThree :: FSM Character (PState QState)
 saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
 
-fourModel :: EpistM
+fourModel :: EpistM State
 fourModel = Mo
     [State (0, [])]
     [a, b, c, d]
@@ -52,7 +54,7 @@ saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourE
 fiveEvModel :: EventModel
 fiveEvModel = standardEventModel [a, b, c, d, e] anyCall postUpdate
 
-fiveModel :: EpistM
+fiveModel :: EpistM State
 fiveModel = Mo
     [State (0, [])]
     [a, b, c, d, e]
@@ -69,7 +71,7 @@ f = Ag 6
 sixEvModel :: EventModel
 sixEvModel = standardEventModel [a, b, c, d, e, f] anyCall postUpdate
 
-sixModel :: EpistM
+sixModel :: EpistM State
 sixModel = Mo
     [State (0, [])]
     [a, b, c, d, e, f]
@@ -81,7 +83,7 @@ saSix :: FSM Character (PState QState)
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
 
 
-diaModel :: EpistM
+diaModel :: EpistM State
 diaModel = Mo
     [State (0, [])]
     [a, b, c, d]

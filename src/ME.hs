@@ -37,24 +37,24 @@ data ME = ME
     [(Agent, FST Character QState)] 
     [(Agent, FSM Character QState)]
 
-getAlphabet :: EpistM -> EventModel -> Alphabet
+getAlphabet :: EpistM State -> EventModel -> Alphabet
 getAlphabet ep evm = map Left (Model.states ep) ++ map Right (events evm)
 
 powerList :: [a] -> [[a]]
 powerList [] = [[]]
 powerList (x : xs) = powerList xs ++ map (x:) (powerList xs)
 
-getFStates :: EpistM -> [QState]
+getFStates :: EpistM State -> [QState]
 getFStates (Mo _ ags _ _ _ ) = fmap Q $ fmap Set.fromList $ powerList $ produceAllProps ags
 
 simpleAccept :: QState -> Bool
 simpleAccept (Q _)      = True
 simpleAccept QInit      = False
 
-getQStates :: EpistM -> [QState]
+getQStates :: EpistM State -> [QState]
 getQStates mo = getFStates mo ++ [QInit]
 
-getvee :: EpistM -> Valuation
+getvee :: EpistM st -> Valuation st
 getvee (Mo _ _ valu _ _) = valu
 
 isForm :: Form -> Bool
@@ -71,7 +71,7 @@ getForms = map fromForm . filter isForm
 idProps :: [Agent] -> [Prop]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
-meTrans :: EpistM -> EventModel -> Transition QState Character
+meTrans :: EpistM State -> EventModel -> Transition QState Character
 meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
@@ -105,17 +105,17 @@ listModels _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
 
 
 
-buildTransducers :: EpistM -> EventModel -> [(Agent, FST Character QState)]
+buildTransducers :: EpistM State -> EventModel -> [(Agent, FST Character QState)]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
 
-buildSSTransducer :: Agent -> EpistM -> EventModel -> SSFST Character
+buildSSTransducer :: Agent -> EpistM State -> EventModel -> SSFST Character
 buildSSTransducer ag ep evm = SSFST (getAlphabet ep evm) trans 
   where
     trans :: SSTransition Character
     trans (Left w)  =  [Left w'   | w'  <- relatedWorldsAgent (eprel ep) ag w]
     trans (Right ev) = [Right ev' | ev' <- relatedWorldsAgent (evrel evm) ag ev]
 
-buildTransducer :: Agent -> EpistM -> EventModel -> FST Character QState
+buildTransducer :: Agent -> EpistM State -> EventModel -> FST Character QState
 buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
   where
     trans :: BiTransition QState Character
@@ -134,12 +134,12 @@ identityTransducer (FSM alpha sts trans int accept) =
             Just q  -> [(ch, q)]
             Nothing -> []
 
-buildComposedTransducers :: Agent -> EpistM -> EventModel -> FSM Character QState -> FST Character ((QState, QState), QState)
+buildComposedTransducers :: Agent -> EpistM State -> EventModel -> FSM Character QState -> FST Character ((QState, QState), QState)
 buildComposedTransducers ag ep ev fsm = idt `composeFST` buildTransducer ag ep ev `composeFST` idt 
   where
     idt = identityTransducer fsm
 
-buildComposedSS :: Agent -> EpistM -> EventModel -> FSM Character st -> FST Character st
+buildComposedSS :: Agent -> EpistM State -> EventModel -> FSM Character st -> FST Character st
 buildComposedSS ag ep evm fsm = buildSSTransducer ag ep evm `composeSS` identityTransducer fsm
 
 pAutomata :: FSM Character QState -> Prop -> FSM Character QState
@@ -162,7 +162,7 @@ setSuccessfulFormula f = updateAcccepting (evalState f)
 
 -- We know now that we can make this better.
 -- * Set initial states from the event model?
-buildDAutomataNoF :: EpistM -> EventModel -> FSM Character QState
+buildDAutomataNoF :: EpistM State -> EventModel -> FSM Character QState
 buildDAutomataNoF ep ev = FSM 
     (getAlphabet ep ev)
     (getQStates ep)
@@ -170,12 +170,12 @@ buildDAutomataNoF ep ev = FSM
     [QInit]
     simpleAccept
 
-buildDAutomata :: Form -> EpistM -> EventModel -> FSM Character QState
+buildDAutomata :: Form -> EpistM State -> EventModel -> FSM Character QState
 buildDAutomata f ep ev = setStatesReachableInit $ buildDAutomataCore f ep ev
 
 -- We set states to be undefined, as they're set in BDABetter
 -- This is because they need to be done after we've set initial state
-buildDAutomataCore :: Form -> EpistM -> EventModel -> FSM Character QState
+buildDAutomataCore :: Form -> EpistM State -> EventModel -> FSM Character QState
 buildDAutomataCore f ep ev = FSM
     (getAlphabet ep ev)
     undefined 
@@ -183,10 +183,10 @@ buildDAutomataCore f ep ev = FSM
     (getInit ep)
     (evalState f)
 
-getInit :: EpistM -> [QState]
+getInit :: Eq st =>  EpistM st -> [QState]
 getInit (Mo _ _ val _ actual) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
 
-buildMEStar :: EpistM -> EventModel -> RegularStructure Character QState
+buildMEStar :: EpistM State -> EventModel -> RegularStructure Character QState
 buildMEStar ep ev = RegularStructure 
     dAuto 
     [(ag, buildComposedSS ag ep ev dAuto) | ag <- agents ep]

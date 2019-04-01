@@ -12,10 +12,10 @@ type Phonebook = [[Int]]
 
 -- This is just like generateModels, except we only have phone number knowledge;
 -- no one knows each others secret already
-generateModelsPhonebook :: [Agent] -> Precondition -> [(EpistM, EventModel)]
+generateModelsPhonebook :: [Agent] -> Precondition -> [(EpistM State, EventModel)]
 generateModelsPhonebook ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validPhonebooks ags
 
-generateModels :: [Agent] -> Precondition -> [(EpistM, EventModel)]
+generateModels :: [Agent] -> Precondition -> [(EpistM State, EventModel)]
 generateModels ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validKnowledgeStates ags
 
 validPhonebooks :: [Agent] -> [[Prop]]
@@ -42,7 +42,7 @@ allKnowledge ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j 
 
 -- We make the assumption that the actual state is actually the actual state
 -- And that any information that we need is valuated at that statei
-graphToGattinger :: EpistM -> Phonebook
+graphToGattinger :: EpistM State -> Phonebook
 graphToGattinger (Mo _ ag val _ actual) = map sort $ foldr updatePhonebook basePhonebook ns
   where
     props = concatMap (\act -> fromMaybe (error "No valuation result") $ lookup act val) actual

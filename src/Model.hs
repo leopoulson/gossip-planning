@@ -18,11 +18,11 @@ data Form = Top | P Prop | Not Form | And [Form] | Or [Form] | K Agent Form deri
 data Prop = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
 data EpistM st = Mo {
-    states :: [st],             -- Set of possible worlds
-    agents :: [Agent],             -- Set of agents in model
-    val :: Valuation st,              -- Valuation function; \pi : World -> Set of props.
-    eprel :: AgentRel st,     -- Epistemic relation between worlds
-    actual :: [st]        -- Set of pointed worlds. 
+    states :: [st],                  -- Set of possible worlds
+    agents :: [Agent],               -- Set of agents in model
+    val :: Valuation st,             -- Valuation function; \pi : World -> Set of props.
+    eprel :: AgentRel st,            -- Epistemic relation between worlds
+    actual :: [st]                   -- Set of pointed worlds. 
     }
 
 type PointedEpM st = (EpistM st, st)  -- This is a pointed model. 

@@ -40,7 +40,7 @@ meTests = test [tStates, tTrans1, tTrans2, tTrans3]
 domeTest :: IO Counts
 domeTest = runTestTT meTests
 
-exampleModel :: EpistM
+exampleModel :: EpistM State
 exampleModel = Mo 
     [State (0, [])]
     [a, b]
@@ -55,7 +55,7 @@ eventModel = EvMo
     anyCall 
     postUpdate
 
-relUpdate :: EpistM
+relUpdate :: EpistM State
 relUpdate = update exampleModel eventModel
 
 dAutomata :: FSM Character QState
@@ -89,7 +89,7 @@ transTests = TestList [transT1, transT2, transT3, transT4, transT5]
 doTransTests :: IO Counts
 doTransTests = runTestTT transTests
 
-transModel :: EpistM
+transModel :: EpistM State
 transModel = Mo
     [State (0, []), State (1, []), State (2, [])]
     [a]
@@ -151,7 +151,7 @@ cTransTests = TestList [ctT1, ctT2]
 doCTransTests :: IO Counts
 doCTransTests = runTestTT cTransTests
 
-cTransModel :: EpistM
+cTransModel :: EpistM State
 cTransModel = Mo
     [State (0, []), State (1, []), State (2, [])]
     [a, b]

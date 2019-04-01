@@ -83,7 +83,9 @@
 
     Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
     The primary points of attack will be: 
-**** TODO Make Epistemic Models parametric
+**** DONE Make Epistemic Models parametric
+     CLOSED: [2019-04-01 Mon 17:44]
+     By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
 **** TODO Look at what can be done for event models?
      Chapter 6 of DEMO-S5 will be helpful to this end 
 **** TODO Change the language of propositions to also be parametric
