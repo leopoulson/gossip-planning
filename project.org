@@ -1,7 +1,13 @@
 * Main Project TODOs
+** TODO Speed up BFS / check why it fails 
+   We have duplicates in our queue, and it would be nice to get rid of these so we can speed up the computation and blah blah blah. 
+
+   Unfortunately, this is causing some false negatives. Need to check why this happens too. Lol!!!!! 
 ** TODO Fix bug with transducer intersection 
    It seems that there's something not going right with conjunctions. 
    We are getting a false negative, when there is indeed a path that we can take. 
+
+   Still got no idea about this one, sorry me
 ** TODO Fix bug with accessibility, for H-O knowledge
 
    Looks like the beast is back but in a different form. I think the problem is is that we're comparing knowledge *after* the call has been made, when 
@@ -67,11 +73,20 @@
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
 ** TODO Think about different knowledge models 
    Muddy children? This could be really neat
+   
+*** Jan van Eijck DEMO-S5
+    In this paper, JvE has his models be parametric in what they store as the state. This is cool, and this is something that we can implement too in ours. 
 
+    It'squite likely that we will have to also add in our own language of propositions. We can probably use the same family of formulas, but the set of propositions that we use will need to change as we use different knowledge models.
 
+    We also need to think about how to handle the updating of information with an epistemic model and an event model.
 
-
-
+    Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
+    The primary points of attack will be: 
+**** TODO Make Epistemic Models parametric
+**** TODO Look at what can be done for event models?
+     Chapter 6 of DEMO-S5 will be helpful to this end 
+**** TODO Change the language of propositions to also be parametric
 ** DONE Fix bug w/ H-O knowledge
    CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 
