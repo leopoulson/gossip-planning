@@ -13,17 +13,17 @@ import RS
 import Data.Maybe (isJust, fromJust, isNothing)
 import Data.Either (rights)
 
-type PSA = FSM Character (PState QState)
+type PSA p = FSM Character (PState (QState p))
 
 -- TODO: A lot of this could probably have been done with zip.
 -- Perhaps it would be nice to update it to use this at a later date.
 
 runTests size n = putStrLn $ prettyPrintResults $ getWithNothings size n
 
-getIncorrectsIn :: [(EpistM State, PSA)] -> [(EpistM State, Maybe [Character])]
+getIncorrectsIn :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [Character])]
 getIncorrectsIn pairs = filter (not . snd . verify) $ getModelCalls pairs
 
-oddModel :: EpistM State
+oddModel :: EpistM StateC GosProp
 oddModel = Mo
   [State (0, [])]
   [a, b, c, d]
@@ -31,10 +31,10 @@ oddModel = Mo
   [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
   [State (0, [])]
 
-oddEvModel :: EventModel
+oddEvModel :: EventModel Call GosProp
 oddEvModel = standardEventModel [a, b, c, d] prec postUpdate
 
-oddPSA :: PSA
+oddPSA :: PSA GosProp
 oddPSA = createSolvingAutomata (successfulFormula $ agents oddModel) oddModel oddEvModel
 
 oddTrans = getTransducer d (buildMEStar oddModel oddEvModel)
@@ -69,25 +69,25 @@ sc5 = FSM.transition oddPSAC (fromJust sc4, Right (Call c b))
 sd5 = FSM.transition oddPSAD (fromJust sd4, Right (Call c b))
 
 
-getIncorrects :: Int -> Int -> [(EpistM State, Maybe [Character])]
+getIncorrects :: Int -> Int -> [(EpistM StateC GosProp, Maybe [Character])]
 getIncorrects size n = getIncorrectsIn . getModelPSAPairs size . getPhonebookModels size $ n
 
-prec :: Precondition
-prec = anyCall
+prec :: Precondition Call GosProp
+prec = lns
 
-allKnowAllExperts :: [Agent] -> Form
+allKnowAllExperts :: [Agent] -> Form GosProp
 allKnowAllExperts ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
 
-abKnowAllExperts :: [Agent] -> Form
+abKnowAllExperts :: [Agent] -> Form GosProp
 abKnowAllExperts ags = And [K c (allExpertsAg ags), K d (allExpertsAg ags)]
 
-aKnowExperts :: [Agent] -> Form
+aKnowExperts :: [Agent] -> Form GosProp
 aKnowExperts ags = K d (allExpertsAg ags)
 
-dKnowExperts :: [Agent] -> Form
+dKnowExperts :: [Agent] -> Form GosProp
 dKnowExperts ags = K d (allExpertsAg ags)
 
-successfulFormula :: [Agent] -> Form
+successfulFormula :: [Agent] -> Form GosProp
 successfulFormula ags = K b (dKnowExperts ags)--K a (allKnowAllExperts ags)
 
 
@@ -100,35 +100,35 @@ prettyPrintResults ress = "Did " ++ show (length ress) ++ " tests. \n" ++
     empties = filter (isNothing . fst) ress
     fulls = filter (isJust . fst) ress
 
-getModelResults :: Int -> Int -> [(EpistM State, [Event])]
+getModelResults :: Int -> Int -> [(EpistM StateC GosProp, [Call])]
 getModelResults size n = getCalls . getJusts . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n
 
 getWithNothings :: Int -> Int -> [(Maybe [Character], Bool)]
 getWithNothings size n = map verify . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n
 
-getCalls :: [(EpistM State, [Character])] -> [(EpistM State, [Event])]
+getCalls :: [(EpistM StateC GosProp, [Character])] -> [(EpistM StateC GosProp, [Call])]
 getCalls = map (\(e, c) -> (e, rights c))
 
-getJusts :: [(EpistM State, Maybe [Character])] -> [(EpistM State, [Character])]
+getJusts :: [(EpistM StateC GosProp, Maybe [Character])] -> [(EpistM StateC GosProp, [Character])]
 getJusts = map (\(a, b) -> (a, fromJust b)) . filter (isJust . snd) 
 
-verify :: (EpistM State, Maybe [Character]) -> (Maybe [Character], Bool)
+verify :: (EpistM StateC GosProp, Maybe [Character]) -> (Maybe [Character], Bool)
 verify (ep, Nothing)    = (Nothing, verifyEmpty ep)
 verify (ep, Just calls) = (Just calls, verifyWinning ep (rights calls))
 
-getModelCalls :: [(EpistM State, PSA)] -> [(EpistM State, Maybe [Character])]
+getModelCalls :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [Character])]
 getModelCalls = map (\(ep, psa) -> (ep, extractCalls . doBFS $ psa))
 
-getModelPSAPairs :: Int -> [(EpistM State, EventModel)] -> [(EpistM State, PSA)]
+getModelPSAPairs :: Int -> [(EpistM StateC GosProp, EventModel Call GosProp)] -> [(EpistM StateC GosProp, PSA GosProp)]
 getModelPSAPairs size models = map (\(ep, ev) -> (ep, createSolvingAutomata (successfulFormula $ getAgents size) ep ev)) models
 
-getModels :: Int -> Int -> [(EpistM State, EventModel)]
+getModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
 getModels size n = take n $ generateModels (getAgents size) prec
 
-getPhonebookModels :: Int -> Int -> [(EpistM State, EventModel)]
+getPhonebookModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
 getPhonebookModels size n = take n $ generateModelsPhonebook (getAgents size) prec
 
-mapBFS :: [PSA] -> [Maybe [Character]]
+mapBFS :: (Show p, Ord p) => [PSA p] -> [Maybe [Character]]
 mapBFS psas = map (extractCalls . doBFS) psas
 
 -- This takes the number of agnets and generates the correct number of agents.

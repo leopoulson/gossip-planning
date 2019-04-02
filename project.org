@@ -86,9 +86,18 @@
 **** DONE Make Epistemic Models parametric
      CLOSED: [2019-04-01 Mon 17:44]
      By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
+**** DONE Change the language of formulas to also be parametric
+     CLOSED: [2019-04-01 Mon 20:51]
+     To do this, we are probably going to have to keep this inside the EpistM definition. 
+**** DONE To add to above, we need to make a typeclass of evaluateable propositions 
+     CLOSED: [2019-04-01 Mon 20:51]
+     This requires some type-safety that the Model we wish to evaluate against has props of the same type. 
+**** TODO Fix EvalState problem
+     The typechecker doesn't like that we're trying 
 **** TODO Look at what can be done for event models?
+     Most likely, we can parametrise it with Events. However we also need to ensure that it "matches" the epistemic model we want to update; hence, we give it also a second argument. This is used in the postcondition function. 
+
      Chapter 6 of DEMO-S5 will be helpful to this end 
-**** TODO Change the language of propositions to also be parametric
 ** DONE Fix bug w/ H-O knowledge
    CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 

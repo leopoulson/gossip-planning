@@ -14,7 +14,9 @@ graph3 = exampleFromList [[0, 1], [1, 2], [2]]
 graph4 :: Graph
 graph4 = exampleFromList [[0, 2, 3], [0, 1], [2], [3]]
 
-precon = anyCall
+type ModelGossip = Model.EpistM Model.StateC Model.GosProp
+
+precon = lns
 
 allKnowExperts :: Form
 -- allKnowExperts = ForallAg (\ag -> K ag precon allExperts)
@@ -33,22 +35,22 @@ winningFormula = K 1 lns dKnowsExperts
 
 t = eval (graph4, [(0, 2), (1, 0), (0, 3), (1, 3), (2, 3)]) winningFormula
 
-verifyCalls :: Model.EpistM Model.State -> [Model.Event] -> Form ->  Bool
+verifyCalls :: ModelGossip -> [Model.Call] -> Form ->  Bool
 verifyCalls ep calls f = verifyE (exampleFromList $ graphToGattinger ep) (callsToGattinger calls) f
 
-verifyAllExperts :: Model.EpistM Model.State -> [Model.Event] -> Bool
+verifyAllExperts :: ModelGossip -> [Model.Call] -> Bool
 verifyAllExperts ep evs = verifyCalls ep evs allExperts
 
-verifyWinning :: Model.EpistM Model.State -> [Model.Event] -> Bool
+verifyWinning :: ModelGossip -> [Model.Call] -> Bool
 verifyWinning ep evs = verifyCalls ep evs winningFormula
 
 verifyE :: Graph -> Sequence -> Form -> Bool
 verifyE g sigma f = eval (g, sigma) f
 
-findSequence :: (Model.EpistM Model.State, Maybe [ME.Character]) -> Sequence
+findSequence :: (ModelGossip, Maybe [ME.Character]) -> Sequence
 findSequence (ep, _) = findNonEmpty (length $ Model.agents ep) (exampleFromList $ graphToGattinger ep)
 
-findSequences :: [(Model.EpistM Model.State, Maybe [ME.Character])] -> [(Model.EpistM Model.State, Sequence)]
+findSequences :: [(ModelGossip, Maybe [ME.Character])] -> [(ModelGossip, Sequence)]
 findSequences es = zip (map fst es) (map findSequence es)
 
 -- of course, we need to fill the hole that null creates
@@ -59,6 +61,6 @@ verifyEmptyG agents g = not $ any (\s -> verifyE g s winningFormula) $ filter ((
 findNonEmpty :: Int -> Graph -> Sequence
 findNonEmpty agents g = head $ filter (\s -> verifyE g s winningFormula) $ filter ((< (agents + 2)) . length) $ sequences precon (g, [])
 
-verifyEmpty :: Model.EpistM Model.State -> Bool
+verifyEmpty :: ModelGossip -> Bool
 verifyEmpty model = verifyEmptyG (length $ Model.agents model) . exampleFromList . graphToGattinger $ model
 

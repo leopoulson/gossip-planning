@@ -1,3 +1,6 @@
+{-#LANGUAGE FlexibleInstances #-}
+{-#LANGUAGE MultiParamTypeClasses #-}
+
 module Powerset where
 
 import Model
@@ -17,7 +20,7 @@ import qualified Data.Set as Set (toList, filter, fromList)
 --import Data.Foldable hiding (concatMap, all, foldr, any)
 --import Data.Monoid
 --import Control.Applicative
-   
+
 type History ch st = [(ch, st)]
 data PSH ch st = PSH (PState st) (History ch st)
 data PState st = PList [PState st] | PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
@@ -44,7 +47,9 @@ instance Ord st => Ord (PState st) where
    is constructed for. This will probably require baking the agent into
    the type of either PState or the PSA itself. 
 -}
-instance (EvalState st, Ord st) => EvalState (PState st) where  
+
+
+instance (EvalState st p, Ord st) => EvalState (PState st) p where  
   evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
   evalState (K _ phi) (PList _)    = error "Can't evaluate K on a PList"
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
@@ -56,11 +61,11 @@ instance (EvalState st, Ord st) => EvalState (PState st) where
 
 
 
-ppPState :: Maybe (PState QState) -> IO ()
+ppPState :: Show p =>  Maybe (PState (QState p)) -> IO ()
 ppPState (Just p) = putStr (prettyPrintPState p 0)
 ppPState Nothing  = putStr "Nothing"
 
-prettyPrintPState :: PState QState -> Int -> String
+prettyPrintPState :: Show p => PState (QState p) -> Int -> String
 prettyPrintPState (PVar (Q set)) n = concat (replicate n "    ") ++ "Var: " ++ (show $ Set.toList set) ++ "\n"
 prettyPrintPState (PCon p ps)    n = concat (replicate n "    ") ++ "Con: \n" ++ prettyPrintPState p (n + 1) ++
                                      concat (replicate n "    ") ++ "Accessibles: \n" ++ concatMap (\p -> prettyPrintPState p (n+1)) ps
@@ -72,7 +77,7 @@ prettyPrintPState (PList ps)     n = concat (replicate n "    ") ++ "List: \n" +
 -- We might have to set the states after we've returned the PSA
 -- Likewise for accepting; we don't know what the accepting states are
 -- However, working with initial states here is perfect
-buildPSA :: (EvalState st, Show st, Show ch) => FSM ch (PState st) -> FST ch (PState st) -> TransFilter (PState st) ch -> FSM ch (PState st)
+buildPSA :: (Eq st, Show st, Show ch) => FSM ch (PState st) -> FST ch (PState st) -> TransFilter (PState st) ch -> FSM ch (PState st)
 buildPSA fsm fstr filter = FSM alphabet' states' transition' initial' accepting' where
     alphabet'                = FSM.alphabet fsm
     accepting'               = error "Accepting not defined"
@@ -92,7 +97,7 @@ getPossStates (stbefore, ch) tfilter bitrans possStates = nub . concatMap (\stin
                                                           -- trace ("PossStates " ++ show possStates ++ "\n Filtered to " ++ show (filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates) ++ "\n\n")
                                                           filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates
 
-psaFromScratch :: Agent -> EpistM State -> EventModel -> FSM Character (PState QState)
+psaFromScratch :: Agent -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM Character (PState (QState GosProp))
 psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
   where
     dAuto = buildDAutomataNoF ep ev
@@ -108,7 +113,7 @@ makeSingleton (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' acce
     trans' _    = error "No transition for a list"
 
 
-makeP :: FSM Character QState -> FSM Character (PState QState)
+makeP :: FSM Character (QState p) -> FSM Character (PState (QState p))
 makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
   where
     sts' = map PVar sts
@@ -118,7 +123,7 @@ makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
     trans' (PVar st, ch)     = PVar <$> trans (st, ch)
     trans' _ = error "No PCon states at this point"
 
-makePTrans :: FST Character QState -> FST Character (PState QState)
+makePTrans :: FST Character (QState p) -> FST Character (PState (QState p))
 makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
   where
     sts' = map PVar sts
@@ -188,7 +193,7 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- Or is it deeper than this? Do we need to create the automata on the fly?
 -- Or just when we get an and behave differently?
 -- This is screaming out for a typeclass. This would make all of our worries go away
-createSolvingAutomata :: Form -> EpistM State -> EventModel -> FSM Character (PState QState)
+createSolvingAutomata :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM Character (PState (QState GosProp))
 createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
                           buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev)) (knowFilter agent)
 createSolvingAutomata (And phis) ep ev         = case includesK (And phis) of
@@ -199,7 +204,7 @@ createSolvingAutomata (Or phis) ep ev          = case includesK (Or phis) of
   False -> makeP $ buildDAutomata (Or phis) ep ev
 createSolvingAutomata phi ep ev = makeP $ buildDAutomata phi ep ev
 
-includesK :: Form -> Bool
+includesK :: Form p -> Bool
 includesK (K _ _)  = True
 includesK (And ps) = any includesK ps
 includesK (Or ps)  = any includesK ps
@@ -207,7 +212,7 @@ includesK (Not p)  = includesK p
 includesK (P _)    = False
 includesK Top      = False
 
-toPList :: FSM Character [PState QState] -> FSM Character (PState QState)
+toPList :: FSM Character [PState (QState p)] -> FSM Character (PState (QState p))
 toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
   where
     --alpha = FSM.alphabet fsms
@@ -219,18 +224,18 @@ toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
     accept' _          = error "Can't accept a non-PList"
 
 
-findCallSequence :: Form -> EpistM State -> EventModel -> Maybe [Character]
+findCallSequence :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> Maybe [Character]
 findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
 
-propIncludes :: Agent -> Prop -> Bool
+propIncludes :: Agent -> GosProp -> Bool
 propIncludes ag (N i j) = i == ag || j == ag
 propIncludes ag (S i j) = i == ag || j == ag
 
-isKnowledge :: Agent -> Prop -> Bool
+isKnowledge :: Agent -> GosProp -> Bool
 isKnowledge ag (N i j) = i == ag
 isKnowledge ag (S i j) = i == ag
 
-knowFilter :: Agent -> TransFilter (PState QState) Character
+knowFilter :: Agent -> TransFilter (PState (QState GosProp)) Character
 knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
   -- | i == i' && j == j' && (i == ag || j == ag) =
       -- Set.filter (isKnowledge ag) qs `setEq` Set.filter (isKnowledge ag) ps

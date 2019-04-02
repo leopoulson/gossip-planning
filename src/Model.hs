@@ -83,7 +83,7 @@ instance Ord Call where
     (Call a1 a2) `compare` (Call b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
 
 -- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
-class Prop p where
+class (Show p, Ord p) => Prop p where
   evalProp :: Eq st => p -> EpistM st p -> st -> Bool
 
 data GosProp = S Agent Agent | N Agent Agent deriving (Eq, Show)
