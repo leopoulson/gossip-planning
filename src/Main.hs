@@ -20,10 +20,10 @@ main :: IO ()
 -- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
 main = runTests 4 100
 
-threeCalls :: Maybe [Either State Event]
+threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
 
-threeModel :: EpistM State
+threeModel :: EpistM StateC GosProp
 threeModel = Mo
     [State (0, [])]
     [a, b, c]
@@ -31,13 +31,13 @@ threeModel = Mo
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
     [State (0, [])]
 
-threeEvModel :: EventModel
+threeEvModel :: EventModel Call GosProp
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
-saThree :: FSM Character (PState QState)
+saThree :: FSM Character (PState (QState GosProp))
 saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
 
-fourModel :: EpistM State
+fourModel :: EpistM StateC GosProp
 fourModel = Mo
     [State (0, [])]
     [a, b, c, d]
@@ -45,16 +45,16 @@ fourModel = Mo
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
     [State (0, [])]
 
-fourEvModel :: EventModel
+fourEvModel :: EventModel Call GosProp
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
-saFour :: FSM Character (PState QState)
+saFour :: FSM Character (PState (QState GosProp))
 saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourEvModel
 
-fiveEvModel :: EventModel
+fiveEvModel :: EventModel Call GosProp
 fiveEvModel = standardEventModel [a, b, c, d, e] anyCall postUpdate
 
-fiveModel :: EpistM State
+fiveModel :: EpistM StateC GosProp
 fiveModel = Mo
     [State (0, [])]
     [a, b, c, d, e]
@@ -62,16 +62,16 @@ fiveModel = Mo
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]]), (e, [[State (0, [])]])]
     [State (0, [])]
 
-saFive :: FSM Character (PState QState)
+saFive :: FSM Character (PState (QState GosProp))
 saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
 
 f :: Agent
 f = Ag 6
 
-sixEvModel :: EventModel
+sixEvModel :: EventModel Call GosProp
 sixEvModel = standardEventModel [a, b, c, d, e, f] anyCall postUpdate
 
-sixModel :: EpistM State
+sixModel :: EpistM StateC GosProp
 sixModel = Mo
     [State (0, [])]
     [a, b, c, d, e, f]
@@ -79,11 +79,11 @@ sixModel = Mo
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]]), (e, [[State (0, [])]]), (f, [[State (0, [])]])]
     [State (0, [])]
 
-saSix :: FSM Character (PState QState)
+saSix :: FSM Character (PState (QState GosProp))
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
 
 
-diaModel :: EpistM State
+diaModel :: EpistM StateC GosProp
 diaModel = Mo
     [State (0, [])]
     [a, b, c, d]
@@ -91,11 +91,11 @@ diaModel = Mo
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
     [State (0, [])]
 
-saDia :: FSM Character (PState QState)
+saDia :: FSM Character (PState (QState GosProp))
 saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel
 
-allKnowAllExperts' :: [Agent] -> Form
+allKnowAllExperts' :: [Agent] -> Form GosProp
 allKnowAllExperts' ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
 
-diaEvModel :: EventModel
+diaEvModel :: EventModel Call GosProp
 diaEvModel = standardEventModel [a, b, c, d] lns postUpdate
