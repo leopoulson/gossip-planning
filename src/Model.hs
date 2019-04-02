@@ -17,6 +17,13 @@ type Valuation st prp = [(st, [Form prp])]
 
 data Form prp = Top | P prp | Not (Form prp) | And [(Form prp)] | Or [(Form prp)] | K Agent (Form prp) deriving (Eq, Show)
 
+instance Functor (Form) where
+  fmap f Top = Top
+  fmap f (P p) = P (f p)
+  fmap f (Not form) = Not (f <$> form)
+  fmap f (And forms) = And (map (f <$>) forms)
+  fmap f (Or forms) = Or (map (f <$>) forms)
+  fmap f (K ag form) = K ag (f <$> form)
 
 data EpistM st p = Mo {
     states :: [st],                  -- Set of possible worlds
