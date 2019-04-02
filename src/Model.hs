@@ -9,7 +9,20 @@ type World = Int
 
 newtype State ev = State (World, [ev]) 
     deriving (Eq, Ord)
+
+-- class EvState ev where
+  -- lastEv :: State ev -> ev
+  --lastEv (State (_, es)) = last es
+
+  -- trimLast :: State ev -> State ev
+ -- trimLast (State (w, es)) = State (w, init es)
+
 type StateC = State Call
+
+-- instance EvState Call where
+  -- lastEv (State (_, es)) = last es
+  -- trimLast (State (w, es)) = State (w, init es)
+
 
 type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]
@@ -30,7 +43,8 @@ data EpistM st p = Mo {
     agents :: [Agent],               -- Set of agents in model
     val :: Valuation st p,             -- Valuation function; \pi : World -> Set of props.
     eprel :: AgentRel st,            -- Epistemic relation between worlds
-    actual :: [st]                   -- Set of pointed worlds. 
+    actual :: [st],                  -- Set of pointed worlds.
+    allProps :: [p]
     }
 
 type PointedEpM st p = (EpistM st p, st)  -- This is a pointed model. 
@@ -70,12 +84,13 @@ instance Show ev => Show (State ev) where
     show (State (w, es)) = "S " ++ show w ++ " Events: " ++ foldr ((++) . (++ ", ") . show) "." es
 
 instance (Show st, Show p) => Show (EpistM st p) where
-    show (Mo sts ags valuation erel initial) = 
+    show (Mo sts ags valuation erel initial allprops) = 
         "States: " ++ show sts ++ "\n" ++
         "Agents: " ++ show ags ++ "\n" ++
         "Valuation: " ++ show valuation ++ "\n" ++ 
         "Relations: " ++ show erel ++ "\n" ++ 
-        "Initial: " ++ show initial ++ "\n"
+        "Initial: " ++ show initial ++ "\n" ++
+        "All props: " ++ show allprops ++ "\n"
 
 instance Ord Agent where
     Ag n `compare` Ag m = n `compare` m
@@ -106,7 +121,7 @@ instance Prop GosProp where
 
 -- This lets us access the relations for a given agent
 rel :: EpistM st p -> Agent -> Rel st
-rel (Mo _ _ _ rels _) = table2fn rels
+rel (Mo _ _ _ rels _ _) = table2fn rels
 
 -- This gets the worlds related to world w
 -- TODO: Perhaps change from head $
@@ -117,7 +132,7 @@ relatedWorldsAgent :: Eq a => AgentRel a -> Agent -> a -> [a]
 relatedWorldsAgent r ag = relatedWorlds (fromMaybe [] (lookup ag r))
 
 tval :: Eq st => EpistM st p -> st -> [Form p]
-tval (Mo _ _ vals _ _) = table2fn vals
+tval (Mo _ _ vals _ _ _) = table2fn vals
 
 -- TODO: Consider changing default value to error?
 table2fn :: Eq a => [(a, [b])] -> a -> [b]
@@ -150,6 +165,7 @@ standardEpistModel ags fs = Mo
   [(State (0, []), map P fs)]
   (map (\ag -> (ag, [[State (0, [])]])) ags)
   [State (0, [])]
+  (produceAllProps ags)
 
 anyCall :: Precondition Call GosProp
 anyCall (Call i j) = P (N i j)
@@ -175,7 +191,7 @@ produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags,
 
 update :: EpistM StateC GosProp -> EventModel Call GosProp -> EpistM StateC GosProp
 update epm evm = 
-    Mo states' (agents epm) val' rels' (actual epm)
+    Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
     where
         states' = [stateUpdate s ev | s <- states epm, ev <- events evm, satisfies (epm, s) (pre evm ev)]
         rels' = [(ag, newRel ag) | ag <- agents epm]
@@ -186,10 +202,26 @@ update epm evm =
         ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
         props = produceAllProps $ agents epm
 
+update' :: (Eq ev, Prop p) => EpistM (State ev) p -> EventModel ev p -> EpistM (State ev) p
+update' epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
+  where
+    states' = [stateUpdate s ev | s <- states epm, ev <- events evm, satisfies (epm, s) (pre evm ev)]
+    rels' = [(ag, newRel ag) | ag <- agents epm]
+    newRel agent = filterRel states' [liftA2 stateUpdate ss es |
+                                      ss <- fromMaybe [] (lookup agent $ eprel epm),
+                                      es <- fromMaybe [] (lookup agent $ evrel evm)]
+    val' = [(s, ps s) | s <- states']
+    ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
+    props = allProps epm
 
+lastEv :: State ev -> ev
+lastEv (State (_, es)) = last es
+
+trimLast :: State ev -> State ev
+trimLast (State (w, es)) = State (w, init es)
 
 ptUpdate :: PointedEpM StateC GosProp -> PointedEvM Call GosProp -> PointedEpM StateC GosProp
-ptUpdate (epModel, w) (evModel, ev) = (update epModel evModel, stateUpdate w ev)
+ptUpdate (epModel, w) (evModel, ev) = (updat epModel evModel, stateUpdate w ev)
 
 filterRel :: Eq a => [a] -> Rel a -> Rel a
 filterRel as = filter (not . null) . map (filter (`elem` as))
@@ -198,19 +230,13 @@ stateUpdate :: State ev -> ev -> State ev
 stateUpdate (State (w, es)) ev = State (w, es ++ [ev])
 
 allExperts :: EpistM StateC GosProp -> Form GosProp
-allExperts (Mo _ ag _ _ _) = allExpertsAg ag
+allExperts (Mo _ ag _ _ _ _) = allExpertsAg ag
 
 allExpertsAg :: [Agent] -> Form GosProp
 allExpertsAg ag = And [P (S i j) | i <- ag, j <- ag, i /= j] 
 
-lastEv :: State ev -> ev
-lastEv (State (_, es)) = last es
-
-trimLast :: State ev -> State ev
-trimLast (State (w, es)) = State (w, init es)
-
 stateRelPairs :: EpistM st pr -> Agent -> [(st, st)]
-stateRelPairs (Mo _ _ _ arel _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
+stateRelPairs (Mo _ _ _ arel _ _) ag = relPairs $ fromMaybe [] (lookup ag arel) 
 
 eventRelPairs :: EventModel ev p -> Agent -> [(ev, ev)]
 eventRelPairs ev ag = relPairs $ fromMaybe [] (lookup ag (evrel ev)) 
@@ -224,15 +250,6 @@ allPairs xs = concatMap (`pair` xs) xs
 
 pair :: a -> [a] -> [(a, a)]
 pair x ys = [(x, y) | y <- ys]
-
-
-
-
-
-
-
-
-
 
 
 

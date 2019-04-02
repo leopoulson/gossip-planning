@@ -30,6 +30,7 @@ oddModel = Mo
   [(State (0, []), [P (N a b), P (N c a), P (N c b), P (N c d)])]
   [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
   [State (0, [])]
+  (produceAllProps [a, b, c, d])
 
 oddEvModel :: EventModel Call GosProp
 oddEvModel = standardEventModel [a, b, c, d] prec postUpdate

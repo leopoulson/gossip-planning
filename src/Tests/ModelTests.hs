@@ -52,6 +52,7 @@ exampleModel1 = Mo
     [(State (0, []), [P (S a b), P (N a b)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b])
 
 eventModel1 :: EventModel Call GosProp
 eventModel1 = EvMo 
@@ -82,6 +83,7 @@ relModel = Mo
     [(State (0, []), [P (N a b), P (N b a)]), (State (1, []), [P (N a b), P (N b a)])]
     [(a, [[State (0, []), State (1, [])]]), (b, [[State (0, [])], [State (1, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b])
 
 relEvent :: EventModel Call GosProp
 relEvent = EvMo
@@ -94,7 +96,7 @@ relUpdate :: EpistM StateC GosProp
 relUpdate = update relModel relEvent
 
 showRel :: EpistM st p -> [(Agent, Rel st)]
-showRel (Mo _ _ _ r _) = r
+showRel (Mo _ _ _ r _ _) = r
 
 
 

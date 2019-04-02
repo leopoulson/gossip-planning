@@ -49,6 +49,7 @@ exampleModel = Mo
     [(State (0, []), [P (S a b), P (N a b)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b])
 
 eventModel :: EventModel Call GosProp
 eventModel = EvMo 
@@ -98,6 +99,7 @@ transModel = Mo
     [(State (0, []), [P (N a b)]), (State (1, []), [P (N a b)]), (State (2, []), [P (N b a)])]
     [(a, [[State (0, [])], [State (1, []), State (2, [])]])]
     [State (0, [])]
+    (produceAllProps [a])
 
 transEv :: EventModel Call GosProp
 transEv = EvMo
@@ -137,6 +139,7 @@ cTransModel = Mo
     [(State (0, []), [P (N a b)]), (State (1, []), [P (N a b)]), (State (2, []), [P (N b a)])]
     [(a, [[State (0, [])], [State (1, []), State (2, [])]]), (b, [[State (0, [])], [State (1, []), State (2, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b])
 
 cTransEv :: EventModel Call GosProp
 cTransEv = EvMo

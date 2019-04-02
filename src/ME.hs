@@ -65,7 +65,7 @@ powerList [] = [[]]
 powerList (x : xs) = powerList xs ++ map (x:) (powerList xs)
 
 getFStates :: EpistM StateC GosProp -> [QState GosProp]
-getFStates (Mo _ ags _ _ _ ) = fmap Q $ fmap Set.fromList $ powerList $ produceAllProps ags
+getFStates (Mo _ ags _ _ _ _) = fmap Q $ fmap Set.fromList $ powerList $ produceAllProps ags
 
 simpleAccept :: QState p -> Bool
 simpleAccept (Q _)      = True
@@ -75,7 +75,7 @@ getQStates :: EpistM StateC GosProp -> [QState GosProp]
 getQStates mo = getFStates mo ++ [QInit]
 
 getvee :: EpistM st p -> Valuation st p
-getvee (Mo _ _ valu _ _) = valu
+getvee (Mo _ _ valu _ _ _) = valu
 
 isForm :: Form p -> Bool
 isForm (P _) = True
@@ -92,10 +92,10 @@ idProps :: [Agent] -> [GosProp]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM StateC GosProp -> EventModel Call GosProp -> Transition (QState GosProp) Character
-meTrans (Mo _ _ v _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
+meTrans (Mo _ _ v _ _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
-meTrans (Mo _ ags _ _ _)  evm              (Q ps , Right ev)
+meTrans (Mo _ ags _ _ _ _)  evm              (Q ps , Right ev)
     | not $ psID `listModels` pre evm ev                             = Nothing
     -- This is quite bad. Doing Set.fromList here is very costly. Must find another way to do this. 
     | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- produceAllProps ags, psID `listModels` post evm (ev, p)]
@@ -200,7 +200,7 @@ buildDAutomataCore f ep ev = FSM
     (evalState f)
 
 getInit :: Prop p => Eq st => EpistM st p -> [QState p]
-getInit (Mo _ _ val _ actual) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
+getInit (Mo _ _ val _ actual _) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
 
 buildMEStar :: EpistM StateC GosProp -> EventModel Call GosProp -> RegularStructure Character (QState GosProp)
 buildMEStar ep ev = RegularStructure 

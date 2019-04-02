@@ -43,7 +43,7 @@ allKnowledge ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j 
 -- We make the assumption that the actual state is actually the actual state
 -- And that any information that we need is valuated at that statei
 graphToGattinger :: EpistM StateC GosProp -> Phonebook
-graphToGattinger (Mo _ ag val _ actual) = map sort $ foldr updatePhonebook basePhonebook ns
+graphToGattinger (Mo _ ag val _ actual _) = map sort $ foldr updatePhonebook basePhonebook ns
   where
     props = concatMap (\act -> fromMaybe (error "No valuation result") $ lookup act val) actual
     ns = filter isN . map fromProp $ props

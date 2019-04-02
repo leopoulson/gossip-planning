@@ -14,13 +14,22 @@ dkA = DKA
 dkB = DKB
 dkC = DKC
 
+type StateB = State AmAn
+
+-- instance EvState AmAn where
+  -- lastEv (State (_, es)) = last es
+  -- trimLast (State (w, es)) = State (w, init es)
+
+makeState :: Int -> StateB
+makeState n = State (n, [])
+
 allBeer :: Form TP
 allBeer = P (True, True, True)
 
-initBar :: EpistM Int TP
-initBar = Mo states [a, b, c] val rels [0]-- [(True, True, True)]
+initBar :: EpistM StateB TP
+initBar = Mo states [a, b, c] val rels [] alls-- [(True, True, True)]
   where
-    states = [0 .. 7] --  [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
+    states = [makeState n | n <- [0 .. 7]] --  [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
     rela = (a, [[ st | st <- states, pLookupEq fst (lookup st val) True], 
                 [ st | st <- states, pLookupEq fst (lookup st val) False]])
     relb = (b, [[ st | st <- states, pLookupEq snd (lookup st val) True],
@@ -29,16 +38,15 @@ initBar = Mo states [a, b, c] val rels [0]-- [(True, True, True)]
                 [ st | st <- states, pLookupEq thd (lookup st val) False]])
 
     rels = [rela, relb, relc]
-    val = zip [0 ..] [[P (b1, b2, b3)] | b1 <- bools, b2 <- bools, b3 <- bools]
+    val = zip [makeState n | n <- [0 .. 7]] [[P (b1, b2, b3)] | b1 <- bools, b2 <- bools, b3 <- bools]
+    alls = [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
 
 barEv :: EventModel AmAn TP
 barEv = EvMo [dkA, dkB, dkC] rels pre post
   where
     rels = [(ag, dks) | ag <- [a, b, c]]
     dks = [[dkA], [dkB], [dkC]]
-    pre = undefined
-    -- post : (AmAn, Prop) -> Form prop
-    
+    pre = preBar
     post = postBar
 
 preBar :: AmAn -> Form TP

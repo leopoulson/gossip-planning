@@ -30,6 +30,7 @@ threeModel = Mo
     [(State (0, []), [P (N a b), P (N b c)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b, c])
 
 threeEvModel :: EventModel Call GosProp
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
@@ -44,6 +45,7 @@ fourModel = Mo
     [(State (0, []), [P (N a b), P (N d c), P (N d a)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b, c, d])
 
 fourEvModel :: EventModel Call GosProp
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
@@ -61,6 +63,7 @@ fiveModel = Mo
     [(State (0, []), [P (N a b), P (N b c), P (N c d), P (N e d)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]]), (e, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b, c, d, e])
 
 saFive :: FSM Character (PState (QState GosProp))
 saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
@@ -78,6 +81,7 @@ sixModel = Mo
     [(State (0, []), [P (N a b), P (N b c), P (N c d), P (N e d), P (N a f)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]]), (e, [[State (0, [])]]), (f, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b, c, d, e, f])
 
 saSix :: FSM Character (PState (QState GosProp))
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
@@ -90,6 +94,7 @@ diaModel = Mo
     [(State (0, []), [P (N c a), P (N c b), P (N d a), P (N d b)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
     [State (0, [])]
+    (produceAllProps [a, b, c, d])
 
 saDia :: FSM Character (PState (QState GosProp))
 saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel
