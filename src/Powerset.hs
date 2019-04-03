@@ -250,3 +250,6 @@ knowFilter ag (PVar (Q qs), Right (Call i j)) (Right (Call i' j'), PVar (Q ps))
 -- Perhaps mimic something similar to above, where we just scope down into the underlying truth?
 knowFilter ag (PCon sta stas, ca) (cb, PCon stb stbs) = knowFilter ag (point sta, ca) (cb, point stb)
 knowFilter ag (PList a, ca) (cb, PList b) = True
+
+idFilter :: (Eq st, Eq ch) => Agent -> TransFilter st ch
+idFilter _ (st, c) (c', st') = c == c' && st == st'

@@ -3,9 +3,11 @@
 
 module Drinkers where
 
+import BFSM
 import ME
 import Model
 import FSM
+import Powerset
 
 import Prelude hiding (fst, snd)
 import Data.Maybe (fromMaybe)
@@ -36,7 +38,7 @@ makeState :: Int -> StateB
 makeState n = State (n, [])
 
 initBar :: EpistM StateB TP
-initBar = Mo states [a, b, c] val rels [] alls-- [(True, True, True)]
+initBar = Mo states [a, b, c] val rels [State (0, [])] alls-- [(True, True, True)]
   where
     states = [makeState n | n <- [0 .. 7]] --  [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
     rela = (a, [[ st | st <- states, pLookupEq fst (lookup st val) True], 
@@ -102,10 +104,49 @@ mapVal ls val = [(a, nub $ map (concatMap (doVal val)) rel) | (a, rel) <- ls]
     doVal :: Valuation StateB TP -> StateB -> [Form TP]
     doVal val st = fromMaybe (error "bad lookup") (lookup st val)
 
--- Tests ----------
+-- Tests ---------,
+
+
 
 dAuto = buildDAutomataNoF initBar barEv
 
 t1 = transition dAuto (QInit, Left (State (0, [])))
 
--- dPSA = createSolvingAutomata
+dPSA = createSolvingAutomata (K a allBeer) initBar barEv idFilter
+
+
+-- Alice and Bob ---------
+
+data Pos     = Succ         deriving (Eq, Ord, Show)
+data Outcome = Get | NotGet deriving (Eq, Ord, Show)
+
+instance Prop Pos where
+  evalProp pr m w = (P pr) `elem` tval m w
+
+
+abModel :: EpistM (State Outcome) Pos
+abModel = Mo
+  [(State (0, [])), (State (1, []))]
+  [a, b]
+  [(State (0, []), [P Succ]), (State (1, []), [Not (P Succ)])]
+  [(a, [[(State (0, [])), (State (1, []))]]), (b, [[(State (0, [])), (State (1, []))]])]
+  [State (1, [])]
+  [Succ]
+
+postEventModel :: EventModel Outcome Pos
+postEventModel = EvMo
+  [Get, NotGet]
+  [(a, [[Get], [NotGet]]), (b, [[Get, NotGet]])]
+  postPre
+  postPost
+
+postPre :: Precondition Outcome Pos
+postPre Get = P Succ
+postPre NotGet = Not (P Succ)
+
+postPost :: Postcondition Outcome Pos
+postPost (_, f) = P f
+
+
+-- abPSA = createSolvingAutomata (K b (Or [K a (P Succ), K a (Not (P Succ))])) abModel postEventModel idFilter
+abPSA = createSolvingAutomata (K a (P Succ)) abModel postEventModel idFilter

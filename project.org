@@ -32,7 +32,17 @@
      
      This was done using a second parameter in event models that controls the proposition they care about; this 
 
-*** ME 
+*** Alice & Bob 
+    A good example model would be Alice & Bob, as discussed in the Gattinger thesis. 
+
+    Here, Alice and Bob are waiting to find out if Alice gets a Postdoc position. In our initial model, we have two worlds; one where alice successfully gets the position, and one where she does not.
+ 
+    Then suddenly, a postman arrives to deliver a letter to Alice, with the universities logo on it. She reads the letter and learns that she gets the position; however, Bob observes this and sees that she knows the result, but he does not know the result himself; he only knows that she learns whether she got the position. 
+    As an event model, this is has two events; that in which Alice is successful, and that in which she is not. Bob cannot distinguish between these two events, whereas Alice can. 
+
+    Then the update of these two things has two states; the one where Alice is successful and the one where she isn't. Bob cannot distinguish between either of these.  
+*** DONE ME 
+    CLOSED: [2019-04-03 Wed 15:28]
     In ME we will probably need to just go through and make everything more general. Then we need to slowly creep through into powerset and so on. Should be quite straightforward
 *** DONE Implement Drinkers
 
