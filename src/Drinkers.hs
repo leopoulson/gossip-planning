@@ -1,18 +1,27 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Drinkers where
 
 import Prelude hiding (fst, snd)
 import Model
+import Data.Maybe (fromMaybe)
+import Data.List (nub)
 
 bools = [True, False]
 
-type TP = (Bool, Bool, Bool)
+type TP = (Bool, Bool, Bool) 
 
-data AmAn = DKA | DKB | DKC deriving (Eq)
+instance Prop TP where
+  evalProp pr m w = (P pr) `elem` tval m w
 
-dkA, dkB, dkC :: AmAn
+data AmAn = DKA | DKB | DKC | AllC deriving (Eq, Show)
+
+dkA, dkB, dkC, allC :: AmAn
 dkA = DKA
 dkB = DKB
 dkC = DKC
+allC = AllC
 
 type StateB = State AmAn
 
@@ -22,9 +31,6 @@ type StateB = State AmAn
 
 makeState :: Int -> StateB
 makeState n = State (n, [])
-
-allBeer :: Form TP
-allBeer = P (True, True, True)
 
 initBar :: EpistM StateB TP
 initBar = Mo states [a, b, c] val rels [] alls-- [(True, True, True)]
@@ -42,22 +48,41 @@ initBar = Mo states [a, b, c] val rels [] alls-- [(True, True, True)]
     alls = [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
 
 barEv :: EventModel AmAn TP
-barEv = EvMo [dkA, dkB, dkC] rels pre post
+barEv = EvMo [dkA, dkB, dkC, allC] rels pre post
   where
     rels = [(ag, dks) | ag <- [a, b, c]]
-    dks = [[dkA], [dkB], [dkC]]
+    dks = [[dkA], [dkB], [dkC], [allC]]
     pre = preBar
     post = postBar
 
+allBeer :: Form TP
+allBeer = P (True, True, True)
+
 preBar :: AmAn -> Form TP
+-- preBar _ = Top
 preBar (DKA) = (Or [P (True, True, True), P (True, True, False), P (True, False, True), P (True, False, False)])
 preBar (DKB) = (Or [P (True, True, True), P (True, True, False), P (False, True, True), P (False, True, False)])
 preBar (DKC) = (Or [P (True, True, True), P (True, False, True), P (False, True, True), P (False, False, True)])
+preBar (AllC) = K c allBeer --(Or [P (True, True, False), P (True, True, True)])
+-- preBar DKA = Or [Not (K a (Not allBeer)), Not (K a allBeer)]
+-- preBar DKB = Or [Not (K b (Not allBeer)), Not (K b allBeer)]
+-- preBar DKC = Or [Not (K c (Not allBeer)), Not (K c allBeer)]
+-- preBar DKA = P (True, )
 
 postBar :: (AmAn, TP) -> Form TP
-postBar (DKA, (b1, b2, b3)) = P (True, b2, b3)
-postBar (DKB, (b1, b2, b3)) = P (b1, True, b3)
-postBar (DKC, (b1, b2, b3)) = P (b1, b2, True)
+-- postBar (DKA, (b1, b2, b3)) = P (True, b2, b3)
+-- postBar (DKB, (b1, b2, b3)) = P (b1, True, b3)
+-- postBar (DKC, (b1, b2, b3)) = P (b1, b2, True)
+-- postBar (DKA, (True, b2, b3)) = P (True, b2, b3)
+-- postBar (DKA, (False, _, _))  = Not Top
+-- postBar (DKB, (b1, True, b3)) = P (b1, True, b3)
+-- postBar (DKB, (_, False, _))  = Not Top
+-- postBar (DKC, (b1, b2, True)) = P (b1, b2, True)
+-- postBar (DKC, (_, _, False))  = Not Top
+-- postBar (AllC, (True, True, True)) = Top
+-- postBar (AllC, _) = Not Top
+postBar (_, p) = P p
+
 
 fst (x, _, _) = x
 snd (_, y, _) = y
@@ -66,3 +91,18 @@ thd (_, _, z) = z
 pLookupEq :: (TP -> Bool) -> Maybe [Form TP] -> Bool -> Bool
 pLookupEq acc fm comp = (map (fmap acc) <$> fm) == Just [(P comp)]
 
+up = update' initBar barEv
+up2 = update' up barEv
+up3 = update' up2 barEv
+
+mapValEp (Mo _ _ val rel _ _) = mapVal rel val
+
+mapVal :: AgentRel StateB -> Valuation StateB TP -> AgentRel (Form TP)
+mapVal ls val = [(a, nub $ map (concatMap (doVal val)) rel) | (a, rel) <- ls]
+  where
+    doVal :: Valuation StateB TP -> StateB -> [Form TP]
+    doVal val st = fromMaybe (error "bad lookup") (lookup st val)
+
+ups = updateSingle initBar (barEv, DKA)
+ups2 = updateSingle ups (barEv, DKB)
+ups3 = updateSingle ups2 (barEv, AllC)

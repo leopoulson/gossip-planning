@@ -1,5 +1,6 @@
 module Model where
 
+import Debug.Trace
 import Data.Maybe
 import Control.Applicative (liftA2)
 
@@ -214,14 +215,26 @@ update' epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
     ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
     props = allProps epm
 
+updateSingle :: (Eq ev, Prop p, Show ev) => EpistM (State ev) p -> PointedEvM ev p -> EpistM (State ev) p
+updateSingle epm (evm, ev) = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
+  where
+    states' = [stateUpdate s ev | s <- states epm, satisfies (epm, s) (pre evm ev)]
+    rels' = [(ag, newRel ag) | ag <- agents epm]
+    newRel agent = filterRel states' [liftA2 stateUpdate ss es |
+                                      ss <- fromMaybe [] (lookup agent $ eprel epm),
+                                      es <- fromMaybe [] (lookup agent $ evrel evm)]
+    val' = [(s, ps s) | s <- states']
+    ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
+    props = allProps epm
+
 lastEv :: State ev -> ev
 lastEv (State (_, es)) = last es
 
 trimLast :: State ev -> State ev
 trimLast (State (w, es)) = State (w, init es)
 
-ptUpdate :: PointedEpM StateC GosProp -> PointedEvM Call GosProp -> PointedEpM StateC GosProp
-ptUpdate (epModel, w) (evModel, ev) = (updat epModel evModel, stateUpdate w ev)
+ptUpdate :: (Eq ev, Prop p) => PointedEpM (State ev) p -> PointedEvM ev p -> PointedEpM (State ev) p
+ptUpdate (epModel, w) (evModel, ev) = (update' epModel evModel, stateUpdate w ev)
 
 filterRel :: Eq a => [a] -> Rel a -> Rel a
 filterRel as = filter (not . null) . map (filter (`elem` as))

@@ -92,7 +92,7 @@ idProps :: [Agent] -> [GosProp]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: EpistM StateC GosProp -> EventModel Call GosProp -> Transition (QState GosProp) Character
-meTrans (Mo _ _ v _ _ _)    _                (QInit, Left state)   = Just $  Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
+meTrans (Mo _ _ v _ _ _)    _                (QInit, Left state)   = Just $ Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
 meTrans (Mo _ ags _ _ _ _)  evm              (Q ps , Right ev)
