@@ -18,7 +18,7 @@ import Data.Either (rights)
 
 main :: IO ()
 -- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
-main = runTests 4 100
+main = runTests 4 300
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
@@ -35,7 +35,7 @@ threeModel = Mo
 threeEvModel :: EventModel Call GosProp
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
-saThree :: FSM Character (PState (QState GosProp))
+saThree :: FSM CallChar (PState (QState GosProp))
 saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
 
 fourModel :: EpistM StateC GosProp
@@ -50,7 +50,7 @@ fourModel = Mo
 fourEvModel :: EventModel Call GosProp
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
-saFour :: FSM Character (PState (QState GosProp))
+saFour :: FSM CallChar (PState (QState GosProp))
 saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourEvModel
 
 fiveEvModel :: EventModel Call GosProp
@@ -65,7 +65,7 @@ fiveModel = Mo
     [State (0, [])]
     (produceAllProps [a, b, c, d, e])
 
-saFive :: FSM Character (PState (QState GosProp))
+saFive :: FSM CallChar (PState (QState GosProp))
 saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
 
 f :: Agent
@@ -83,7 +83,7 @@ sixModel = Mo
     [State (0, [])]
     (produceAllProps [a, b, c, d, e, f])
 
-saSix :: FSM Character (PState (QState GosProp))
+saSix :: FSM CallChar (PState (QState GosProp))
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
 
 
@@ -96,7 +96,7 @@ diaModel = Mo
     [State (0, [])]
     (produceAllProps [a, b, c, d])
 
-saDia :: FSM Character (PState (QState GosProp))
+saDia :: FSM CallChar (PState (QState GosProp))
 saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel
 
 allKnowAllExperts' :: [Agent] -> Form GosProp

@@ -19,7 +19,10 @@ generateModels :: [Agent] -> Precondition Call GosProp -> [(EpistM StateC GosPro
 generateModels ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validKnowledgeStates ags
 
 validPhonebooks :: [Agent] -> [[GosProp]]
-validPhonebooks = subsequences . allPhonebooks
+validPhonebooks ags = map ((++) (idProps ags)) <$> subsequences . allPhonebooks $ ags
+
+idProps :: [Agent] -> [GosProp]
+idProps ags = [S i i | i <- ags] ++ [N i i | i <- ags]
 
 validKnowledgeStates :: [Agent] -> [[GosProp]]
 validKnowledgeStates = filter isValid . subsequences . allKnowledge 
@@ -38,7 +41,7 @@ allPhonebooks :: [Agent] -> [GosProp]
 allPhonebooks ags = [N i j | i <- ags, j <- ags, i /= j]
 
 allKnowledge :: [Agent] -> [GosProp]
-allKnowledge ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
+allKnowledge ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
 
 -- We make the assumption that the actual state is actually the actual state
 -- And that any information that we need is valuated at that statei
@@ -48,7 +51,7 @@ graphToGattinger (Mo _ ag val _ actual _) = map sort $ foldr updatePhonebook bas
     props = concatMap (\act -> fromMaybe (error "No valuation result") $ lookup act val) actual
     ns = filter isN . map fromProp $ props
     intAgs = map (\(Ag n) -> n) ag
-    basePhonebook = [[agn] | agn <- intAgs]
+    basePhonebook = [[] | agn <- intAgs]
 
 
 

@@ -1,4 +1,44 @@
 * Main Project TODOs
+** TODO Think about different knowledge models 
+   Muddy children? This could be really neat
+   
+*** Support 
+    In DEMO-S5, JvE has his models be parametric in what they store as the state. This is cool, and this is something that we can implement too in ours. 
+
+    It'squite likely that we will have to also add in our own language of propositions. We can probably use the same family of formulas, but the set of propositions that we use will need to change as we use different knowledge models.
+
+    We also need to think about how to handle the updating of information with an epistemic model and an event model.
+
+    Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
+    The primary points of attack will be: 
+**** DONE Make Epistemic Models parametric
+     CLOSED: [2019-04-01 Mon 17:44]
+     By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
+**** DONE Change the language of formulas to also be parametric
+     CLOSED: [2019-04-01 Mon 20:51]
+     To do this, we are probably going to have to keep this inside the EpistM definition. 
+**** DONE To add to above, we need to make a typeclass of evaluateable propositions 
+     CLOSED: [2019-04-01 Mon 20:51]
+     This requires some type-safety that the Model we wish to evaluate against has props of the same type. 
+**** DONE Fix EvalState problem
+     CLOSED: [2019-04-02 Tue 14:46]
+     The typechecker doesn't like that we're trying 
+     Fixed ! Due to the limitless power of haskell Language Extensions. This is good report stuff. 
+**** DONE Look at what can be done for event models?
+     CLOSED: [2019-04-02 Tue 14:46]
+     Most likely, we can parametrise it with Events. However we also need to ensure that it "matches" the epistemic model we want to update; hence, we give it also a second argument. This is used in the postcondition function. 
+
+     Chapter 6 of DEMO-S5 will be helpful to this end 
+     
+     This was done using a second parameter in event models that controls the proposition they care about; this 
+
+*** ME 
+    In ME we will probably need to just go through and make everything more general. Then we need to slowly creep through into powerset and so on. Should be quite straightforward
+*** DONE Implement Drinkers
+
+    CLOSED: [2019-04-03 Wed 11:48]
+    This seems to be OK. We need to use a Knowledge formula in the precondition; this may or may not be very bad
+*** TODO Implement Muddy Children
 ** TODO Speed up BFS / check why it fails 
    We have duplicates in our queue, and it would be nice to get rid of these so we can speed up the computation and blah blah blah. 
 
@@ -71,41 +111,6 @@
 ** TODO Add some kind of copyright thing regarding Malvin's stuff 
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
-** TODO Think about different knowledge models 
-   Muddy children? This could be really neat
-   
-*** Support 
-    In DEMO-S5, JvE has his models be parametric in what they store as the state. This is cool, and this is something that we can implement too in ours. 
-
-    It'squite likely that we will have to also add in our own language of propositions. We can probably use the same family of formulas, but the set of propositions that we use will need to change as we use different knowledge models.
-
-    We also need to think about how to handle the updating of information with an epistemic model and an event model.
-
-    Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
-    The primary points of attack will be: 
-**** DONE Make Epistemic Models parametric
-     CLOSED: [2019-04-01 Mon 17:44]
-     By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
-**** DONE Change the language of formulas to also be parametric
-     CLOSED: [2019-04-01 Mon 20:51]
-     To do this, we are probably going to have to keep this inside the EpistM definition. 
-**** DONE To add to above, we need to make a typeclass of evaluateable propositions 
-     CLOSED: [2019-04-01 Mon 20:51]
-     This requires some type-safety that the Model we wish to evaluate against has props of the same type. 
-**** DONE Fix EvalState problem
-     CLOSED: [2019-04-02 Tue 14:46]
-     The typechecker doesn't like that we're trying 
-     Fixed ! Due to the limitless power of haskell Language Extensions. This is good report stuff. 
-**** DONE Look at what can be done for event models?
-     CLOSED: [2019-04-02 Tue 14:46]
-     Most likely, we can parametrise it with Events. However we also need to ensure that it "matches" the epistemic model we want to update; hence, we give it also a second argument. This is used in the postcondition function. 
-
-     Chapter 6 of DEMO-S5 will be helpful to this end 
-     
-     This was done using a second parameter in event models that controls the proposition they care about; this 
-
-*** TODO Implement Drinkers
-*** TODO Implement Muddy Children
 ** DONE Fix bug w/ H-O knowledge
    CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 

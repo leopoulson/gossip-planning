@@ -3,8 +3,11 @@
 
 module Drinkers where
 
-import Prelude hiding (fst, snd)
+import ME
 import Model
+import FSM
+
+import Prelude hiding (fst, snd)
 import Data.Maybe (fromMaybe)
 import Data.List (nub)
 
@@ -91,10 +94,6 @@ thd (_, _, z) = z
 pLookupEq :: (TP -> Bool) -> Maybe [Form TP] -> Bool -> Bool
 pLookupEq acc fm comp = (map (fmap acc) <$> fm) == Just [(P comp)]
 
-up = update' initBar barEv
-up2 = update' up barEv
-up3 = update' up2 barEv
-
 mapValEp (Mo _ _ val rel _ _) = mapVal rel val
 
 mapVal :: AgentRel StateB -> Valuation StateB TP -> AgentRel (Form TP)
@@ -103,6 +102,8 @@ mapVal ls val = [(a, nub $ map (concatMap (doVal val)) rel) | (a, rel) <- ls]
     doVal :: Valuation StateB TP -> StateB -> [Form TP]
     doVal val st = fromMaybe (error "bad lookup") (lookup st val)
 
-ups = updateSingle initBar (barEv, DKA)
-ups2 = updateSingle ups (barEv, DKB)
-ups3 = updateSingle ups2 (barEv, AllC)
+-- Tests ----------
+
+dAuto = buildDAutomataNoF initBar barEv
+
+t1 = transition dAuto (QInit, Left (State (0, [])))

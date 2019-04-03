@@ -31,7 +31,7 @@ dKnowsExperts :: Form
 dKnowsExperts = K 3 precon allExperts
 
 winningFormula :: Form
-winningFormula = K 1 lns dKnowsExperts
+winningFormula = K 0 lns (K 1 lns dKnowsExperts)
 
 t = eval (graph4, [(0, 2), (1, 0), (0, 3), (1, 3), (2, 3)]) winningFormula
 
@@ -47,10 +47,10 @@ verifyWinning ep evs = verifyCalls ep evs winningFormula
 verifyE :: Graph -> Sequence -> Form -> Bool
 verifyE g sigma f = eval (g, sigma) f
 
-findSequence :: (ModelGossip, Maybe [ME.Character]) -> Sequence
+findSequence :: (ModelGossip, Maybe [ME.CallChar]) -> Sequence
 findSequence (ep, _) = findNonEmpty (length $ Model.agents ep) (exampleFromList $ graphToGattinger ep)
 
-findSequences :: [(ModelGossip, Maybe [ME.Character])] -> [(ModelGossip, Sequence)]
+findSequences :: [(ModelGossip, Maybe [ME.CallChar])] -> [(ModelGossip, Sequence)]
 findSequences es = zip (map fst es) (map findSequence es)
 
 -- of course, we need to fill the hole that null creates

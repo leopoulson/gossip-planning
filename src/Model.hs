@@ -188,7 +188,7 @@ postUpdate (Call i j, N n m)
     | otherwise                 = P (N n m)
 
 produceAllProps :: [Agent] -> [GosProp]
-produceAllProps ags = [N i j | i <- ags, j <- ags, i /= j] ++ [S i j | i <- ags, j <- ags, i /= j]
+produceAllProps ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
 
 update :: EpistM StateC GosProp -> EventModel Call GosProp -> EpistM StateC GosProp
 update epm evm = 

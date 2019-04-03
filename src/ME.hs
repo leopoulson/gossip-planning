@@ -11,15 +11,16 @@ import Data.Maybe
 import Data.List (sort)
 import qualified Data.Set as Set
 
+import Debug.Trace
+
 -- data Character = World State | Call Agent Agent deriving (Eq, Show)
 -- type Alphabet = [Character]
 
-type Character = Either StateC Call
-type Alphabet = [Character]
 
--- This gives us state evaluation into the type
--- class Ord st => EvalState st where 
-  -- evalState :: Form p -> st -> Bool
+type Character ev = Either (State ev) ev
+type Alphabet ev = [Character ev]
+
+type CallChar = Character Call
 
 -- States in ME* are indexed just by the propositions that are true at them
 -- So we can just let them *be* the propositions that are true at them
@@ -28,18 +29,8 @@ data QState p = Q (Set.Set p) | QInit deriving (Show, Ord)
 instance (Eq p) => Eq (QState p) where
     QInit == QInit = True
     Q ps1 == Q ps2 = ps1 == ps2
-    QInit == _     = False   
-    Q _   == _     = False 
-
--- This is getting removed until we can find a better way to do this. 
-
--- instance Prop p => EvalState (QState p) where
-    -- evalState f (Q ps)  = models ps f
-    -- evalState _ QInit   = error "Evaluation on QInit"
-
--- instance EvalState (QState GosProp) where
-    -- evalState f (Q ps) = models ps f
-    -- evalState _ QInit  = error "eval on QInit"
+    QInit == _     = False
+    Q _   == _     = False
 
 class (Ord st, Prop p) => EvalState st p where
   evalState :: Form p -> st -> Bool
@@ -48,30 +39,26 @@ instance (Ord p, Prop p) => EvalState (QState p) p where
   evalState f (Q ps) = models ps f
   evalState _ QInit  = error "Evaluation on QInit"
 
--- evalState :: Form GosProp -> QState GosProp -> Bool
--- evalState f (Q ps) = models ps f
--- evalState _ QInit  = error "Eval on QInit"
+data ME p ch = ME 
+    (FSM (Character ch) (QState p))
+    [(Agent, FST (Character ch) (QState p))] 
+    [(Agent, FSM (Character ch) (QState p))]
 
-data ME p = ME 
-    (FSM Character (QState p))
-    [(Agent, FST Character (QState p))] 
-    [(Agent, FSM Character (QState p))]
-
-getAlphabet :: EpistM StateC p -> EventModel Call p -> Alphabet
+getAlphabet :: EpistM (State ev) p -> EventModel ev p -> Alphabet ev
 getAlphabet ep evm = map Left (Model.states ep) ++ map Right (events evm)
 
 powerList :: [a] -> [[a]]
 powerList [] = [[]]
 powerList (x : xs) = powerList xs ++ map (x:) (powerList xs)
 
-getFStates :: EpistM StateC GosProp -> [QState GosProp]
-getFStates (Mo _ ags _ _ _ _) = fmap Q $ fmap Set.fromList $ powerList $ produceAllProps ags
+getFStates :: Prop p => EpistM (State ev) p -> [QState p]
+getFStates (Mo _ ags _ _ _ props)= fmap Q $ fmap Set.fromList $ powerList $ props
 
 simpleAccept :: QState p -> Bool
 simpleAccept (Q _)      = True
 simpleAccept QInit      = False
 
-getQStates :: EpistM StateC GosProp -> [QState GosProp]
+getQStates :: Prop p => EpistM (State ev) p -> [QState p]
 getQStates mo = getFStates mo ++ [QInit]
 
 getvee :: EpistM st p -> Valuation st p
@@ -91,16 +78,16 @@ getForms = map fromForm . filter isForm
 idProps :: [Agent] -> [GosProp]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
-meTrans :: EpistM StateC GosProp -> EventModel Call GosProp -> Transition (QState GosProp) Character
+meTrans :: (Prop p, Eq ev) => EpistM (State ev) p -> EventModel ev p -> Transition (QState p) (Character ev)
 meTrans (Mo _ _ v _ _ _)    _                (QInit, Left state)   = Just $ Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
 meTrans _                 _                (QInit, Right _)      = Nothing
 meTrans _                 _                (Q _  , Left _)       = Nothing
-meTrans (Mo _ ags _ _ _ _)  evm              (Q ps , Right ev)
+meTrans (Mo _ ags _ _ _ props)  evm              (Q ps , Right ev)
     | not $ psID `listModels` pre evm ev                             = Nothing
     -- This is quite bad. Doing Set.fromList here is very costly. Must find another way to do this. 
-    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- produceAllProps ags, psID `listModels` post evm (ev, p)]
+    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- props, psID `listModels` post evm (ev, p)]
     where
-        psID = Set.toList ps ++ idProps ags
+        psID = Set.toList ps -- ++ idProps ags
 
 evalQState :: Prop p => Form p -> QState p -> Bool
 evalQState form (Q ps) = models ps form
@@ -125,17 +112,17 @@ listModels _  (K _ _)     = error "Cannot evaluate K φ on a set of props"
 
 
 
-buildTransducers :: EpistM StateC p -> EventModel Call p -> [(Agent, FST Character (QState p))]
+buildTransducers :: Eq ev => EpistM (State ev) p -> EventModel ev p -> [(Agent, FST (Character ev) (QState p))]
 buildTransducers ep ev = [(agent, buildTransducer agent ep ev) | agent <- agents ep]
 
-buildSSTransducer :: Agent -> EpistM StateC p -> EventModel Call p -> SSFST Character
+buildSSTransducer :: Eq ev => Agent -> EpistM (State ev) p -> EventModel ev p -> SSFST (Character ev)
 buildSSTransducer ag ep evm = SSFST (getAlphabet ep evm) trans 
   where
-    trans :: SSTransition Character
+    --trans :: SSTransition Character
     trans (Left w)  =  [Left w'   | w'  <- relatedWorldsAgent (eprel ep) ag w]
     trans (Right ev) = [Right ev' | ev' <- relatedWorldsAgent (evrel evm) ag ev]
 
-buildTransducer :: Agent -> EpistM StateC p -> EventModel Call p -> FST Character (QState p)
+buildTransducer :: Eq ev => Agent -> EpistM (State ev) p -> EventModel ev p -> FST (Character ev) (QState p)
 buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
   where
     --trans :: BiTransition QState Character
@@ -146,7 +133,7 @@ buildTransducer ag ep evm = FST (getAlphabet ep evm) [QInit] trans [QInit] acc
     acc QInit = True
     acc _ = False
 
-identityTransducer :: FSM Character st -> FST Character st
+identityTransducer :: Eq ev => FSM (Character ev) st -> FST (Character ev) st
 identityTransducer (FSM alpha sts trans int accept) = 
     FST alpha sts trans' int accept where
         -- trans' :: BiTransition st Character
@@ -154,10 +141,11 @@ identityTransducer (FSM alpha sts trans int accept) =
             Just q  -> [(ch, q)]
             Nothing -> []
 
-buildComposedSS :: Agent -> EpistM StateC p -> EventModel Call p -> FSM Character st -> FST Character st
+buildComposedSS :: Eq ev => Agent -> EpistM (State ev) p -> EventModel ev p -> FSM (Character ev) st -> FST (Character ev) st
 buildComposedSS ag ep evm fsm = buildSSTransducer ag ep evm `composeSS` identityTransducer fsm
 
 -- This and the below functions are probably not used at all, can delete
+
 -- pAutomata :: FSM Character QState -> Prop -> FSM Character QState
 -- pAutomata (FSM alpha sts trans int accept) pr = 
     -- FSM alpha sts trans int accepting' where
@@ -178,7 +166,7 @@ setSuccessfulFormula f = updateAcccepting (evalState f)
 
 -- We know now that we can make this better.
 -- * Set initial states from the event model?
-buildDAutomataNoF :: EpistM StateC GosProp -> EventModel Call GosProp -> FSM Character (QState GosProp)
+buildDAutomataNoF :: (Eq ev, Prop p) => EpistM (State ev) p -> EventModel ev p -> FSM (Character ev) (QState p)
 buildDAutomataNoF ep ev = FSM 
     (getAlphabet ep ev)
     (getQStates ep)
@@ -186,12 +174,12 @@ buildDAutomataNoF ep ev = FSM
     [QInit]
     simpleAccept
 
-buildDAutomata :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM Character (QState GosProp)
+buildDAutomata :: (Eq ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> FSM (Character ev) (QState p)
 buildDAutomata f ep ev = setStatesReachableInit $ buildDAutomataCore f ep ev
 
 -- We set states to be undefined, as they're set in BDABetter
 -- This is because they need to be done after we've set initial state
-buildDAutomataCore :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM Character (QState GosProp)
+buildDAutomataCore :: (Eq ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> FSM (Character ev) (QState p)
 buildDAutomataCore f ep ev = FSM
     (getAlphabet ep ev)
     undefined 
@@ -202,7 +190,7 @@ buildDAutomataCore f ep ev = FSM
 getInit :: Prop p => Eq st => EpistM st p -> [QState p]
 getInit (Mo _ _ val _ actual _) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
 
-buildMEStar :: EpistM StateC GosProp -> EventModel Call GosProp -> RegularStructure Character (QState GosProp)
+buildMEStar :: (Eq ev, Prop p) => EpistM (State ev) p -> EventModel ev p -> RegularStructure (Character ev) (QState p)
 buildMEStar ep ev = RegularStructure 
     dAuto 
     [(ag, buildComposedSS ag ep ev dAuto) | ag <- agents ep]

@@ -13,14 +13,14 @@ import RS
 import Data.Maybe (isJust, fromJust, isNothing)
 import Data.Either (rights)
 
-type PSA p = FSM Character (PState (QState p))
+type PSA p = FSM CallChar (PState (QState p))
 
 -- TODO: A lot of this could probably have been done with zip.
 -- Perhaps it would be nice to update it to use this at a later date.
 
 runTests size n = putStrLn $ prettyPrintResults $ getWithNothings size n
 
-getIncorrectsIn :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [Character])]
+getIncorrectsIn :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getIncorrectsIn pairs = filter (not . snd . verify) $ getModelCalls pairs
 
 oddModel :: EpistM StateC GosProp
@@ -70,7 +70,7 @@ sc5 = FSM.transition oddPSAC (fromJust sc4, Right (Call c b))
 sd5 = FSM.transition oddPSAD (fromJust sd4, Right (Call c b))
 
 
-getIncorrects :: Int -> Int -> [(EpistM StateC GosProp, Maybe [Character])]
+getIncorrects :: Int -> Int -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getIncorrects size n = getIncorrectsIn . getModelPSAPairs size . getPhonebookModels size $ n
 
 prec :: Precondition Call GosProp
@@ -89,10 +89,10 @@ dKnowExperts :: [Agent] -> Form GosProp
 dKnowExperts ags = K d (allExpertsAg ags)
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula ags = K b (dKnowExperts ags)--K a (allKnowAllExperts ags)
+successfulFormula ags = K a (K b (dKnowExperts ags))--K a (allKnowAllExperts ags)
 
 
-prettyPrintResults :: [(Maybe [Character], Bool)] -> [Char]
+prettyPrintResults :: [(Maybe [CallChar], Bool)] -> [Char]
 prettyPrintResults ress = "Did " ++ show (length ress) ++ " tests. \n" ++ 
                           show (length empties) ++ " were negative results, of which " ++ show (trues empties) ++ " were True.\n" ++
                           show (length fulls)   ++ " were positive results, of which " ++ show (trues fulls) ++ " were True."
@@ -104,20 +104,20 @@ prettyPrintResults ress = "Did " ++ show (length ress) ++ " tests. \n" ++
 getModelResults :: Int -> Int -> [(EpistM StateC GosProp, [Call])]
 getModelResults size n = getCalls . getJusts . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n
 
-getWithNothings :: Int -> Int -> [(Maybe [Character], Bool)]
+getWithNothings :: Int -> Int -> [(Maybe [CallChar], Bool)]
 getWithNothings size n = map verify . getModelCalls . getModelPSAPairs size . getPhonebookModels size $ n
 
-getCalls :: [(EpistM StateC GosProp, [Character])] -> [(EpistM StateC GosProp, [Call])]
+getCalls :: [(EpistM StateC GosProp, [CallChar])] -> [(EpistM StateC GosProp, [Call])]
 getCalls = map (\(e, c) -> (e, rights c))
 
-getJusts :: [(EpistM StateC GosProp, Maybe [Character])] -> [(EpistM StateC GosProp, [Character])]
+getJusts :: [(EpistM StateC GosProp, Maybe [CallChar])] -> [(EpistM StateC GosProp, [CallChar])]
 getJusts = map (\(a, b) -> (a, fromJust b)) . filter (isJust . snd) 
 
-verify :: (EpistM StateC GosProp, Maybe [Character]) -> (Maybe [Character], Bool)
+verify :: (EpistM StateC GosProp, Maybe [CallChar]) -> (Maybe [CallChar], Bool)
 verify (ep, Nothing)    = (Nothing, verifyEmpty ep)
 verify (ep, Just calls) = (Just calls, verifyWinning ep (rights calls))
 
-getModelCalls :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [Character])]
+getModelCalls :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getModelCalls = map (\(ep, psa) -> (ep, extractCalls . doBFS $ psa))
 
 getModelPSAPairs :: Int -> [(EpistM StateC GosProp, EventModel Call GosProp)] -> [(EpistM StateC GosProp, PSA GosProp)]
@@ -129,7 +129,7 @@ getModels size n = take n $ generateModels (getAgents size) prec
 getPhonebookModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
 getPhonebookModels size n = take n $ generateModelsPhonebook (getAgents size) prec
 
-mapBFS :: (Show p, Ord p) => [PSA p] -> [Maybe [Character]]
+mapBFS :: (Show p, Ord p) => [PSA p] -> [Maybe [CallChar]]
 mapBFS psas = map (extractCalls . doBFS) psas
 
 -- This takes the number of agnets and generates the correct number of agents.

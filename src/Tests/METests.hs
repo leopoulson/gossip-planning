@@ -26,15 +26,15 @@ tStates = "Check that the states are enumerated correctly"
 
 tTrans1 :: Test
 tTrans1 = "Check that transition is working as it should, from initial state"
-       ~: Just (Q (fromList ([S a b, N a b]))) ~=? transition dAutomata (QInit, Left (State (0, []))) 
+       ~: Just (Q (fromList ([S a a, S b b, N a a, N b b, S a b, N a b]))) ~=? transition dAutomata (QInit, Left (State (0, []))) 
 
 tTrans2 :: Test
 tTrans2 = "Test transition updated by call"
-       ~: Just (Q (fromList [S a b, S b a, N a b, N b a])) ~=? transition dAutomata (Q (fromList [S a b, N a b]), Right (Call a b))
+       ~: Just (Q (fromList [S a a, S b b, N a a, N b b, S a b, S b a, N a b, N b a])) ~=? transition dAutomata (Q (fromList [S a a, S b b, N a a, N b b, S a b, N a b]), Right (Call a b))
 
 tTrans3 :: Test
 tTrans3 = "Test transition updated by call when everyone knows everything"
-       ~: Just (Q (fromList [S a b, S b a, N a b, N b a])) ~=? transition dAutomata (Q (fromList [S a b, S b a, N a b, N b a]), Right (Call a b))
+       ~: Just (Q (fromList [S a a, S a b, S b a, S b b, N a a, N a b, N b a, N b b])) ~=? transition dAutomata (Q (fromList [S a b, S a a, S b b, S b a, N a b, N a a, N b a, N b b]), Right (Call a b))
 
 meTests :: Test
 meTests = test [tStates, tTrans1, tTrans2, tTrans3]
@@ -46,7 +46,7 @@ exampleModel :: EpistM StateC GosProp
 exampleModel = Mo 
     [State (0, [])]
     [a, b]
-    [(State (0, []), [P (S a b), P (N a b)])]
+    [(State (0, []), [P (S a a), P (S b b), P (N a a), P (N b b), P (S a b), P (N a b)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]])]
     [State (0, [])]
     (produceAllProps [a, b])
@@ -61,7 +61,7 @@ eventModel = EvMo
 relUpdate :: EpistM StateC GosProp
 relUpdate = update exampleModel eventModel
 
-dAutomata :: FSM Character (QState GosProp)
+dAutomata :: FSM CallChar (QState GosProp)
 dAutomata = buildDAutomataNoF exampleModel eventModel
 
 -- Tests for one-state transducer construction
@@ -108,7 +108,7 @@ transEv = EvMo
     anyCall
     postUpdate
 
-trans :: FST Character (QState GosProp)
+trans :: FST CallChar (QState GosProp)
 trans = buildTransducer a transModel transEv
 
 -- Tests for identity transducer construction
@@ -127,7 +127,7 @@ idTests = TestList [idTT1, idTT2]
 doIdTests :: IO Counts
 doIdTests = runTestTT idTests
 
-idT :: FST Character (QState GosProp)
+idT :: FST CallChar (QState GosProp)
 idT = identityTransducer dAutomata
 
 -- Tests for composition transducer construction
@@ -182,28 +182,28 @@ ssTests = TestList [ssTest1, ssTest2, ssTest3]
 dossTests :: IO Counts
 dossTests = runTestTT ssTests
 
-sstrans :: SSFST Character
+sstrans :: SSFST CallChar
 sstrans = buildSSTransducer a cTransModel cTransEv
 
-idTrans :: FST Character GosState
+idTrans :: FST CallChar GosState
 idTrans = identityTransducer transAuto
 
-transAuto :: FSM Character GosState
+transAuto :: FSM CallChar GosState
 transAuto = buildDAutomataNoF cTransModel cTransEv
 
-tripleTrans :: FST Character GosState
+tripleTrans :: FST CallChar GosState
 tripleTrans = buildComposedSS a cTransModel cTransEv transAuto
 
-tripleTransFn :: BiTransition GosState Character
+tripleTransFn :: BiTransition GosState CallChar
 tripleTransFn = bitransition tripleTrans
 
-ttTest1 :: [(Character, GosState)]
+ttTest1 :: [(CallChar, GosState)]
 ttTest1 = tripleTransFn (Q $ fromList [N a b], Right (Call a b))
 
-ttTest2 :: [(Character, GosState)]
+ttTest2 :: [(CallChar, GosState)]
 ttTest2 = tripleTransFn (Q $ fromList [N b a], Right (Call b a))
 
-ttTest3 :: [(Character, GosState)]
+ttTest3 :: [(CallChar, GosState)]
 ttTest3 = tripleTransFn (Q $ fromList [N b a], Right (Call a a))
 
 
