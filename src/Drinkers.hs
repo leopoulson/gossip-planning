@@ -107,3 +107,5 @@ mapVal ls val = [(a, nub $ map (concatMap (doVal val)) rel) | (a, rel) <- ls]
 dAuto = buildDAutomataNoF initBar barEv
 
 t1 = transition dAuto (QInit, Left (State (0, [])))
+
+-- dPSA = createSolvingAutomata

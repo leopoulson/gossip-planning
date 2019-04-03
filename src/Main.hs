@@ -36,7 +36,7 @@ threeEvModel :: EventModel Call GosProp
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate
 
 saThree :: FSM CallChar (PState (QState GosProp))
-saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel
+saThree = createSolvingAutomata (allExpertsAg [a, b, c]) threeModel threeEvModel knowFilter
 
 fourModel :: EpistM StateC GosProp
 fourModel = Mo
@@ -51,7 +51,7 @@ fourEvModel :: EventModel Call GosProp
 fourEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saFour :: FSM CallChar (PState (QState GosProp))
-saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourEvModel
+saFour = createSolvingAutomata (K a $ allExpertsAg [a, b, c, d]) fourModel fourEvModel knowFilter
 
 fiveEvModel :: EventModel Call GosProp
 fiveEvModel = standardEventModel [a, b, c, d, e] anyCall postUpdate
@@ -66,7 +66,7 @@ fiveModel = Mo
     (produceAllProps [a, b, c, d, e])
 
 saFive :: FSM CallChar (PState (QState GosProp))
-saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel
+saFive = createSolvingAutomata (allExpertsAg [a, b, c, d, e]) fiveModel fiveEvModel knowFilter
 
 f :: Agent
 f = Ag 6
@@ -84,7 +84,7 @@ sixModel = Mo
     (produceAllProps [a, b, c, d, e, f])
 
 saSix :: FSM CallChar (PState (QState GosProp))
-saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel
+saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel knowFilter
 
 
 diaModel :: EpistM StateC GosProp
@@ -97,7 +97,7 @@ diaModel = Mo
     (produceAllProps [a, b, c, d])
 
 saDia :: FSM CallChar (PState (QState GosProp))
-saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel
+saDia = createSolvingAutomata (K d $ allExpertsAg [a, b, c, d]) diaModel diaEvModel knowFilter
 
 allKnowAllExperts' :: [Agent] -> Form GosProp
 allKnowAllExperts' ags = And $ [K ag (allExpertsAg ags) | ag <- ags]

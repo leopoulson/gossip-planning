@@ -36,13 +36,13 @@ oddEvModel :: EventModel Call GosProp
 oddEvModel = standardEventModel [a, b, c, d] prec postUpdate
 
 oddPSA :: PSA GosProp
-oddPSA = createSolvingAutomata (successfulFormula $ agents oddModel) oddModel oddEvModel
+oddPSA = createSolvingAutomata (successfulFormula $ agents oddModel) oddModel oddEvModel knowFilter
 
 oddTrans = getTransducer d (buildMEStar oddModel oddEvModel)
 oddTransition = FST.bitransition oddTrans
 
-oddPSAC = createSolvingAutomata (K c (allExpertsAg [a, b, c, d])) oddModel oddEvModel
-oddPSAD = createSolvingAutomata (K d (allExpertsAg [a, b, c, d])) oddModel oddEvModel
+oddPSAC = createSolvingAutomata (K c (allExpertsAg [a, b, c, d])) oddModel oddEvModel knowFilter
+oddPSAD = createSolvingAutomata (K d (allExpertsAg [a, b, c, d])) oddModel oddEvModel knowFilter
 
 ts1 = oddTransition (fromPState $ head $ FSM.initial $ oddPSA, Right (Call c a))
 
@@ -121,7 +121,7 @@ getModelCalls :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosPr
 getModelCalls = map (\(ep, psa) -> (ep, extractCalls . doBFS $ psa))
 
 getModelPSAPairs :: Int -> [(EpistM StateC GosProp, EventModel Call GosProp)] -> [(EpistM StateC GosProp, PSA GosProp)]
-getModelPSAPairs size models = map (\(ep, ev) -> (ep, createSolvingAutomata (successfulFormula $ getAgents size) ep ev)) models
+getModelPSAPairs size models = map (\(ep, ev) -> (ep, createSolvingAutomata (successfulFormula $ getAgents size) ep ev knowFilter)) models
 
 getModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
 getModels size n = take n $ generateModels (getAgents size) prec

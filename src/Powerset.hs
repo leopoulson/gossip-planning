@@ -97,8 +97,8 @@ getPossStates (stbefore, ch) tfilter bitrans possStates = nub . concatMap (\stin
                                                           -- trace ("PossStates " ++ show possStates ++ "\n Filtered to " ++ show (filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates) ++ "\n\n")
                                                           filter (\stbefore' -> tfilter (stbefore, ch) (ch, stbefore')) possStates
 
-psaFromScratch :: Agent -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM CallChar (PState (QState GosProp))
-psaFromScratch ag ep ev = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (knowFilter ag)
+psaFromScratch :: (Eq ev, Show ev, Prop p) => Agent -> EpistM (State ev) p -> EventModel ev p -> (Agent -> TransFilter (PState (QState p)) (Character ev)) -> FSM (Character ev) (PState (QState p))
+psaFromScratch ag ep ev filt = buildPSA (makeP dAuto) (makePTrans $ buildComposedSS ag ep ev dAuto) (filt ag)
   where
     dAuto = buildDAutomataNoF ep ev
 
@@ -113,7 +113,7 @@ makeSingleton (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' acce
     trans' _    = error "No transition for a list"
 
 
-makeP :: FSM CallChar (QState p) -> FSM CallChar (PState (QState p))
+makeP :: (Eq ev, Prop p) => FSM (Character ev) (QState p) -> FSM (Character ev) (PState (QState p))
 makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
   where
     sts' = map PVar sts
@@ -123,7 +123,7 @@ makeP (FSM alpha sts trans int accept) = FSM alpha sts' trans' int' accept'
     trans' (PVar st, ch)     = PVar <$> trans (st, ch)
     trans' _ = error "No PCon states at this point"
 
-makePTrans :: FST CallChar (QState p) -> FST CallChar (PState (QState p))
+makePTrans :: (Eq ev, Prop p) => FST (Character ev) (QState p) -> FST (Character ev) (PState (QState p))
 makePTrans (FST alpha sts trans int accept) = FST alpha sts' trans' int' accept' 
   where
     sts' = map PVar sts
@@ -193,16 +193,16 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- Or is it deeper than this? Do we need to create the automata on the fly?
 -- Or just when we get an and behave differently?
 -- This is screaming out for a typeclass. This would make all of our worries go away
-createSolvingAutomata :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> FSM CallChar (PState (QState GosProp))
-createSolvingAutomata form@(K agent phi) ep ev = setStatesReachableInit $ setSuccessfulFormula form $
-                          buildPSA (createSolvingAutomata phi ep ev) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev)) (knowFilter agent)
-createSolvingAutomata (And phis) ep ev         = case includesK (And phis) of
-  True  -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+createSolvingAutomata :: (Eq ev, Show ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> (Agent -> TransFilter (PState (QState p)) (Character ev)) -> FSM (Character ev) (PState (QState p))
+createSolvingAutomata form@(K agent phi) ep ev tfilter = setStatesReachableInit $ setSuccessfulFormula form $
+                          buildPSA (createSolvingAutomata phi ep ev tfilter) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev tfilter)) (tfilter agent)
+createSolvingAutomata (And phis) ep ev tfilter        = case includesK (And phis) of
+  True  -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev tfilter) phis
   False -> makeP $ buildDAutomata (And phis) ep ev
-createSolvingAutomata (Or phis) ep ev          = case includesK (Or phis) of
-  True  -> toPList $ unionFSM $ map (\phi -> createSolvingAutomata phi ep ev) phis
+createSolvingAutomata (Or phis) ep ev tfilter        = case includesK (Or phis) of
+  True  -> toPList $ unionFSM $ map (\phi -> createSolvingAutomata phi ep ev tfilter) phis
   False -> makeP $ buildDAutomata (Or phis) ep ev
-createSolvingAutomata phi ep ev = makeP $ buildDAutomata phi ep ev
+createSolvingAutomata phi ep ev _ = makeP $ buildDAutomata phi ep ev
 
 includesK :: Form p -> Bool
 includesK (K _ _)  = True
@@ -212,7 +212,7 @@ includesK (Not p)  = includesK p
 includesK (P _)    = False
 includesK Top      = False
 
-toPList :: FSM CallChar [PState (QState p)] -> FSM CallChar (PState (QState p))
+toPList :: (Eq ev, Prop p) => FSM (Character ev) [PState (QState p)] -> FSM (Character ev) (PState (QState p))
 toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
   where
     --alpha = FSM.alphabet fsms
@@ -224,8 +224,8 @@ toPList (FSM alpha _ trans int accept) = FSM alpha states' trans' int' accept'
     accept' _          = error "Can't accept a non-PList"
 
 
-findCallSequence :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> Maybe [CallChar]
-findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
+-- findCallSequence :: Form GosProp -> EpistM StateC GosProp -> EventModel Call GosProp -> Maybe [CallChar]
+-- findCallSequence form ep ev = extractCalls . doBFS $ createSolvingAutomata form ep ev
 
 propIncludes :: Agent -> GosProp -> Bool
 propIncludes ag (N i j) = i == ag || j == ag
