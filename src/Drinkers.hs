@@ -128,7 +128,7 @@ abModel :: EpistM (State Outcome) Pos
 abModel = Mo
   [(State (0, [])), (State (1, []))]
   [a, b]
-  [(State (0, []), [P Succ]), (State (1, []), [Not (P Succ)])]
+  [(State (0, []), [P Succ]), (State (1, []), [])]
   [(a, [[(State (0, [])), (State (1, []))]]), (b, [[(State (0, [])), (State (1, []))]])]
   [State (1, [])]
   [Succ]

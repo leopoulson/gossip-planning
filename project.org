@@ -35,7 +35,7 @@
 *** Alice & Bob 
     A good example model would be Alice & Bob, as discussed in the Gattinger thesis. 
 
-    Here, Alice and Bob are waiting to find out if Alice gets a Postdoc position. In our initial model, we have two worlds; one where alice successfully gets the position, and one where she does not.
+    Here, Alice and Bob are waiting to find out if Alice gets a Postdoc position. In our initial model, we have two worlds; one where alice successfully gets the position, and one where she does not. *REMEMBER* That we don't put in negations to state valuations; we assume everything that is not true at a state is not true, and hence we have no need for putting negations into states. This also breaks things later on lol 
  
     Then suddenly, a postman arrives to deliver a letter to Alice, with the universities logo on it. She reads the letter and learns that she gets the position; however, Bob observes this and sees that she knows the result, but he does not know the result himself; he only knows that she learns whether she got the position. 
     As an event model, this is has two events; that in which Alice is successful, and that in which she is not. Bob cannot distinguish between these two events, whereas Alice can. 

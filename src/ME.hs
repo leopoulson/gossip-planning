@@ -188,7 +188,7 @@ buildDAutomataCore f ep ev = FSM
     (evalState f)
 
 getInit :: Prop p => Eq st => EpistM st p -> [QState p]
-getInit (Mo _ _ val _ actual _) = Q <$> map (\st -> Set.fromList . map fromForm . fromMaybe [] $ lookup st val) actual
+getInit (Mo _ _ val _ actual _) = Q <$> map (\st -> Set.fromList . map fromForm . filter isForm . fromMaybe [] $ lookup st val) actual
 
 buildMEStar :: (Eq ev, Prop p) => EpistM (State ev) p -> EventModel ev p -> RegularStructure (Character ev) (QState p)
 buildMEStar ep ev = RegularStructure 
