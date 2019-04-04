@@ -38,19 +38,15 @@ bfs fsm queue seen =
   --trace ("Queue: " ++ show (queue) ++ "\nSeen: " ++ show (seen) ++ "\n\n") $
   case queue of
     []     -> Nothing    -- If the queue is empty, we stop and that is that
-    (q:qs) ->  case accepting fsm $ node q of
+    (q:qs) ->  {-case accepting fsm $ node q of
             True  -> Just $ rebuildPath q                                     -- Here construct the path
-            False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse
-
-
-
-
-    {-  if (node q) `notMember` seen then
+            False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse -}
+      if (node q) `notMember` seen then
           --trace ("Node: " ++ show (node q) ++ "\n") $
           case accepting fsm $ node q of
             True  -> Just $ rebuildPath q                                     -- Here construct the path
             False -> bfs fsm (updateQueue fsm q qs seen) (insert (node q) seen)   -- Here we want to recurse
-       else  bfs fsm qs seen--}
+       else  bfs fsm qs seen
 
 bfs' :: Ord a => FSM ch a -> Seq.Seq (BNode a ch) -> Set a -> Maybe [(a, Maybe ch)]
 bfs' fsm queue seen = case Seq.viewl queue of

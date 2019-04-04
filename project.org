@@ -1,4 +1,7 @@
 * Main Project TODOs
+** TODO Fix NOT over automata 
+   We can probably just do this by taking the complement?
+   Weird still broken 
 ** TODO Think about different knowledge models 
    Muddy children? This could be really neat
    
@@ -53,6 +56,7 @@
    We have duplicates in our queue, and it would be nice to get rid of these so we can speed up the computation and blah blah blah. 
 
    Unfortunately, this is causing some false negatives. Need to check why this happens too. Lol!!!!! 
+   Need to check this. Did a quick fix but it feels like this isn't enough? 
 ** TODO Fix bug with transducer intersection 
    It seems that there's something not going right with conjunctions. 
    We are getting a false negative, when there is indeed a path that we can take. 
@@ -118,9 +122,14 @@
 *** Using QuickCheck 
     It seems that all we need to do to use QuickCheck to test our program is to define an Arbitrary instance for the type of initial graphs. This should just mean using the functions in the MakeGraphs file. 
     This might be a bit of overkill though; plus, with ours, we can easily specify the size of the graph we want. 
-** TODO Add some kind of copyright thing regarding Malvin's stuff 
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
+** DONE Fix initial states 
+   CLOSED: [2019-04-04 Thu 11:26]
+   We have a problem where initial states in PSAs are not correctly set; we want them to be a PCon w/ the exact state, but also the states that we indistinguishable from the related one in the beginning (from the Epistemic Model). 
+** DONE Fix knowledge over PLists 
+   CLOSED: [2019-04-04 Thu 11:26]
+   Something is weird there and I'm not 100% sure what to do. This might get fixed when we fix initial states. Who knows 
 ** DONE Fix bug w/ H-O knowledge
    CLOSED: [2019-03-31 Sun 17:42]
    * The issue seems to be that when we go through a second-order automata, the states are not updated with the correct indisgintuishable calls, but the formula being evaluated is the correct one. This is most likely where the issue is. 
@@ -352,3 +361,5 @@ This is a weird result, as we suddenly lose all of the enqueue time from the pro
     - Next, we step through our automata from earlier and the transducer simulatenously; thus building up a set of the states that are indistinguishable from our current state. 
     - This lets us evaluate a formula like "a knows that everyone is an expert" in constant time; we just need to look at all of the states that are indistinguishable from our current one and check that everyone is an expert in these. This is much quicker than if we had to find these states some other way. 
     - We can just repeat this process for higher-order knowledge, like 'everyone knows that everyone knows that everyone is an expert'
+
+
