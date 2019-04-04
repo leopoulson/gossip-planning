@@ -11,7 +11,8 @@ import RS
 import BFSM
 
 import Data.List (nub, intersperse)
-import Data.Maybe (fromJust, isJust)
+import Data.Maybe (fromJust, isJust, fromMaybe)
+import Data.Set hiding (map, filter, foldr)
 
 import Debug.Trace
 
@@ -22,6 +23,7 @@ import qualified Data.Set as Set (toList, filter, fromList)
 --import Control.Applicative
 
 type History ch st = [(ch, st)]
+type PSA ev p = FSM (Character ev) (PState (QState p))
 data PSH ch st = PSH (PState st) (History ch st)
 data PState st = PList [PState st] | PCon (PState st) [PState st] | PVar st deriving (Eq, Show)
 
@@ -49,9 +51,9 @@ instance Ord st => Ord (PState st) where
 -}
 
 
-instance (EvalState st p, Ord st) => EvalState (PState st) p where  
-  evalState (K _ phi) (PCon _ sts) = all (evalState phi) sts
-  evalState (K _ phi) (PList _)    = error "Can't evaluate K on a PList"
+instance (Show st, EvalState st p, Ord st) => EvalState (PState st) p where  
+  evalState (K ag phi) (PCon _ sts) = trace ("Evaluating " ++ show (K ag phi) ++ " on " ++ show sts ++ "\n") $ all (evalState phi) sts
+  evalState (K a phi) (PList sts)  = all (evalState (K a phi)) sts --error "Can't evaluate K on a PList"
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
   evalState (And phis) (PList ps)  = all (\pstate -> evalState (And phis) pstate) ps
   evalState (And phis) ps          = all (\phi -> evalState phi ps) phis
@@ -181,9 +183,49 @@ fromPState :: PState st -> st
 fromPState (PVar st) = st
 fromPState (PCon st _) = fromPState st
 
+getVals :: QState p -> Set p
+getVals (Q ps) = ps
+getVals QInit = error "Called getVals on QInit"
+
 fromSndMaybe :: [(a, Maybe b)] -> [(a, b)]
 fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
                filter (isJust . snd)
+
+fixInitial :: (Prop p, Eq ev, Show ev) => Agent -> EpistM (State ev) p -> PSA ev p -> PSA ev p
+fixInitial ag ep (FSM al sts tr int acc) = FSM al sts tr int' acc
+  where
+    int' = map expandInitial int
+    expandInitial (PCon (PVar (Q ps)) sts) = expand ag ps ep 
+    expandInitial p = p
+
+expand :: (Prop p, Eq ev, Show ev) => Agent -> Set p -> EpistM (State ev) p -> PState (QState p)
+expand ag ps ep = PCon (PVar (Q ps)) (map (\p -> PVar (Q (fromList p))) $ rels ps ep)
+  where
+    rels ps ep = case lookup ag (eprel ep) of
+      Nothing -> error "Error in expand"
+      -- here ls is the set of indistinguishable states, for agent
+      Just ls -> trace ("ls: " ++ show ls) $ doThing ps (hardLookup ag (eprel ep)) (val ep) -- filter (\l -> hardLookup l (val ep) `allElem` ps) ls
+
+doThing :: (Prop p, Eq a, Show a) => Set p -> Rel a -> Valuation a p -> [[p]]
+doThing ps rel val = concat $ map (\a -> transform a val) (trace ("things: " ++ show (concat $ getThings ps rel val)) $ (concat $ getThings ps rel val))
+
+transform :: (Prop p, Eq a, Show a) => a -> Valuation a p -> [[p]]
+transform a val = trace ("transform of " ++ show a ++ " = " ++ show (fromForm <$> hardLookup a val)) ([fromForm <$> hardLookup a val])
+
+getThings :: (Prop p, Eq a, Show a) => Set p -> Rel a -> Valuation a p -> [[a]]
+getThings ps rel val = filter (\l -> filterThing l ps val) rel
+
+filterThing :: (Prop p, Eq a, Show a) => [a] -> Set p -> Valuation a p -> Bool
+filterThing [] _ _ = False
+filterThing (a : as) ps val = case (map fromForm (hardLookup a val) `allElem` ps) of
+  True -> True
+  False -> filterThing as ps val
+
+allElem :: Ord a => [a] -> Set a -> Bool
+allElem es l = all (\e -> e `member` l) es
+
+hardLookup :: (Show a, Eq a) => a -> [(a, b)] -> b
+hardLookup a b = fromMaybe (undefined) $ lookup a b
 
 -- For the K case, we want to perform some operation on the result of the function for phi.
 -- Most likely, we will call buildSolveRS? And then extract some information somehow
@@ -194,14 +236,17 @@ fromSndMaybe = map (\(l, r) -> (l, fromJust r)) .
 -- Or just when we get an and behave differently?
 -- This is screaming out for a typeclass. This would make all of our worries go away
 createSolvingAutomata :: (Eq ev, Show ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> (Agent -> TransFilter (PState (QState p)) (Character ev)) -> FSM (Character ev) (PState (QState p))
-createSolvingAutomata form@(K agent phi) ep ev tfilter = setStatesReachableInit $ setSuccessfulFormula form $
+createSolvingAutomata form@(K agent phi) ep ev tfilter = setStatesReachableInit $ setSuccessfulFormula form $ fixInitial agent ep $
                           buildPSA (createSolvingAutomata phi ep ev tfilter) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev tfilter)) (tfilter agent)
+
 createSolvingAutomata (And phis) ep ev tfilter        = case includesK (And phis) of
   True  -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev tfilter) phis
   False -> makeP $ buildDAutomata (And phis) ep ev
+
 createSolvingAutomata (Or phis) ep ev tfilter        = case includesK (Or phis) of
   True  -> toPList $ unionFSM $ map (\phi -> createSolvingAutomata phi ep ev tfilter) phis
   False -> makeP $ buildDAutomata (Or phis) ep ev
+
 createSolvingAutomata phi ep ev _ = makeP $ buildDAutomata phi ep ev
 
 includesK :: Form p -> Bool
@@ -253,3 +298,6 @@ knowFilter ag (PList a, ca) (cb, PList b) = True
 
 idFilter :: (Eq st, Eq ch) => Agent -> TransFilter st ch
 idFilter _ (st, c) (c', st') = c == c' && st == st'
+
+tFilter :: (Eq st, Eq ch) => Agent -> TransFilter st ch
+tFilter _ (st, c) (c', st') = True

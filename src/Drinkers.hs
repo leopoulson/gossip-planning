@@ -7,6 +7,7 @@ import BFSM
 import ME
 import Model
 import FSM
+import FST
 import Powerset
 
 import Prelude hiding (fst, snd)
@@ -130,7 +131,7 @@ abModel = Mo
   [a, b]
   [(State (0, []), [P Succ]), (State (1, []), [])]
   [(a, [[(State (0, [])), (State (1, []))]]), (b, [[(State (0, [])), (State (1, []))]])]
-  [State (1, [])]
+  [State (0, []), State (1, [])]
   [Succ]
 
 postEventModel :: EventModel Outcome Pos
@@ -149,4 +150,7 @@ postPost (_, f) = P f
 
 
 -- abPSA = createSolvingAutomata (K b (Or [K a (P Succ), K a (Not (P Succ))])) abModel postEventModel idFilter
-abPSA = createSolvingAutomata (K a (P Succ)) abModel postEventModel idFilter
+abPSA = createSolvingAutomata (K b (P Succ)) abModel postEventModel tFilter
+
+tr = buildTransducer b abModel postEventModel
+trc = buildComposedSS b abModel postEventModel (buildDAutomata (P Succ) abModel postEventModel)

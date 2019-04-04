@@ -11,19 +11,7 @@ type World = Int
 newtype State ev = State (World, [ev]) 
     deriving (Eq, Ord)
 
--- class EvState ev where
-  -- lastEv :: State ev -> ev
-  --lastEv (State (_, es)) = last es
-
-  -- trimLast :: State ev -> State ev
- -- trimLast (State (w, es)) = State (w, init es)
-
 type StateC = State Call
-
--- instance EvState Call where
-  -- lastEv (State (_, es)) = last es
-  -- trimLast (State (w, es)) = State (w, init es)
-
 
 type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]

@@ -13,14 +13,12 @@ import RS
 import Data.Maybe (isJust, fromJust, isNothing)
 import Data.Either (rights)
 
-type PSA p = FSM CallChar (PState (QState p))
-
 -- TODO: A lot of this could probably have been done with zip.
 -- Perhaps it would be nice to update it to use this at a later date.
 
 runTests size n = putStrLn $ prettyPrintResults $ getWithNothings size n
 
-getIncorrectsIn :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
+getIncorrectsIn :: [(EpistM StateC GosProp, PSA Call GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getIncorrectsIn pairs = filter (not . snd . verify) $ getModelCalls pairs
 
 oddModel :: EpistM StateC GosProp
@@ -35,7 +33,7 @@ oddModel = Mo
 oddEvModel :: EventModel Call GosProp
 oddEvModel = standardEventModel [a, b, c, d] prec postUpdate
 
-oddPSA :: PSA GosProp
+oddPSA :: PSA Call GosProp
 oddPSA = createSolvingAutomata (successfulFormula $ agents oddModel) oddModel oddEvModel knowFilter
 
 oddTrans = getTransducer d (buildMEStar oddModel oddEvModel)
@@ -117,10 +115,10 @@ verify :: (EpistM StateC GosProp, Maybe [CallChar]) -> (Maybe [CallChar], Bool)
 verify (ep, Nothing)    = (Nothing, verifyEmpty ep)
 verify (ep, Just calls) = (Just calls, verifyWinning ep (rights calls))
 
-getModelCalls :: [(EpistM StateC GosProp, PSA GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
+getModelCalls :: [(EpistM StateC GosProp, PSA Call GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getModelCalls = map (\(ep, psa) -> (ep, extractCalls . doBFS $ psa))
 
-getModelPSAPairs :: Int -> [(EpistM StateC GosProp, EventModel Call GosProp)] -> [(EpistM StateC GosProp, PSA GosProp)]
+getModelPSAPairs :: Int -> [(EpistM StateC GosProp, EventModel Call GosProp)] -> [(EpistM StateC GosProp, PSA Call GosProp)]
 getModelPSAPairs size models = map (\(ep, ev) -> (ep, createSolvingAutomata (successfulFormula $ getAgents size) ep ev knowFilter)) models
 
 getModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
@@ -129,7 +127,7 @@ getModels size n = take n $ generateModels (getAgents size) prec
 getPhonebookModels :: Int -> Int -> [(EpistM StateC GosProp, EventModel Call GosProp)]
 getPhonebookModels size n = take n $ generateModelsPhonebook (getAgents size) prec
 
-mapBFS :: (Show p, Ord p) => [PSA p] -> [Maybe [CallChar]]
+mapBFS :: (Show p, Ord p) => [PSA Call p] -> [Maybe [CallChar]]
 mapBFS psas = map (extractCalls . doBFS) psas
 
 -- This takes the number of agnets and generates the correct number of agents.
