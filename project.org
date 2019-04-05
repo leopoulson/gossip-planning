@@ -2,56 +2,6 @@
 ** TODO Fix NOT over automata 
    We can probably just do this by taking the complement?
    Weird still broken 
-** TODO Think about different knowledge models 
-   Muddy children? This could be really neat
-   
-*** Support 
-    In DEMO-S5, JvE has his models be parametric in what they store as the state. This is cool, and this is something that we can implement too in ours. 
-
-    It'squite likely that we will have to also add in our own language of propositions. We can probably use the same family of formulas, but the set of propositions that we use will need to change as we use different knowledge models.
-
-    We also need to think about how to handle the updating of information with an epistemic model and an event model.
-
-    Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
-    The primary points of attack will be: 
-**** DONE Make Epistemic Models parametric
-     CLOSED: [2019-04-01 Mon 17:44]
-     By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
-**** DONE Change the language of formulas to also be parametric
-     CLOSED: [2019-04-01 Mon 20:51]
-     To do this, we are probably going to have to keep this inside the EpistM definition. 
-**** DONE To add to above, we need to make a typeclass of evaluateable propositions 
-     CLOSED: [2019-04-01 Mon 20:51]
-     This requires some type-safety that the Model we wish to evaluate against has props of the same type. 
-**** DONE Fix EvalState problem
-     CLOSED: [2019-04-02 Tue 14:46]
-     The typechecker doesn't like that we're trying 
-     Fixed ! Due to the limitless power of haskell Language Extensions. This is good report stuff. 
-**** DONE Look at what can be done for event models?
-     CLOSED: [2019-04-02 Tue 14:46]
-     Most likely, we can parametrise it with Events. However we also need to ensure that it "matches" the epistemic model we want to update; hence, we give it also a second argument. This is used in the postcondition function. 
-
-     Chapter 6 of DEMO-S5 will be helpful to this end 
-     
-     This was done using a second parameter in event models that controls the proposition they care about; this 
-
-*** Alice & Bob 
-    A good example model would be Alice & Bob, as discussed in the Gattinger thesis. 
-
-    Here, Alice and Bob are waiting to find out if Alice gets a Postdoc position. In our initial model, we have two worlds; one where alice successfully gets the position, and one where she does not. *REMEMBER* That we don't put in negations to state valuations; we assume everything that is not true at a state is not true, and hence we have no need for putting negations into states. This also breaks things later on lol 
- 
-    Then suddenly, a postman arrives to deliver a letter to Alice, with the universities logo on it. She reads the letter and learns that she gets the position; however, Bob observes this and sees that she knows the result, but he does not know the result himself; he only knows that she learns whether she got the position. 
-    As an event model, this is has two events; that in which Alice is successful, and that in which she is not. Bob cannot distinguish between these two events, whereas Alice can. 
-
-    Then the update of these two things has two states; the one where Alice is successful and the one where she isn't. Bob cannot distinguish between either of these.  
-*** DONE ME 
-    CLOSED: [2019-04-03 Wed 15:28]
-    In ME we will probably need to just go through and make everything more general. Then we need to slowly creep through into powerset and so on. Should be quite straightforward
-*** DONE Implement Drinkers
-
-    CLOSED: [2019-04-03 Wed 11:48]
-    This seems to be OK. We need to use a Knowledge formula in the precondition; this may or may not be very bad
-*** TODO Implement Muddy Children
 ** TODO Speed up BFS / check why it fails 
    We have duplicates in our queue, and it would be nice to get rid of these so we can speed up the computation and blah blah blah. 
 
@@ -124,6 +74,58 @@
     This might be a bit of overkill though; plus, with ours, we can easily specify the size of the graph we want. 
 ** TODO Change structure (use typeclass instead of QState subtypes)
    This would do little more than just clean up the code. I would be surprised if this gave us a notable improvement in time or something. 
+** DONE Think about different knowledge models 
+   CLOSED: [2019-04-04 Thu 13:48]
+   Muddy children? This could be really neat
+   
+   So we have a few things to write about here. Drinkers and Muddy Children are necessarily epistemic actions; they depend on the knowledge of the agents in the model. In the world of event models this is fine, hwoever once we try and use these in the power set automata it won't work; our states are indexed by the propositions that are true at them, and as such we cannot use these models that have epistemic winning conditions in them. 
+*** Support 
+    In DEMO-S5, JvE has his models be parametric in what they store as the state. This is cool, and this is something that we can implement too in ours. 
+
+    It's quite likely that we will have to also add in our own language of propositions. We can probably use the same family of formulas, but the set of propositions that we use will need to change as we use different knowledge models.
+
+    We also need to think about how to handle the updating of information with an epistemic model and an event model.
+
+    Muddy Children seems to be the same kind of situation; we have a specialised Epistemic model and we update this model through event models. 
+    The primary points of attack will be: 
+**** DONE Make Epistemic Models parametric
+     CLOSED: [2019-04-01 Mon 17:44]
+     By this, I mean that the Models take some type and these types become the States of our new model. So we have a set of them, and also they're used in valuation and initial. 
+**** DONE Change the language of formulas to also be parametric
+     CLOSED: [2019-04-01 Mon 20:51]
+     To do this, we are probably going to have to keep this inside the EpistM definition. 
+**** DONE To add to above, we need to make a typeclass of evaluateable propositions 
+     CLOSED: [2019-04-01 Mon 20:51]
+     This requires some type-safety that the Model we wish to evaluate against has props of the same type. 
+**** DONE Fix EvalState problem
+     CLOSED: [2019-04-02 Tue 14:46]
+     The typechecker doesn't like that we're trying 
+     Fixed ! Due to the limitless power of haskell Language Extensions. This is good report stuff. 
+**** DONE Look at what can be done for event models?
+     CLOSED: [2019-04-02 Tue 14:46]
+     Most likely, we can parametrise it with Events. However we also need to ensure that it "matches" the epistemic model we want to update; hence, we give it also a second argument. This is used in the postcondition function. 
+
+     Chapter 6 of DEMO-S5 will be helpful to this end 
+     
+     This was done using a second parameter in event models that controls the proposition they care about; this 
+
+*** Alice & Bob 
+    A good example model would be Alice & Bob, as discussed in the Gattinger thesis. 
+
+    Here, Alice and Bob are waiting to find out if Alice gets a Postdoc position. In our initial model, we have two worlds; one where alice successfully gets the position, and one where she does not. *REMEMBER* That we don't put in negations to state valuations; we assume everything that is not true at a state is not true, and hence we have no need for putting negations into states. This also breaks things later on lol 
+ 
+    Then suddenly, a postman arrives to deliver a letter to Alice, with the universities logo on it. She reads the letter and learns that she gets the position; however, Bob observes this and sees that she knows the result, but he does not know the result himself; he only knows that she learns whether she got the position. 
+    As an event model, this is has two events; that in which Alice is successful, and that in which she is not. Bob cannot distinguish between these two events, whereas Alice can. 
+
+    Then the update of these two things has two states; the one where Alice is successful and the one where she isn't. Bob cannot distinguish between either of these.  
+*** DONE ME 
+    CLOSED: [2019-04-03 Wed 15:28]
+    In ME we will probably need to just go through and make everything more general. Then we need to slowly creep through into powerset and so on. Should be quite straightforward
+*** DONE Implement Drinkers
+
+    CLOSED: [2019-04-03 Wed 11:48]
+    This seems to be OK. We need to use a Knowledge formula in the precondition; this may or may not be very bad
+*** TODO Implement Muddy Children
 ** DONE Fix initial states 
    CLOSED: [2019-04-04 Thu 11:26]
    We have a problem where initial states in PSAs are not correctly set; we want them to be a PCon w/ the exact state, but also the states that we indistinguishable from the related one in the beginning (from the Epistemic Model). 

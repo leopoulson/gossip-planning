@@ -87,7 +87,7 @@ dKnowExperts :: [Agent] -> Form GosProp
 dKnowExperts ags = K d (allExpertsAg ags)
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula ags = K a (K b (dKnowExperts ags))--K a (allKnowAllExperts ags)
+successfulFormula ags = allKnowAllExperts ags --K a (K b (dKnowExperts ags))
 
 
 prettyPrintResults :: [(Maybe [CallChar], Bool)] -> [Char]

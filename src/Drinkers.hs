@@ -149,8 +149,9 @@ postPost :: Postcondition Outcome Pos
 postPost (_, f) = P f
 
 
--- abPSA = createSolvingAutomata (K b (Or [K a (P Succ), K a (Not (P Succ))])) abModel postEventModel idFilter
-abPSA = createSolvingAutomata (K b (P Succ)) abModel postEventModel tFilter
+abPSA = createSolvingAutomata (K b (Or [K a (Not (P Succ)), K a ((P Succ))])) abModel postEventModel idFilter
+-- abPSA = createSolvingAutomata (K b (Not (And [Not (K a (P Succ)), Not (K a (Not (P Succ)))]))) abModel postEventModel idFilter
+-- abPSA = createSolvingAutomata (K b (K a (Not $ P Succ))) abModel postEventModel tFilter
 
 tr = buildTransducer b abModel postEventModel
 trc = buildComposedSS b abModel postEventModel (buildDAutomata (P Succ) abModel postEventModel)

@@ -52,7 +52,7 @@ instance Ord st => Ord (PState st) where
 
 
 instance (Show st, EvalState st p, Ord st) => EvalState (PState st) p where  
-  evalState (K ag phi) (PCon _ sts) = trace ("Evaluating " ++ show (K ag phi) ++ " on " ++ show sts ++ "\n") $ all (evalState phi) sts
+  evalState (K ag phi) (PCon _ sts) = all (evalState phi) sts
   evalState (K a phi) (PList sts)  = all (evalState (K a phi)) sts --error "Can't evaluate K on a PList"
   evalState (K _ _) (PVar _)       = error "Can't evaluate K on a PVar"
   evalState (And phis) (PList ps)  = all (\pstate -> evalState (And phis) pstate) ps
@@ -60,6 +60,7 @@ instance (Show st, EvalState st p, Ord st) => EvalState (PState st) p where
   evalState (Or phis) ps           = any (\phi -> evalState phi ps) phis
   evalState phi (PVar st)          = evalState phi st
   evalState phi (PCon st _)        = evalState phi st
+  evalState phi (PList sts)        = all (evalState phi) sts
 
 
 
@@ -204,13 +205,13 @@ expand ag ps ep = PCon (PVar (Q ps)) (map (\p -> PVar (Q (fromList p))) $ rels p
     rels ps ep = case lookup ag (eprel ep) of
       Nothing -> error "Error in expand"
       -- here ls is the set of indistinguishable states, for agent
-      Just ls -> trace ("ls: " ++ show ls) $ doThing ps (hardLookup ag (eprel ep)) (val ep) -- filter (\l -> hardLookup l (val ep) `allElem` ps) ls
+      Just ls -> doThing ps (hardLookup ag (eprel ep)) (val ep) -- filter (\l -> hardLookup l (val ep) `allElem` ps) ls
 
 doThing :: (Prop p, Eq a, Show a) => Set p -> Rel a -> Valuation a p -> [[p]]
-doThing ps rel val = concat $ map (\a -> transform a val) (trace ("things: " ++ show (concat $ getThings ps rel val)) $ (concat $ getThings ps rel val))
+doThing ps rel val = concat $ map (\a -> transform a val) (concat $ getThings ps rel val)
 
 transform :: (Prop p, Eq a, Show a) => a -> Valuation a p -> [[p]]
-transform a val = trace ("transform of " ++ show a ++ " = " ++ show (fromForm <$> hardLookup a val)) ([fromForm <$> hardLookup a val])
+transform a val = [fromForm <$> hardLookup a val]
 
 getThings :: (Prop p, Eq a, Show a) => Set p -> Rel a -> Valuation a p -> [[a]]
 getThings ps rel val = filter (\l -> filterThing l ps val) rel
@@ -238,6 +239,8 @@ hardLookup a b = fromMaybe (undefined) $ lookup a b
 createSolvingAutomata :: (Eq ev, Show ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> (Agent -> TransFilter (PState (QState p)) (Character ev)) -> FSM (Character ev) (PState (QState p))
 createSolvingAutomata form@(K agent phi) ep ev tfilter = setStatesReachableInit $ setSuccessfulFormula form $ fixInitial agent ep $
                           buildPSA (createSolvingAutomata phi ep ev tfilter) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev tfilter)) (tfilter agent)
+
+createSolvingAutomata (Not phi) ep ev tfilter = complementFSM $ createSolvingAutomata phi ep ev tfilter
 
 createSolvingAutomata (And phis) ep ev tfilter        = case includesK (And phis) of
   True  -> toPList $ intersectionFSM $ map (\phi -> createSolvingAutomata phi ep ev tfilter) phis

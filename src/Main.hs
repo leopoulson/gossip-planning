@@ -18,7 +18,7 @@ import Data.Either (rights)
 
 main :: IO ()
 -- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
-main = runTests 4 300
+main = runTests 5 5
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
