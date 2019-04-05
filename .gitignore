@@ -22,3 +22,5 @@ cabal.project.local~
 
 *.hs#
 /src/Main
+
+*.bak
