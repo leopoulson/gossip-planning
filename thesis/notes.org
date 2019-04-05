@@ -1,0 +1,75 @@
+* Thesis Notes
+
+
+
+
+* Thesis Structure
+** Introduction (<5 pages)
+*** Motivate
+*** State Contributions 
+    We need to make clear exactly what we're putting forward; namely the algorithm and the implementation.
+
+    In here, we need to argue that the contributions are: 
+**** Important 
+     The fact that there's so much literature on the topic is a testament to the it being an important work. 
+**** New 
+     We need to show that what we've done is new; to do this we can just exhaust the lit review and show that there isn't anything else that achieves what we're setting out to do.
+**** Interesting 
+     Here, we can just discuss the gossip problem in itself. It *is* an interesting topic, and as such we can just talk about it; little particular dressing up needs to be doen in this section
+**** Difficult / Challenging / Worthy of 3rd year project
+     This is probably the most difficult section to write. 
+     Here we need to discuss why this task will be / is difficult; mainly discuss that there's a lot of new background and theory that took a lot of time to understand. 
+*** Purpose
+    The purpose of this chapter is to communicate to the reader precisely what our contributions are, what they do, and why they are worthwhile. 
+    This statement is one of the most important parts of the whole thesis, and the marker will most likely have some idea of what mark they will give it based on the ideas put forward in the introduction.
+
+** Background (10-15 pages)
+*** Purpose
+    The purpose of this chapter is to guide the marker through my work and make sure they understand it enough to see what's going on in the later parts. 
+*** Teaching 
+    Essentially just keep elaborating on what's already in my background chapter. 
+*** Literature review
+    We need to show that we're very comfortable with the surrounding literature and have exhausted it. 
+    Two important subpoints: 
+**** Discussion of other tools 
+     Here we need to mention what exists, in order to later compare our tool against the existing. This will be Malvin's two, as well as perhaps JvE's work. 
+     We should also make clear here that there's nothing else that does what we're planning to do. 
+**** Account of general theory of uniform strategies
+     We should give a basic overview of what uniform strategies are about, to the end of showing to the marker that our algorithm is a special case of this.
+     It need not be a perfect explanation, but enough to show where our approach is coming from. 
+** Algorithm & Implementation (10-20 pages)
+*** Purpose 
+    The purpose of this section is to back up what we said in the initial section; that our work has been difficult and challenging. 
+    We want to communicate that we have indeed done a substantial piece of work. 
+*** Algorithm
+    In here, we want to give an overview of what the algorithm consists of. This should include an example run. 
+    We also need to make clear our contributions; what does this do, what does it add, etc
+*** Implementation 
+    Here we would like to discuss implementation details and design choices.
+**** Why Haskell
+      In this we can mention exploiting laziness, etc
+
+**** Why not to use an automata library 
+     Not a particular reason for this as it stands lol. Perhaps this can be to do with the weirdness w/ the SSFST and normal FST composition? 
+    
+** Evaluation (5-10 pages)
+*** Purpose
+    Here we need to argue that we have *evidence* that we've *achieved* that which we say we had in the beginning. This is *backing up* our claims.
+    Note that the evaluation is commonly seen as a mark of a good project; a flimsy evaluation suggests that the writer has not really considered their work.
+    It is *definitely* in our interest to work hard on this section and fill it with good information. 
+
+*** Content
+**** Plan for testing 
+     Here we can talk about why we did testing in the way that we did and so on. 
+     Make sure to emphasise that we did consider the test plan prior to starting, and that it's been thought over heavily; this will no doubt reflect well than just going in willy-nilly
+**** Test results and comparison 
+     This is going to attest to what we say in the intro, about whether or not our implementation is optimal and so on. Make sure to profile Malvin's stuff and whatever. Would be great to discuss why these things occur. 
+**** Sketch proof of correctness
+     Unsure about this. Perhaps this will just come as a direct consequence of it being derived from the uniform strategies section? 
+**** Point out negatives and explain
+     This is a really important part; if we have any negatives (trust me we DO) it would be very good to explain where these negatives come from. 
+**** Discussion of optimisation
+     Again this is just a chance to mention how we made it quick. Got a good history of this in the notes so this should be fine!
+
+** Conclusion and Future Work (~3 pages)
+**** Reflection, summary, future work 
