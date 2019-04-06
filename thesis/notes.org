@@ -1,31 +1,75 @@
 * Thesis Notes
 
-
-
-
 * Thesis Structure
 ** Introduction (<5 pages)
 *** Motivate
 *** State Contributions 
-    We need to make clear exactly what we're putting forward; namely the algorithm and the implementation.
+    We need to make clear exactly what we're putting forward; namely the
+    algorithm and the implementation.
 
     In here, we need to argue that the contributions are: 
+
 **** Important 
      The fact that there's so much literature on the topic is a testament to the it being an important work. 
-**** New 
-     We need to show that what we've done is new; to do this we can just exhaust the lit review and show that there isn't anything else that achieves what we're setting out to do.
-**** Interesting 
-     Here, we can just discuss the gossip problem in itself. It *is* an interesting topic, and as such we can just talk about it; little particular dressing up needs to be doen in this section
-**** Difficult / Challenging / Worthy of 3rd year project
-     This is probably the most difficult section to write. 
-     Here we need to discuss why this task will be / is difficult; mainly discuss that there's a lot of new background and theory that took a lot of time to understand. 
-*** Purpose
-    The purpose of this chapter is to communicate to the reader precisely what our contributions are, what they do, and why they are worthwhile. 
-    This statement is one of the most important parts of the whole thesis, and the marker will most likely have some idea of what mark they will give it based on the ideas put forward in the introduction.
+     Perhaps we can convey this point in the general introduction part. 
 
+     It would be also good to mention the motivations for using an automata
+     method for the project. 
+
+**** New 
+     We need to show that what we've done is new; to do this we can just exhaust
+     the lit review and show that there isn't anything else that achieves what
+     we're setting out to do.
+
+     We can mention that there are existing checkers for this (e.g. DEMO-S5,
+     SMCDEL, ...), but none that perform it using the automata approach. We can
+     also just cite the (modern) papers on the topic. 
+
+**** Interesting 
+     Here, we can just discuss the gossip problem in itself. It *is* an
+     interesting topic, and as such we can just talk about it; little particular
+     dressing up needs to be done in this section.
+
+**** Difficult / Challenging / Worthy of 3rd year project
+     This is probably the most difficult section to write. Here we need to
+     discuss why this task will be / is difficult; mainly discuss that there's a
+     lot of new background and theory that took a lot of time to understand.
+
+     We can try and mention the explicit challenges that we face throughout the
+     project. This lays it out very clearly to the marker.
+*** Purpose
+    The purpose of this chapter is to communicate to the reader precisely what
+    our contributions are, what they do, and why they are worthwhile. 
+
+    This statement is one of the most important parts of the whole thesis, and
+    the marker will most likely have some idea of what mark they will give it
+    based on the ideas put forward in the introduction.
+*** Structure 
+**** General Introduction
+     Introduce the problem, etc
+**** Perhaps some kind of project aim section?
+**** Motivation
+     Talk about why it's interesting and why to spend so much time on it
+***** Introduction to the classic gossip problem
+***** Introduction to the dynamic gossip problem
+***** Applications (mainly networking)
+      This would be a good part to mention how many people there are studying
+      the gossip problem; to make it clear that the project is important. 
+***** Provide some examples of gossip solvers / model checkers from the literature. 
+***** An introduction to planning, especially epistemic planning. 
+***** TODO: Find an example of the gossip problem requiring that every agent knows everyone is an expert. 
+**** Declare contributions
+     Bezier curve example has a good section on this; just bullet pointing them.
+     It would be good to talk about the *challenges*; this would convey to the
+     marker where the difficulties came from. 
+***** Formalising the algorithm discussed in the paper
+***** Implementation in Haskell
+***** How our system improves on the existing software available? 
+***** Unification of these different areas (DEL, automated planning...)
 ** Background (10-15 pages)
 *** Purpose
-    The purpose of this chapter is to guide the marker through my work and make sure they understand it enough to see what's going on in the later parts. 
+    The purpose of this chapter is to guide the marker through my work and make
+    sure they understand it enough to see what's going on in the later parts.
 *** Teaching 
     Essentially just keep elaborating on what's already in my background chapter. 
 *** Literature review
@@ -37,6 +81,34 @@
 **** Account of general theory of uniform strategies
      We should give a basic overview of what uniform strategies are about, to the end of showing to the marker that our algorithm is a special case of this.
      It need not be a perfect explanation, but enough to show where our approach is coming from. 
+*** Structure
+    Do we want to introduce DEL or GP first? 
+**** Introduce DEL, and its semantics
+***** DONE The language of EL
+      CLOSED: [2019-04-06 Sat 15:40]
+***** DONE Kripke models
+      CLOSED: [2019-04-06 Sat 16:05]
+****** TODO Check if the set of worlds in a Kripke model needs to be finite
+***** DONE Evaluation on Kripke models
+      CLOSED: [2019-04-06 Sat 16:43]
+***** DONE Properties of knowledge;
+      CLOSED: [2019-04-06 Sat 17:22]
+      We should mention that the knowledge operator is an equivalence relation,
+      and that this will be the case thoroughout the thesis. 
+
+      We could also mention porperties of knowledge if we don't have certian
+      axioms. 
+***** Event models
+      We should probably give a worked example for this part; or just an example
+      of an event model. We could just use the gossip problem?
+***** A long example of all of it 
+      Perhaps just a toy example with two agents. We could just lift the Alice &
+      Bob example from Gattinger thesis? It would probably be quite nice to not
+      do an example in gossip problem, as we won't have introduced it yet
+**** Formalise the gossip problem
+***** Introduce it as in Tij71?
+***** 
+**** 
 ** Algorithm & Implementation (10-20 pages)
 *** Purpose 
     The purpose of this section is to back up what we said in the initial section; that our work has been difficult and challenging. 
@@ -73,3 +145,5 @@
 
 ** Conclusion and Future Work (~3 pages)
 **** Reflection, summary, future work 
+* To ask about 
+  - Is it too early to introduce propositional pre- / post-conditions? 

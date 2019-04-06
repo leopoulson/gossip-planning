@@ -16,6 +16,168 @@
 \maketitle
 \thispagestyle{firstpage}
 
+\section{Introduction}
+
+\subsection{Motivation}
+
+\subsubsection{Gossip} 
+The gossip problem is a problem regarding peer-to-peer information sharing. A
+set of agents start out with some secret information, and their goal is to
+transfer this information across the whole network, thus finding out the secret
+of all of the other agents. This information is transferred through a phone call
+from one agent to another. When two agents communicate they tell each other all
+the secrets that they know; hence the name \textit{gossip}. %This process of
+% gossiping is heavily used in networks, and the investigation of epidemic
+% information spreading. \textbf{add citations}.
+
+In the original problem formulation (\cite{Tijdeman:1971}), each agent began
+with the phone number of each other agent, and hence the starting network is a
+complete graph. Recently, there has been a lot of work in studying a variation
+of this problem named the \textit{dynamic} gossip problem. In this, the agents
+start out with an incomplete set of phone numbers, and as they call the other
+agents, they exchange all of the phone numbers they know and so the graph's
+edges grow in number.
+
+The dynamic gossip problem is a popular research topic (\cite{DynamicGossip},
+\cite{EpProforDyGo}), with applications in work in epidemics and research
+discoverd (\cite{DiscoverythruGossip}). In such scenarios, our network may be
+some peer to peer network, with our agents as computers and the goal to be
+finding the IP addresses of all of the other computers; or our network might be
+a social network, where we have people as agents who want to connect with
+everyone around them. In both cases, our network is updated as the agents
+communicate and they learn the contact details of other agents. 
+
+\textbf{Applications of DEL here \ldots}
+
+\subsubsection{Planning}
+
+Automated planning is the act of computing a finite sequence of actions to take
+some system from a given initial state to some successful state. Recently, a
+variant of this has been studied by the dynamic epistemic logic community,
+called \textit{epistemic} planning. Given an initial set of knowledge states of
+a set of agents, a finite set of available events, and an epistemic objective,
+the epistemic planning problem consists of computing the finite sequence of
+events whose occurence takes us from the initial state to a state satisfying the
+epistemic objective.
+
+This problem is undecidable for many cases (\cite{UndecidabilityEP}), but by placing
+certain restrictions on the models we use it becomes decidable.
+
+\subsection{Contributions}
+
+In this thesis, we put forward a process to solve the decidable epistemic planning
+problem. We also give an implementation of this process in Haskell. This process
+also will solve the gossip problem, by finding a sequence of calls to make every
+agent know the secret of every other agent; however it is also capable of
+finding sequences of calls that lead to a situation in which every agent knows
+that every agent is a secret. \textbf{TODO: Find applications for this}. 
+
+Given that our software solves just the epistemic planning problem and not
+strictly the gossip problem, it can plan for any appropriate models. There is no
+other software currently that solves this problem.  
+
+\newpage
+
+\section{Background}
+
+\subsection{Dynamic Epistemic Logic}
+
+\subsubsection{Epistemic Logic}
+
+Epistemic Logic is the logical language that we use to reason about knowledge.
+It is a modal logic; a logic with some operator, that can be used to model the
+passage of time, knowledge, obligation, or any other modality. The essential
+reference on epistemic logic is \cite{ReasoningAboutKnowledge}, and it is from
+here that most of the information in this section comes. 
+  
+If we have some set of agents $A$ and some set of propositions $\Lambda$, then
+we define the language of epistemic logic over this set of propositions,
+$\mc{L}(\Lambda)$, with the following BNF;
+
+
+\begin{equation*}
+  \phi ::= \top \mid p \mid \neg \phi \mid \phi \land \phi \mid K_i \phi
+\end{equation*}
+
+\noindent where $p \in \Lambda$ and $i \in A$. We also can define false, conjunction and
+implication in the classic way. We read $K_i \phi$ as ``agent $i$ knows that
+$\phi$ is true''. We can give our epistemic logic a semantics through use of
+\textit{Kripke models}. 
+
+\bigskip
+
+A Kripke model $\mc{M}$ over a set of agents $I$ and a set of propositions
+$\Lambda$ is a triple $(W, R, V)$, where $W$ is a \textbf{(maybe)} finite set of
+worlds, $R$ is a set of binary relations over $W$ indexed by an agent, such that
+$R_i \subseteq W \times W$, and $V : W \rightarrow \mc{P}(\Lambda)$ is a
+valuation function that associates to every world in $W$ some set of
+propositions that are true at it.
+
+For epistemic logic, we think of $R_i$ as being the set of pairs of worlds that
+an agent $i$ cannot distinguish between, and thus considers possible. In our
+semantics, we use this relation to define knowledge in terms of possibility;
+agent $i$ knows that something is true if it's true at all of the worlds that
+$i$ cannot distinguish between.
+
+\bigskip
+
+When giving a semantics to a formula on a Kripke model, we need to use a
+\textit{pointed Kriple model}. This is just a pair $(\mc{M}, w)$ where $w$ is a
+world of $\mc{M}$. Then we read $(\mc{M}, w) \models \phi$ as ``$w$ satisfies
+$\phi$''. We define the evaluation as follows:
+
+\begin{align*}
+  (\mc{M}, w) & \models \top \\
+  (\mc{M}, w) & \models p \text{ iff } p \in V(w) \\
+  (\mc{M}, w) & \models \neg \phi \text{ iff } (\mc{M}, w) \not \models \phi \\
+  (\mc{M}, w) & \models \phi \land \psi \text{ iff } (\mc{M}, w) \models \phi \text{ and } (\mc{M}, w) \models \psi \\
+  (\mc{M}, w) & \models K_i \phi \text{ iff for all $v$ such that } (w, v) \in R_i, (\mc{M}, v) \models \phi 
+\end{align*}
+
+\bigskip 
+
+We need to give some properties to our knowledge operator in order to better
+understand it. We make all of our relations $R_i$ equivalence relations. This
+means three things;
+
+\begin{itemize}
+\item $R_i$ is \textit{reflexive}; for all $w \in W$, $(w, w) \in R_i$.
+\item $R_i$ is \textit{symmetric}; for all $w, v \in W, (w, v) \in R_i$ iff $(v,
+  w) \in R_i$.
+\item $R_i$ is \textit{transitive}; for all $w, v, u \in W$ if $(w, v) \in R_i$
+  and $(v, u) \in R_i$, then $(w, u) \in R_i$.
+\end{itemize}
+
+This is done in order to convey that agent $i$ considers world $v$ possible from
+world $w$ if in both $w$ and $v$ agent $i$ has the same information; that is,
+they are indistinguishable to the agent.
+
+\textbf{TODO: Perhaps we can write something about the K $\phi$ -> $\phi$ axiom here?} 
+
+\subsubsection{Event Models}
+
+Public announcement logic was the first development in epistemic logic to
+support information change in epistemic logic, and is described in \cite{PAL}.
+However, in public annoucement logic, we may only model truthful, public
+communications; but we all know that there are many other types of communication
+and events after which some information has changed. An agent may communicate
+with another agent in a private phone call, or may be lying to them;
+furthermore, we may have some \textit{physical} action, like a coin flip
+occuring, after which some knowledge has changed.
+
+To model these more complicated events, we use \textit{event models}. These
+treat events in a very similar way to how Kripke models treat worlds; we think
+of a set of possible events that can occur, and encode the events that an agent
+can tell apart.
+
+Formally, an event model is a tuple $(E, R^E, \pre, \post)$. 
+
+
+
+%%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\printbibliography[title={Bibliography}]
+
 
 
 \end{document}
