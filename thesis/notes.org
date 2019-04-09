@@ -44,20 +44,66 @@
     This statement is one of the most important parts of the whole thesis, and
     the marker will most likely have some idea of what mark they will give it
     based on the ideas put forward in the introduction.
+
+This chapter should describe the project context, and motivate each of
+the proposed aims and objectives.  Ideally, it is written at a fairly
+high-level, and easily understood by a reader who is technically
+competent but not an expert in the topic itself.
+
+In short, the goal is to answer three questions for the reader.  First,
+what is the project topic, or problem being investigated?  Second, why
+is the topic important, or rather why should the reader care about it?
+For example, why there is a need for this project (e.g., lack of similar
+software or deficiency in existing software), who will benefit from the
+project and in what way (e.g., end-users, or software developers) what
+work does the project build on and why is the selected approach either
+important and/or interesting (e.g., fills a gap in literature, applies
+results from another field to a new problem).  Finally, what are the
+central challenges involved and why are they significant?
+
+The chapter should conclude with a concise bullet point list that
+summarises the aims and objectives.  For example:
+
+\begin{quote}
+\noindent
+The high-level objective of this project is to reduce the performance
+gap between hardware and software implementations of modular arithmetic.
+More specifically, the concrete aims are:
+
+\begin{enumerate}
+\item Research and survey literature on public-key cryptography and
+      identify the state of the art in exponentiation algorithms.
+\item Improve the state of the art algorithm so that it can be used
+      in an effective and flexible way on constrained devices.
+\item Implement a framework for describing exponentiation algorithms
+      and populate it with suitable examples from the literature on
+      an ARM7 platform.
+\item Use the framework to perform a study of algorithm performance
+      in terms of time and space, and show the proposed improvements
+      are worthwhile.
+      \end{enumerate}
+    \end{quote}
+
 *** Structure 
 **** General Introduction
      Introduce the problem, etc
 **** Perhaps some kind of project aim section?
 **** Motivation
      Talk about why it's interesting and why to spend so much time on it
-***** Introduction to the classic gossip problem
-***** Introduction to the dynamic gossip problem
-***** Applications (mainly networking)
+***** DONE Introduction to the classic gossip problem
+      CLOSED: [2019-04-07 Sun 11:51]
+***** DONE Introduction to the dynamic gossip problem
+      CLOSED: [2019-04-07 Sun 11:51]
+***** TODO Applications (mainly networking)
       This would be a good part to mention how many people there are studying
       the gossip problem; to make it clear that the project is important. 
-***** Provide some examples of gossip solvers / model checkers from the literature. 
-***** An introduction to planning, especially epistemic planning. 
-***** TODO: Find an example of the gossip problem requiring that every agent knows everyone is an expert. 
+      We should add some more of these; there's not really enough right now.
+      There are very many though so I'm sure we can find some!
+***** TODO Provide some examples of gossip solvers / model checkers from the literature. 
+      We need to find out if SMCDEL is capable of planning, or just
+      verification. 
+***** TODO An introduction to planning, especially epistemic planning. 
+***** TODO Find an example of the gossip problem requiring that every agent knows everyone is an expert. 
 **** Declare contributions
      Bezier curve example has a good section on this; just bullet pointing them.
      It would be good to talk about the *challenges*; this would convey to the
@@ -70,17 +116,38 @@
 *** Purpose
     The purpose of this chapter is to guide the marker through my work and make
     sure they understand it enough to see what's going on in the later parts.
+
+This chapter is intended to describe the technical basis on which execution
+of the project depends.  The goal is to provide a detailed explanation of
+the specific problem at hand, and existing work that is relevant (e.g., an
+existing algorithm that you use, alternative solutions proposed, supporting
+technologies).
+
+Per the same advice in the handbook, note there is a subtly difference from
+this and a full-blown literature review (or survey).  The latter might try
+to capture and organise (e.g., categorise somehow) {\em all} related work,
+potentially offering meta-analysis, whereas here the goal is simple to
+ensure the dissertation is self-contained.  Put another way, after reading
+this chapter a non-expert reader should have obtained enough background to
+understand what {\em you} have done (by reading subsequent sections), then
+accurately assess your work.  You might view an additional goal as giving
+the reader confidence that you are able to absorb, understand and clearly
+communicate highly technical material.
 *** Teaching 
     Essentially just keep elaborating on what's already in my background chapter. 
 *** Literature review
-    We need to show that we're very comfortable with the surrounding literature and have exhausted it. 
-    Two important subpoints: 
+    We need to show that we're very comfortable with the surrounding literature
+    and have exhausted it. Two important subpoints:
 **** Discussion of other tools 
-     Here we need to mention what exists, in order to later compare our tool against the existing. This will be Malvin's two, as well as perhaps JvE's work. 
-     We should also make clear here that there's nothing else that does what we're planning to do. 
+     Here we need to mention what exists, in order to later compare our tool
+     against the existing. This will be Malvin's two, as well as perhaps JvE's
+     work. We should also make clear here that there's nothing else that does
+     what we're planning to do.
 **** Account of general theory of uniform strategies
-     We should give a basic overview of what uniform strategies are about, to the end of showing to the marker that our algorithm is a special case of this.
-     It need not be a perfect explanation, but enough to show where our approach is coming from. 
+     We should give a basic overview of what uniform strategies are about, to
+     the end of showing to the marker that our algorithm is a special case of
+     this. It need not be a perfect explanation, but enough to show where our
+     approach is coming from.
 *** Structure
     Do we want to introduce DEL or GP first? 
 **** Introduce DEL, and its semantics
@@ -98,7 +165,8 @@
 
       We could also mention porperties of knowledge if we don't have certian
       axioms. 
-***** Event models
+***** DONE Event models
+      CLOSED: [2019-04-07 Sun 11:30]
       We should probably give a worked example for this part; or just an example
       of an event model. We could just use the gossip problem?
 ***** A long example of all of it 
@@ -106,13 +174,44 @@
       Bob example from Gattinger thesis? It would probably be quite nice to not
       do an example in gossip problem, as we won't have introduced it yet
 **** Formalise the gossip problem
-***** Introduce it as in Tij71?
-***** 
-**** 
+***** DONE Introduce it as in Tij71?
+      CLOSED: [2019-04-07 Sun 13:11]
+      Phone calls between one another... 
+***** DONE Then introduce dynamic gossip
+      CLOSED: [2019-04-07 Sun 15:40]
+      Mainly highlight that the graph changes over time. Show some examples
+***** DONE Definitely mention something about protocols. 
+      CLOSED: [2019-04-07 Sun 15:40]
+      We will need to mention the restriction of just propositional protocols;
+      however, this should come after we've introduced planning and the
+      restriction that this puts on us. 
+***** TODO Then formalise everything afterwards. 
+**** Formalising of Planning
+***** DONE General overview - what it is
+      CLOSED: [2019-04-08 Mon 17:44]
+***** DONE Then talk about the epistemic variant of it? 
+      CLOSED: [2019-04-08 Mon 18:23]
+      This might not really make sense - there's no particular distinction
+      between the two
+***** We should mention the effect of this on what we want to do
+      Specifically, the restriction to proposotional planning. 
+***** We should probably make clear the difference between planning and model checking
+**** Other tools 
+     We should give, for each, 
+***** An overview of the way it works 
+***** What information we can take from them?
+***** Shortcomings of this implementation; what my tool will do that theirs didn't. 
+***** DEMO-S5
+***** Gossip
+***** SMCDEL
+**** General theory of Uniform Strategies
+
 ** Algorithm & Implementation (10-20 pages)
 *** Purpose 
     The purpose of this section is to back up what we said in the initial section; that our work has been difficult and challenging. 
-    We want to communicate that we have indeed done a substantial piece of work. 
+    We want to communicate that we have indeed done a substantial piece of work.
+
+ 
 *** Algorithm
     In here, we want to give an overview of what the algorithm consists of. This should include an example run. 
     We also need to make clear our contributions; what does this do, what does it add, etc
@@ -129,6 +228,29 @@
     Here we need to argue that we have *evidence* that we've *achieved* that which we say we had in the beginning. This is *backing up* our claims.
     Note that the evaluation is commonly seen as a mark of a good project; a flimsy evaluation suggests that the writer has not really considered their work.
     It is *definitely* in our interest to work hard on this section and fill it with good information. 
+
+    This chapter often acts to differentiate project quality: even if the work
+    completed is of a high technical quality, critical yet objective evaluation
+    and comparison of the outcomes is crucial.  In essence, the reader wants to
+    learn something, so the worst examples amount to simple statements of fact
+    (e.g., ``graph X shows the result is Y''); the best examples are analytical
+    and exploratory (e.g., ``graph X shows the result is Y, which means Z; this
+    contradicts [1], which may be because I use a different assumption'').  As
+    such, both positive {\em and} negative outcomes are valid {\em if} presented
+    in a suitable manner.
+
+    This chapter is intended to evaluate what you did.  The content is highly
+    topic-specific, but for many projects will have flavours of the following:
+
+      \begin{enumerate}
+      \item functional  testing, including analysis and explanation of failure
+            cases,
+      \item behavioural testing, often including analysis of any results that
+            draw some form of conclusion wrt. the aims and objectives,
+            and
+      \item evaluation of options and decisions within the project, and/or a
+          comparison with alternatives.
+      \end{enumerate}
 
 *** Content
 **** Plan for testing 

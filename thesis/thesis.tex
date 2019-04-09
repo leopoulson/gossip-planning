@@ -20,7 +20,7 @@
 
 \subsection{Motivation}
 
-\subsubsection{Gossip} 
+\subsubsection{The Gossip Problem} 
 The gossip problem is a problem regarding peer-to-peer information sharing. A
 set of agents start out with some secret information, and their goal is to
 transfer this information across the whole network, thus finding out the secret
@@ -31,7 +31,7 @@ the secrets that they know; hence the name \textit{gossip}. %This process of
 % information spreading. \textbf{add citations}.
 
 In the original problem formulation (\cite{Tijdeman:1971}), each agent began
-with the phone number of each other agent, and hence the starting network is a
+with the phone number of every other agent, and hence the starting network is a
 complete graph. Recently, there has been a lot of work in studying a variation
 of this problem named the \textit{dynamic} gossip problem. In this, the agents
 start out with an incomplete set of phone numbers, and as they call the other
@@ -40,14 +40,24 @@ edges grow in number.
 
 The dynamic gossip problem is a popular research topic (\cite{DynamicGossip},
 \cite{EpProforDyGo}), with applications in work in epidemics and research
-discoverd (\cite{DiscoverythruGossip}). In such scenarios, our network may be
-some peer to peer network, with our agents as computers and the goal to be
-finding the IP addresses of all of the other computers; or our network might be
-a social network, where we have people as agents who want to connect with
-everyone around them. In both cases, our network is updated as the agents
-communicate and they learn the contact details of other agents. 
+discoverd (\cite{DiscoverythruGossip}) \textbf{Add more references.}. In such
+scenarios, our network may be some peer to peer network, with our agents as
+computers and the goal to be finding the IP addresses of all of the other
+computers; or our network might be a social network, where we have people as
+agents who want to connect with everyone around them. In both cases, our network
+is updated as the agents communicate and they learn the contact details of other
+agents.
 
 \textbf{Applications of DEL here \ldots}
+
+There are several existing implementations of model checkers for epistemic logic
+and gossip problems; three of them are \cite{DEMO-S5}, \cite{GithubGossip},
+\cite{SMCDEL}. The three all differ in implementation style, but they all aim to
+solve the same problem; given some system with an initial state and a way to
+move between states, what events can occur to take the system from its initial
+state to a successful one? \cite{GithubGossip} aims to give the user the events
+required to take the system to the state, whereas the other two aim to tell the
+user if a string of events given are successful. 
 
 \subsubsection{Planning}
 
@@ -62,6 +72,8 @@ epistemic objective.
 
 This problem is undecidable for many cases (\cite{UndecidabilityEP}), but by placing
 certain restrictions on the models we use it becomes decidable.
+
+\subsubsection{Model Checking}
 
 \subsection{Contributions}
 
@@ -99,10 +111,12 @@ $\mc{L}(\Lambda)$, with the following BNF;
   \phi ::= \top \mid p \mid \neg \phi \mid \phi \land \phi \mid K_i \phi
 \end{equation*}
 
-\noindent where $p \in \Lambda$ and $i \in A$. We also can define false, conjunction and
-implication in the classic way. We read $K_i \phi$ as ``agent $i$ knows that
-$\phi$ is true''. We can give our epistemic logic a semantics through use of
-\textit{Kripke models}. 
+\noindent where $p \in \Lambda$ and $i \in A$. We also can define false,
+conjunction and implication in the classic way. We read $K_i \phi$ as ``agent
+$i$ knows that $\phi$ is true''. We can also define the dual to $K$, in the
+classic way as $\widehat K_i \phi ::= \neg K_i \neg \phi$. We read this as
+``agent $i$ considers it possible that $\phi$ is true''. We can give our
+epistemic logic a semantics through use of \textit{Kripke models}.
 
 \bigskip
 
@@ -152,9 +166,21 @@ This is done in order to convey that agent $i$ considers world $v$ possible from
 world $w$ if in both $w$ and $v$ agent $i$ has the same information; that is,
 they are indistinguishable to the agent.
 
-\textbf{TODO: Perhaps we can write something about the K $\phi$ -> $\phi$ axiom here?} 
+It is identical to say that our relations $R_i$ are equivalence relations, as it
+is to say that our model is an \textsf{S5} model. This is defined as a model in
+which the modal operator $K$ obeys the following axioms:
+
+\begin{itemize}
+\item \textsf{K}: $K (\phi \rightarrow \psi) \rightarrow (K \phi \rightarrow K
+  \psi)$
+\item \textsf{T}: $K \phi \rightarrow \phi$
+\item \textsf{5}: $\widehat K \phi \rightarrow K \widehat K \phi$
+\end{itemize}
+
+These axioms hold independent of which agent's knowledge we are reasoning about. 
 
 \subsubsection{Event Models}
+\label{sec:Event Models}
 
 Public announcement logic was the first development in epistemic logic to
 support information change in epistemic logic, and is described in \cite{PAL}.
@@ -168,13 +194,249 @@ occuring, after which some knowledge has changed.
 To model these more complicated events, we use \textit{event models}. These
 treat events in a very similar way to how Kripke models treat worlds; we think
 of a set of possible events that can occur, and encode the events that an agent
-can tell apart.
+can tell apart. We give the modern definition of event models, as in
+\cite{MalvinThesis}, and \cite{AutomataTechniques}, however these were first
+defined in \textbf{Cite 1998 Baltag paper}
 
-Formally, an event model is a tuple $(E, R^E, \pre, \post)$. 
+Formally, an event model \tmc{E} is a tuple $(E, Q, \pre, \post)$. $E$ is a finite set
+of events; $Q$ is a set of relations $Q_i$ for each $i \in Ag$, such that $Q_i
+\subseteq E \times E$. As before, we make all relations $Q$ equivalence
+relations. $\pre : E \rightarrow \mc{L}(\Lambda) $ is the \textit{precondition
+  function}; given an event $e \in E$, it returns to us a formula that has to be
+true in order for $e$ to occur. $\post : E \times \Lambda \rightarrow
+\mc{L}(\Lambda)$ is the \textit{postcondition function}; given an event $e \in
+E$ and a proposition $p \in \Lambda$, it returns to us some formula that had to
+be true at the prior state $s$ in order for $p$ to be true after event $e$
+occurs at $s$. We will later give examples for these two functions.
+
+Updating a Kripke model \tmc{M} with an event model \tmc{E} is gives us another
+Kripke model $\mc{M} \times \mc{E} ::= (W', R', V')$, where:
+
+\begin{align*}
+  W'   &::= \left\{(w, e) \in W \times E \mid (\mc{M}, w) \models \pre(e)\right\} \\
+  R_i' &::= \left\{((w, e), (v, f)) \mid (w, v) \in R_i, (e, f) \in Q_i \right\} \\
+  V'(w, e) &::= \left\{ p \in \Lambda \mid (\mc{M}, w) \models \post(e, p) \right\}
+\end{align*}
+
+We see that it is the postcondition function that allows for factual change;
+that is, the update of what is true at a state given the occurence of some
+event. 
+
+\subsection{The Gossip Problem}
+
+Gossip is a procedure for spreading secrets around a group of agents, where the
+agents are commonly displayed as nodes in a graph and the ability of one agent
+to contact another displayed as an edge between two nodes. Gossip was first put
+forward in \cite{Tijdeman:1971}, where the network is a complete graph; all
+agents can contact one another. One question here was to find how many calls are
+needed for every agent to learn the secret of every other agent. We will
+henceforth describe an agent knowing the secret of every other agent as this
+agent being an \textit{expert}. It was quickly proved (\cite{TelephoneDisease},
+\cite{GandT}) that this number, for a network where the number of agents $n$ is
+greater than 4, is $2n - 4$.
+ 
+\subsubsection{Dynamic Gossip}
+
+Dynamic Gossip is a variant of the classical gossip problem, in which we start
+off with an incomplete graph, representing the fact that the agents have only
+the phone numbers of some of the other agents. In this case, when two agents
+talk on the phone, they also exchange all of the phone numbers that they know as
+well as the secrets that they know.
+
+\subsubsection{Protocols}
+
+The gossip problem, as we have mentioned so far, can rely on some central
+scheduler to tell the agents what call to make, and lets them know when to stop.
+However in distributed computing, methods that do not require this central
+authority are desirable. In such a situation, the agents need to have some form
+of rules to follow to decide how to behave and who to call next. This is the
+motivation for a \textit{gossip protocol}, which are short conditions that must
+be fulfilled in order for an agent to make a specific call. These protocols were
+first proposed in \cite{EPfDG}, \cite{KnowledgeandGossip}, and some exemplar
+ones are:
+
+\begin{itemize}
+\item \textsf{ANY} - If $x$ knows the phone number of $y$, $x$ may call $y$.
+\item \textsf{LNS} - If $x$ knows the phone number of $y$ and $x$ does not
+    know the secret of $y$, then $x$ may call $y$.
+\end{itemize}
+
+In this thesis, we do not study the distributed gossip problem; rather, a
+version with a central authority that surveys the network topology and then
+decides which agent is allowed to make a call, and also who they will call.
+However, these protocols do still have use for us. \textsf{ANY} allows for
+infinite call sequences - for example, one where agent $a$ just repeatedly calls
+$b$, whereas all of the call sequences induced by \textsf{LNS} are of finite
+length. In the long run this does not really matter; both \textsf{ANY} and
+\textsf{LNS} have runtime expected execution length in $O(n \log n)$
+(\cite{DynamicGossip}), yet in our implementation tests performed with
+\textsf{LNS} took considerably less time than \textsf{ANY}. For this pragmatic
+reason \textsf{LNS} is often used in this thesis.
+
+It should also be noted that there are certain classes of graphs for which
+\textsf{LNS} cannot induce a successful call sequence, yet \textsf{ANY} can
+(\cite{DynamicGossip}). However, this thesis does not investigate this topic,
+and as such this will no longer be mentioned. 
+
+\subsubsection{Formalisation}
+
+We now go on to formalise some of the ideas mentioned so far in this section.
+The definitions of gossip graphs are classic and can be found in all of the
+related literature (e.g. \cite{DynamicGossip}, \cite{MalvinThesis})
+
+\bigskip
+
+We formally denote a gossip graph \tmc{G} with a triple $(A, N, S)$. $A$ is a
+finite set of agents in the graph; $N \subseteq A \times A$ is a set of ordered
+pairs of agents such that $(u, v) \in N$ (or $Nuv$) iff $u$ knows the phone
+number of $v$. $S \subseteq A \times A$ is a set of ordered pairs of agnets such
+that $(u, v) \in S$ (or $Suv$) iff $u$ knows the \textit{secret} of $v$.
+
+We have that for all gossip graphs, for any agent $a$, $(a, a) \in N$ and $(a, a)
+ \in S$, expressing that any agent always knows their own phone number and
+ secret. 
+
+\subsection{Planning}
+
+Automated planning is the process of computing which set of events must occur to
+take a system from some given initial state to some successful state. Such a
+system is defined as a triple $\Sigma = (S, A, \gamma)$, where:
+
+\begin{itemize}
+\item $S$ is some set of states;
+\item $A$ is some set of \textit{actions};
+\item $\gamma : S \times A \hookrightarrow S$ is a state-transition function. It
+  is partial; for $s \in S, a \in A$, either $\gamma(s, a) \in S$ or it is
+  undefined. 
+\end{itemize}
+
+Then an instance of the planning problem is a triple $(\Sigma, s_i, S_g)$,
+where;
+
+\begin{itemize}
+\item $\Sigma$ is a planning system;
+\item $s_i \in S$ is some initial state;
+\item $S_g \subseteq S$ is some set of goal states.  
+\end{itemize}
+
+A \textit{solution} to the planning problem is some ordered set of actions
+${a_0, a_1, \ldots, a_n}$ such that $\gamma(\gamma(\ldots \gamma(s_0, a_0)
+\ldots ,a_{n-1}) ,a_n) \in S_g$. 
+
+Note that we call a planning problem \textit{multi-agent} if the number of
+agents in the system is greater than 1, and \textit{single-agent} if the number
+of agents is equal to 1. 
+
+\subsubsection{Epistemic Planning}
+
+The dynamic epistemic logic community has recently been investigating a special case
+of planning, namely \textit{epistemic} planning (\cite{BolanderEP},
+\cite{UndecidabilityEP}). This is planning where we may have some initial
+epistemic state (e.g. agent $a$ knows $\phi$), some actions that update these
+epistemic states, and some accepting epistemic state (e.g. agent $b$ knows
+$\psi$). It is not hard to see how this can be applied to the gossip problem.
+
+We give a formal definition of the epistemic planning problem that slightly
+differs from convention, however with this definition and those from the
+literature are equivalent. Then the epistemic planning problem is as follows;
+given a pointed epistemic model $(\mc{M}, w)$ and an event model $\mc{E}$, and
+some goal formula $\phi$, find some set of events ${e_1, e_2, \ldots, e_n}$ such
+that $(\mc{M}, w) \otimes (\mc{E}, e_1) \otimes \ldots \otimes (\mc{E}, e_n)
+\models \phi$. The \textit{propositional epistemic planning problem} is the
+restriction of this to event models with pre- and post-condition functions whose
+codomains are in the propositional fragment of \tmc{L}; that is, they do not
+contain the modal operator $K$. These event models are what we call
+propositional event models. 
+
+It is proven in \cite{BolanderEP} that the multi-agent epistemic planning
+problem is undecidable for an aribtrary system. However, placing certain
+restrictions on the system used yields decidability (\cite{DecidabilityEp},
+\cite{AutomataTechniques}). One particularly important result is that the
+propositional epistemic planning problem is decidable; indeed, it is this result
+that this thesis relies on. 
+
+\bigskip \bigskip \bigskip
+
+In this thesis, we focus on solving the epistemic planning problem by means of
+the automata constructions described in \cite{AutomataTechniques}. These
+methods, and the resulting piece of software associated with this thesis, are
+unique in that they will work for any epistemic model and (propositional) event
+model. This unfortunately means that we cannot plan for situations like muddy
+children or drinking logicians (\cite{DEMO-S5}) as they require epistemic pre-
+or post-conditions. 
 
 
+\subsection{Existing Tools}
+
+We now give an overview of existing software in the realm of model checking or
+planning for epistemic systems.
+
+\subsubsection{DEMO-S5}
+
+DEMO-S5 (\cite{DEMO-S5}) is a model checker for epistemic models, limited to
+$S5$ models. It is also limited in that it only supports events that are either
+public announcements (e.g. an agent telling every other agent some statement) or
+publicly observable factual change (e.g. the flip of a coin, where the result is
+seen by every agent).
+
+It performs the task of model checking by taking an epistemic model and a
+formula representing either the announcement or the fact that changed, and
+updating the model with the event represented by the formula. The definition of
+the update used is very similar to the update of an epistemic model with an
+event model as defined in Section \ref{sec:Event Models}. The given events are
+applied, and at this point we check if we're in a successful state or not.
+
+\bigskip
+
+Unfortunately we cannot use this to model check a gossip problem, as events in
+the gossip problem are neither of these; they are private one-to-one
+communications. Furthermore, the software is incapable of planning; simply
+checking. Despite this, the software was incredibly useful in our project in
+order to aid understanding of epistemic and event models. Indeed, the
+formalisation of epistemic and event models demonstrated here was used in the
+code associated with this thesis.
+
+\subsubsection{Gossip}
+
+\cite{GithubGossip} is another model checker, however now for strictly the
+gossip problem. This program has a significant advantage over the other two
+pieces of software; namely that it is capable of planning. It does this by
+generating all of the possible sequences of calls on the graph and then checking
+which of these are successful (i.e., after execution of all of the calls the
+graph is in some successful state) and which are not. It also has further
+capabilities for studying protocols deeply, however these are not relevant to
+our thesis.
+
+Although the methods used within this software are very different to the ones
+used in our implementation, this system proved to be very useful for testing
+purposes, due to its simplicity of use. The results returned by our software
+during testing were verified using this system. Further elaboration on this will
+be given in the evaluation section of this thesis.
+
+One limitation of this system is that is may only handle gossip states, and not
+generic epistemic models. Also limiting is that it enumerates all possible call
+sequences from the initial state; we are only interested in successful ones.
+This means that we have the possibility of lots of wasted computation if we need
+to validate lots of unsuccessful paths before we get to a successful one. 
+
+\subsubsection{SMCDEL}
+
+SMCDEL is the most sophisticated of the three pieces of software. A technical
+report is given in \cite{SMCDEL}, whilst a lot of the underlying theory is in
+\cite{MalvinThesis}. The main difference is that it uses \textit{symbolic model
+  checking}, a method put forward in \cite{SymbolicModelChecking}. This gives a
+much more efficient implementation \textbf{why}?, as can be seen in the
+Chapter 4 of \cite{MalvinThesis}.
+
+This software is capable of efficiently model checking all classes of epistemic
+models, and also has capacity for planning; however this side of the program is
+not well-displayed, and it is unclear precisely how to use it. Furthermore, due
+to a reasonably unpleasant interface we choose not to use this software for
+benchmarking and instead use the simpler \cite{GithubGossip}. 
 
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
 
 \printbibliography[title={Bibliography}]
 
