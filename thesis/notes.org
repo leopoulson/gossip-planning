@@ -205,16 +205,36 @@ communicate highly technical material.
 ***** Gossip
 ***** SMCDEL
 **** General theory of Uniform Strategies
+***** DONE A recap on what transducers are
+      CLOSED: [2019-04-10 Wed 11:27]
+***** DONE Game Arenas
+      CLOSED: [2019-04-10 Wed 09:42]
+***** DONE Powerset Arenas & Construction
+      CLOSED: [2019-04-10 Wed 11:27]
+***** DONE Lifting Transducers
+      CLOSED: [2019-04-10 Wed 11:27]
 
 ** Algorithm & Implementation (10-20 pages)
 *** Purpose 
-    The purpose of this section is to back up what we said in the initial section; that our work has been difficult and challenging. 
-    We want to communicate that we have indeed done a substantial piece of work.
+    The purpose of this section is to back up what we said in the initial
+    section; that our work has been difficult and challenging. We want to
+    communicate that we have indeed done a substantial piece of work.
 
  
 *** Algorithm
-    In here, we want to give an overview of what the algorithm consists of. This should include an example run. 
-    We also need to make clear our contributions; what does this do, what does it add, etc
+    In here, we want to give an overview of what the algorithm consists of. This
+    should include an example run. We also need to make clear our contributions;
+    what does this do, what does it add, etc
+**** Some kind of introduction
+     Mention that the algorithm stated is a valuable addition to the thesis and
+     is one of the goals
+     
+     Also discuss where it came from and how it differs from existing processes? 
+**** ME* - what it is and does, and how it is built
+***** 
+**** Our version of the powerset construction
+**** Compositions of automata (union, negation of formulas etc)
+
 *** Implementation 
     Here we would like to discuss implementation details and design choices.
 **** Why Haskell

@@ -434,6 +434,208 @@ not well-displayed, and it is unclear precisely how to use it. Furthermore, due
 to a reasonably unpleasant interface we choose not to use this software for
 benchmarking and instead use the simpler \cite{GithubGossip}. 
 
+\subsection{Uniform Strategies}
+
+In this thesis, we use a lot of ideas from \cite{AutomataTechniques}. This paper
+puts forward a method for epistemic planning, through use of automata
+representing states of the model and events in the event model as the states and
+transitions respectively. This then references a process in
+\cite{UniformStrategies} for the creation of an automata which has a set of the
+other indistinguishable states baked into the states of the automata. This is a
+very useful thing for our context, as it means that we can evaluate formulas of
+the form $K_a \phi$ \textit{positionally}; that is, we need only to look at the
+state to be able to evaluate the formula. This is in contrast to the
+alternative, which is to check our current state then compute the possible call
+sequences that are indistinguishable from our current one, and then go and check
+there too, and so on.
+
+The process in \cite{UniformStrategies} is very verbose and is beyond the scope
+of this thesis; however, in order to illustrate the fact that our algorithm is a
+special case of the process, we give a brief introduction to the process and its
+theory. We slightly change some of the definitions to lend itself better to our
+scenario. The setting is game theory; hence the frequent references to plays and
+strategies.
+
+\subsubsection{Game Arenas}
+
+A game with \textit{imperfect information} is a game in which the players have
+some uncertainty concerning hte current configuration of the game (for example
+Poker; a player does not know which cards are in the other players' hands). A
+player in such a game cannot plan to play differently in a situation she cannot
+distinguish; hence we have to define her strategy \textit{uniformly} across
+situations she cannot distinguish. 
+
+We consider two-player turn-based games played on a some graph, where the
+vertices are labelled with propositions. These propositions hold some useful
+information about the state; it could be what people know about it, or some fact
+about the environment the player is in and so on. This set of propositions will
+be referred to as $AP$. 
+
+Then a game arena is a structure $\mc{G} = (V, E, v_I, l)$ where $V = V_1 \uplus
+V_2$ \footnote{We use $\uplus$ here to indicate that this is a partition} is a
+set of positions split between those of Player 1 ($V_1$) and those of Player 2
+($V_2$). $E \subseteq (V_1 \times V_2) \cup (V_2 \times V_1)$ is the set of
+edges, $v_I \in V$ is the initial position and $l : V \rightarrow \mc{P}(AP)$ is
+a valuation function, which maps each position to the finite set of propositions
+that are true at it.
+
+\subsubsection{Transducers}
+
+We give a quick recap of transducers, as they are used heavily in the next two
+sections. A transducer is like a nondeterministic finite automaton with two
+tapes; an \textit{input} tape and an \textit{output} tape. The transducer reads
+an input finite wood on its input and writes a finite word on its output tape.
+Hence a transducer defines a binary relation. Relations recognised by a
+transducer are called \textit{regular} or \textit{rational} relations. 
+
+A transducer is a 6-tuple $T = (Q, \Sigma, \Gamma, I, F, \Delta)$, where $Q$ is
+a finite set of states, $\Sigma$ is the input alphabet, $\Gamma$ is the output
+alphabet, $I \subseteq Q$ is a finite set of initial states, $F \subseteq Q$ is
+a finite set of final states, and $\Delta \subseteq Q \times \left( \Sigma \cup
+  \{\epsilon\} \right) \times \left( \Gamma \cup \{\epsilon\} \right) \times Q$
+is the transition function.
+
+$(q, a, b, q') \in \Delta$ means that the transducer can move from state $q$ to
+state $q'$ by reading $a$ from the input tape and writing $b$ to the output
+tape. Then we can define the extended transition relation $\Delta^\ast$ as the
+smallest relation satisfying:
+
+\begin{itemize}
+\item for all $q \in Q$, $(q, \epsilon, \epsilon, q) \in \Delta^\ast$
+\item if $(q, w, w', q') \in \Delta^\ast$ and $(q', a, b, q'') \in \Delta$, then
+  $(q, w . a, w' . b, q'') \in \Delta^\ast$
+  
+\end{itemize}
+
+We can see $\Delta^\ast$ as the transitive closure of $\Delta$. We abbreviate
+$(q, w, w', q') \in \Delta^\ast$ to $q \rsarrow_{w \mid w'} q'$ in the rest of
+this section.
+
+Finally, we say that the relation recognised by some transducer $T$ is
+
+\begin{align*}
+  [T] ::= \left\{ (w, w') \mid w \in \Sigma^\ast, w' \in \Gamma^\ast, \exists q_F \in F, \exists q_i \in I, q_i \rsarrow_{w \mid w'} q_F \right\}
+\end{align*}
+
+\subsubsection{The Powerset Arena}
+\label{sec:PowersetArena}
+
+In games with imperfect information, the information set of a player after a
+certain play is the set of positions she may possibly be in, consistent with
+what she has observed\footnote{For instance in a game of poker with one deck of cards, a
+player may have no idea what the other players have in their hands except that
+they know they don't have the cards the player has in their own hands, nor the
+cards face-up on the table.}. We can define a similar notion in our setting, and
+we show that this is sufficient to build a powerset arena in which formulas of
+the form $K_a \phi$, where $\phi$ is propositional, can be evaluated positionally. 
+
+For an arena \tmc{G} and a transducer $T$ over finite sequences of events $e_i \in
+E$, we construct this automata $\widehat{\mc{G}}$ in which we can evaluate
+formulas of the form $K_i \phi$... 
+
+Our new information set after a move occurs cannot be computed knowing only the
+previous information set and the new position; we need to simulate the
+nondeterministic execution of $T$, taking as input the sequence of positions
+played and writing as output the related plays. Precisely, we need two things;
+the set of states the transducer may be in after reading the sequence of
+positions played so far, and for each of these states the set of possible last
+positions written on the output tape. We need only remember the last letter and
+not the whole tape because the information set we aim to compute is just the set
+of the last positions of related plays.
+
+Then our positions are of the form $(v, S, Last)$, where $v \in V$, $S \subseteq
+Q$, where $Q$ is the set of states in the transducer and $S$ is the set of
+possible current states of $T$, and $Last : S -> \mc{P}(V)$\footnote{It may be
+  more helpful to think of this as something a bit more tangible than a
+  function, e.g. a list of tuples $(S, [P])$} associates to a state $q \in S$
+the set of the possible last positions on the output tape fo $T$ if the current
+state is $q$. The transitions in this arena follow those in \tmc{G}, except we
+now maintain the additional information about the configuration of the
+transducer.
+
+To construct the initial position $\widehat{v_I} = (v_I, S_I, Last_I) \in
+\widehat{\mc{G}}$, we need to simulate the execution of $T$ starting from its
+initial state and reading $v_I$. To do this, we introduce an artificial position
+$\widehat{v_{-1}} = (v_{-1}, S_{-1}, Last_{-1})$, where $v_{-1} \not \in V$ is
+some fresh position, $S_{-1} = \{q_i\}$ where $q_i$ is the initial state of the
+transducer because before starting the transducer is in its initial state, and
+$Last_{-1} (q_i) = \emptyset$ because we have nothing written on the output
+tape.  
+
+\bigskip
+
+We now come onto defining \tmc{G}. Let $\mc{G} = (V, E, v_I, l)$ be an arena and
+$T = (Q, V, q_i, Q_F, \Delta)$ be an FST. Then we define the arena
+$\widehat{\mc{G}} = (\widehat{V}, \widehat{E}, \widehat{v_I}, \widehat{l})$ as:
+
+\begin{itemize}
+\item $\widehat{V} = V \times \mc{P}(Q) \times (Q \rightarrow \mc{P}(V))$
+\item $(u, S, Last) \widehat{\rightarrow} (v, S', Last')$ if
+  \begin{itemize}
+  \item $u = v_{-1} \text{ and } v = v_I, \text{ or } u \rightarrow v$,
+  \item $S' = \left\{q' \mid \exists q \in S, \exists \lambda' \in V^\ast, q
+      \rsarrow_{v \mid \lambda'} q' \right\}$ and
+  \item $Last' (q') = \left\{ v' \mid \exists q \in S, \exists \lambda' \in
+      V^\ast, q \rsarrow_{v \mid \lambda' \circ v'} q', \text{ or } q \rsarrow_{v \mid
+        \epsilon} q' \text{ and } v' \in Last(q) \right\}$
+  \end{itemize}
+\item $\widehat{v_I}$ is the only $\widehat{v} \in \widehat{V}$ such that
+  $\widehat{v}_{-1} \widehat{\rightarrow} \widehat{v}$.
+\item $\widehat{l}(\widehat{v}) = l (v)$ if $\widehat{v}= (v, S, Last)$. 
+\end{itemize}
+
+The definition of transitons is quite complicated, and as such we give a high-level
+explanation of it. Regarding the definition of the transitions,
+the first point means that our transitions in $\widehat{E}$ follow those in $E$,
+except for the transition leaving $\widehat{v_{-1}}$, which we use to define
+$\widehat{v_I}$. 
+
+The second point expresses that when we move from $u$ to $v$ in \tmc{G}, we give
+$v$ as input to the transducer. Then the set of states that we can be in, that
+is, $S'$, is the set of states that can be reached from some previous possible
+state in $q \in S$ by reading $v$ on the input tape and outputting some sequence
+$\lambda'$.
+
+Finally, the third point expresses that if some position $v'$ is at the end of
+the output tape after the transducer reads $v$ and reaches $q$, then it's either
+because while reading $v$ the last letter it wrote is $v'$, or it wrote nothing
+and $v'$ was already at the end of the output tape before reading $v$. 
+
+Finally, we say that $\widehat{v}_I$ is the only successor of
+$\widehat{v}_{-1}$, and that the valuation of a position in the powerset arena
+is the valuation of the underlying position in the original arena. 
+
+\subsubsection{Lifting Transducers}
+
+We can keep on repeating this process, creating a power-powerset arena
+$\widehat{\widehat{G}}$. However we first need to lift our transducer $T$ where
+$[T] \subseteq Plays_\ast \times Plays_\ast$ to a transducer $\widehat{T}$ where
+$[\widehat{T}] \subseteq \widehat{Plays_\ast} \times \widehat{Plays_\ast}$.
+
+We write $T\downarrow$ for the transducer that computers the bijective function
+$f$ that maps a play $\widehat{p} \in \wh{Plays_\ast}$ to the underlying play $p
+\in Player_\ast$, and $T\uparrow$ for the deterministic transducer that computes
+$f^{-1}$. Both can be easily constructed from our powerset arena $\wh{G}$.
+
+Then the lift of a transducer $T$ is $\wh{T} = T\downarrow \circ T \circ
+T\uparrow$.
+
+Once we have the transducer $\wh{T}$, we can repeat the process in Section
+\ref{sec:PowersetArena} with $\wh{G}$ to get $\wh{\wh{G}}$, and so on ad
+infinitum. $\wh{\wh{G}}$ would allow us to positionally check formulae of the
+form $K_i K_j \phi$.
+
+\newpage
+
+\section{Algorithm}
+
+We now give a description of the algorithm we put forward in order to plan for
+epistemic models.
+
+\textbf{TODO: Add some more to this}.
+
+\subsection{\mestar}
+
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
