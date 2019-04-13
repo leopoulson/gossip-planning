@@ -146,12 +146,14 @@ standardEventModel ags = EvMo calls (callRel calls ags)
     callRel evs ags = [(ag, unrel ag evs) | ag <- ags]
     unrel ag evs = [[ev] | ev <- evs, callIncludes ev ag] ++ [[ev | ev <- evs, not $ callIncludes ev ag]]
 
+midProps :: [Agent] -> [GosProp]
+midProps ags = [S i i | i <- ags] ++ [N i i | i <- ags]
 
 standardEpistModel :: [Agent] -> [GosProp] -> EpistM StateC GosProp
 standardEpistModel ags fs = Mo
   [State (0, [])]
   ags
-  [(State (0, []), map P fs)]
+  [(State (0, []), map P fs ++ map P (midProps ags))]
   (map (\ag -> (ag, [[State (0, [])]])) ags)
   [State (0, [])]
   (produceAllProps ags)

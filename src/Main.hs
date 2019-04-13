@@ -18,7 +18,26 @@ import Data.Either (rights)
 
 main :: IO ()
 -- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
-main = runTests 5 5
+main = runTests 4 100
+
+-- thesisModel :: EpistM StateC GosProp
+-- thesisModel = Mo
+--     [State (0, [])]
+--     [a, b, c, d]
+--     [(State (0, []), [P (N a b), P (N b c), P (N c d)])]
+--     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
+--     [State (0, [])]
+--     (produceAllProps [a, b, c, d])
+
+thesisModel :: EpistM StateC GosProp
+thesisModel = standardEpistModel [a, b, c, d] [N a b, N b c, N c d]
+  
+thesisEvModel :: EventModel Call GosProp
+thesisEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
+
+saThesis :: FSM CallChar (PState (QState GosProp))
+saThesis = createSolvingAutomata ((allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
+
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
