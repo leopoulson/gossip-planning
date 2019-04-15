@@ -8,8 +8,9 @@ import FSM
 import FST
 import RS
 import Data.Maybe
-import Data.List (sort)
+import Data.List (sort, subsequences)
 import qualified Data.Set as Set
+-- import qualified Data.HashSet as Set
 
 import Debug.Trace
 
@@ -52,7 +53,10 @@ powerList [] = [[]]
 powerList (x : xs) = powerList xs ++ map (x:) (powerList xs)
 
 getFStates :: Prop p => EpistM (State ev) p -> [QState p]
-getFStates (Mo _ ags _ _ _ props)= fmap Q $ fmap Set.fromList $ powerList $ props
+getFStates (Mo _ ags _ _ _ props) = fmap Q $ powerSet $ props
+
+powerSet :: Ord a => Set.Set a -> [(Set.Set a)]
+powerSet s = map Set.fromList $ subsequences $ Set.toList s
 
 simpleAccept :: QState p -> Bool
 simpleAccept (Q _)      = True
@@ -84,7 +88,8 @@ meTrans _                 _         (QInit, Right _)      = Nothing
 meTrans _                 _         (Q _  , Left _)       = Nothing
 meTrans (Mo _ _ _ _ _ props) evm    (Q ps , Right ev)
     | not $ ps `models` pre evm ev                        = Nothing
-    | otherwise                                           = Just $  Q . Set.fromList $ [p | p <- props, ps `models` post evm (ev, p)]
+    | otherwise                                           = Just . Q $ Set.filter (\p -> ps `models` post evm (ev, p)) props
+                                                                    -- [p | p <- props, ps `models` post evm (ev, p)]
 
 evalQState :: Prop p => Form p -> QState p -> Bool
 evalQState form (Q ps) = models ps form

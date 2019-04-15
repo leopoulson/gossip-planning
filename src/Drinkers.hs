@@ -13,6 +13,7 @@ import Powerset
 import Prelude hiding (fst, snd)
 import Data.Maybe (fromMaybe)
 import Data.List (nub)
+import qualified Data.Set as Set
 
 bools = [True, False]
 
@@ -51,7 +52,7 @@ initBar = Mo states [a, b, c] val rels [State (0, [])] alls-- [(True, True, True
 
     rels = [rela, relb, relc]
     val = zip [makeState n | n <- [0 .. 7]] [[P (b1, b2, b3)] | b1 <- bools, b2 <- bools, b3 <- bools]
-    alls = [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
+    alls = Set.fromList [(b1, b2, b3) | b1 <- bools, b2 <- bools, b3 <- bools]
 
 barEv :: EventModel AmAn TP
 barEv = EvMo [dkA, dkB, dkC, allC] rels pre post
@@ -132,7 +133,7 @@ abModel = Mo
   [(State (0, []), [P Succ]), (State (1, []), [])]
   [(a, [[(State (0, [])), (State (1, []))]]), (b, [[(State (0, [])), (State (1, []))]])]
   [State (0, []), State (1, [])]
-  [Succ]
+  (Set.fromList [Succ])
 
 postEventModel :: EventModel Outcome Pos
 postEventModel = EvMo

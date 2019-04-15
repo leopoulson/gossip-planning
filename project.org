@@ -219,8 +219,9 @@
 
 ** GHC Profiling
 
-   GHC has profiling built in; this is very nice; [[https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html][here is the link]]. 
-   It gives us a breakdown of where most of the time is spent during the tests. This means we can improve the program by making the bottlenecked areas more efficient.
+   GHC has profiling built in; this is very nice; [[https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html][here is the link]]. It gives us
+   a breakdown of where most of the time is spent during the tests. This means
+   we can improve the program by making the bottlenecked areas more efficient.
 
    To save time in the future:
    
@@ -321,6 +322,13 @@
 |      |       |        |        |
 
 This is a weird result, as we suddenly lose all of the enqueue time from the profile, yet total time increases. 
+*** Eight - Change props to be a set - 15/4 
+    Had a holiday!
+
+
+    Here I changed the set of props to be a set rather than a list. This dropped
+    400MB when running 100 tests - really nice. This is because we no longer
+    have to call Set.fromList; we just filter the set. We also lost about 0.1s on 100 turns. 
 
 * Existing Software
 ** Gattinger - Gossip
