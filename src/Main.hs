@@ -36,7 +36,7 @@ thesisEvModel :: EventModel Call GosProp
 thesisEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saThesis :: FSM CallChar (PState (QState GosProp))
-saThesis = createSolvingAutomata ((allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
+saThesis = createSolvingAutomata (K a (P (S b c))) thesisModel thesisEvModel knowFilter
 
 
 threeCalls :: Maybe [Either StateC Call]

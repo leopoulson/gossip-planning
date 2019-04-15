@@ -472,7 +472,7 @@ The transition $\delta(q_{N_b a, N_a c}, ba)$ then takes us to the state labelle
 You may wonder what happens to calls we cannot make; for instance, call $cb$ from our initial state. If you inspect the definition for $\delta$ in Section \ref{subsec:regularME*} we see that if $v \not \models \pre (e)$ then the transition is undefined; that is, there is no transition, it is rejected. This means that we can build up a tree of knowledge states, with calls permitted \textit{at the origin state} as transitions between them. We can see an example of this for the gossip state $\{N_b a, N_a c\}$ below. 
 
 \begin{center}
-    \begin{tikzpicture}[every node part/.style={align=center}]
+    \begin{tikzpicture}r
         \node (a) [draw, rounded rectangle] at (4, 2) {$N_a c, N_b a$};
         \node (b) [draw, rounded rectangle] at (6, 0) {
             \begin{tabular}[c]

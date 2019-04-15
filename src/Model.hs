@@ -33,7 +33,7 @@ data EpistM st p = Mo {
     val :: Valuation st p,             -- Valuation function; \pi : World -> Set of props.
     eprel :: AgentRel st,            -- Epistemic relation between worlds
     actual :: [st],                  -- Set of pointed worlds.
-    allProps :: [p]
+    allProps :: [p] 
     }
 
 type PointedEpM st p = (EpistM st p, st)  -- This is a pointed model. 
@@ -96,6 +96,7 @@ instance Ord Call where
 -- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
 class (Show p, Ord p) => Prop p where
   evalProp :: Eq st => p -> EpistM st p -> st -> Bool
+  allProps' :: [Agent] -> [p]
 
 data GosProp = S Agent Agent | N Agent Agent deriving (Eq, Show)
 
@@ -106,6 +107,7 @@ instance Prop GosProp where
     evalProp (S i j) m w 
       | i == j    = True
       | otherwise = P (S i j) `elem` tval m w
+    allProps' ags = [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
 
 
 -- This lets us access the relations for a given agent
@@ -203,7 +205,7 @@ update' epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
                                       es <- fromMaybe [] (lookup agent $ evrel evm)]
     val' = [(s, ps s) | s <- states']
     ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
-    props = allProps epm
+    props = allProps' (agents epm)
 
 updateSingle :: (Eq ev, Prop p, Show ev) => EpistM (State ev) p -> PointedEvM ev p -> EpistM (State ev) p
 updateSingle epm (evm, ev) = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)

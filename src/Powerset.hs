@@ -237,8 +237,14 @@ hardLookup a b = fromMaybe (undefined) $ lookup a b
 -- Or just when we get an and behave differently?
 -- This is screaming out for a typeclass. This would make all of our worries go away
 createSolvingAutomata :: (Eq ev, Show ev, Prop p) => Form p -> EpistM (State ev) p -> EventModel ev p -> (Agent -> TransFilter (PState (QState p)) (Character ev)) -> FSM (Character ev) (PState (QState p))
-createSolvingAutomata form@(K agent phi) ep ev tfilter = setStatesReachableInit $ setSuccessfulFormula form $ fixInitial agent ep $
-                          buildPSA (createSolvingAutomata phi ep ev tfilter) (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev tfilter)) (tfilter agent)
+createSolvingAutomata form@(K agent phi) ep ev tfilter 
+    = setStatesReachableInit $ 
+      setSuccessfulFormula form $ 
+      fixInitial agent ep $
+      buildPSA 
+               (createSolvingAutomata phi ep ev tfilter) 
+               (buildComposedSS agent ep ev (createSolvingAutomata phi ep ev tfilter)) 
+               (tfilter agent)
 
 createSolvingAutomata (Not phi) ep ev tfilter = complementFSM $ createSolvingAutomata phi ep ev tfilter
 

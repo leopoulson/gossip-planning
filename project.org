@@ -1,4 +1,13 @@
 * Main Project TODOs
+** TODO Change meTrans to not use list comprehension
+   Rather, we want to keep the set of all props in the epistemic model as a Set
+   rather than a list. This will give us a speed increase, as we don't have to
+   call Set.fromList all the time.
+** TODO Think about OR again
+   We might be able to just do this by taking the intersection and setting the
+   successful states to be those where *any* of the states in the list are
+   successful? 
+** TODO Update the Prop typeclass to provide an instance for all propositions
 ** TODO Fix NOT over automata 
    We can probably just do this by taking the complement?
    Weird still broken 

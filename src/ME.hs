@@ -79,15 +79,12 @@ idProps :: [Agent] -> [GosProp]
 idProps ags = [S i j | i <- ags, j <- ags, i == j] ++ [N i j | i <- ags, j <- ags, i == j]
 
 meTrans :: (Prop p, Eq ev) => EpistM (State ev) p -> EventModel ev p -> Transition (QState p) (Character ev)
-meTrans (Mo _ _ v _ _ _)    _                (QInit, Left state)   = Just $ Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
-meTrans _                 _                (QInit, Right _)      = Nothing
-meTrans _                 _                (Q _  , Left _)       = Nothing
-meTrans (Mo _ ags _ _ _ props)  evm              (Q ps , Right ev)
-    | not $ psID `listModels` pre evm ev                             = Nothing
-    -- This is quite bad. Doing Set.fromList here is very costly. Must find another way to do this. 
-    | otherwise                                                  = Just $  Q . Set.fromList $ [p | p <- props, psID `listModels` post evm (ev, p)]
-    where
-        psID = Set.toList ps -- ++ idProps ags
+meTrans (Mo _ _ v _ _ _)    _       (QInit, Left state)   = Just $ Q . Set.fromList . getForms $ fromMaybe undefined (lookup state v)
+meTrans _                 _         (QInit, Right _)      = Nothing
+meTrans _                 _         (Q _  , Left _)       = Nothing
+meTrans (Mo _ _ _ _ _ props) evm    (Q ps , Right ev)
+    | not $ ps `models` pre evm ev                        = Nothing
+    | otherwise                                           = Just $  Q . Set.fromList $ [p | p <- props, ps `models` post evm (ev, p)]
 
 evalQState :: Prop p => Form p -> QState p -> Bool
 evalQState form (Q ps) = models ps form

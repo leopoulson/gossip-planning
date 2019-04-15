@@ -8,7 +8,7 @@
     algorithm and the implementation.
 
     In here, we need to argue that the contributions are: 
-
+    
 **** Important 
      The fact that there's so much literature on the topic is a testament to the it being an important work. 
      Perhaps we can convey this point in the general introduction part. 
@@ -24,7 +24,6 @@
      We can mention that there are existing checkers for this (e.g. DEMO-S5,
      SMCDEL, ...), but none that perform it using the automata approach. We can
      also just cite the (modern) papers on the topic. 
-
 **** Interesting 
      Here, we can just discuss the gossip problem in itself. It *is* an
      interesting topic, and as such we can just talk about it; little particular
@@ -50,16 +49,16 @@ the proposed aims and objectives.  Ideally, it is written at a fairly
 high-level, and easily understood by a reader who is technically
 competent but not an expert in the topic itself.
 
-In short, the goal is to answer three questions for the reader.  First,
-what is the project topic, or problem being investigated?  Second, why
-is the topic important, or rather why should the reader care about it?
-For example, why there is a need for this project (e.g., lack of similar
-software or deficiency in existing software), who will benefit from the
-project and in what way (e.g., end-users, or software developers) what
-work does the project build on and why is the selected approach either
-important and/or interesting (e.g., fills a gap in literature, applies
-results from another field to a new problem).  Finally, what are the
-central challenges involved and why are they significant?
+In short, the goal is to answer three questions for the reader. 
+First, what is the project topic, or problem being investigated? 
+Second, why is the topic important, or rather why should the reader care about
+it? For example, why there is a need for this project (e.g., lack of similar
+software or deficiency in existing software), who will benefit from the project
+and in what way (e.g., end-users, or software developers) what work does the
+project build on and why is the selected approach either important and/or
+interesting (e.g., fills a gap in literature, applies results from another field
+to a new problem). 
+Finally, what are the central challenges involved and why are they significant?
 
 The chapter should conclude with a concise bullet point list that
 summarises the aims and objectives.  For example:
@@ -70,7 +69,6 @@ The high-level objective of this project is to reduce the performance
 gap between hardware and software implementations of modular arithmetic.
 More specifically, the concrete aims are:
 
-\begin{enumerate}
 \item Research and survey literature on public-key cryptography and
       identify the state of the art in exponentiation algorithms.
 \item Improve the state of the art algorithm so that it can be used
@@ -81,13 +79,10 @@ More specifically, the concrete aims are:
 \item Use the framework to perform a study of algorithm performance
       in terms of time and space, and show the proposed improvements
       are worthwhile.
-      \end{enumerate}
-    \end{quote}
 
 *** Structure 
 **** General Introduction
      Introduce the problem, etc
-**** Perhaps some kind of project aim section?
 **** Motivation
      Talk about why it's interesting and why to spend so much time on it
 ***** DONE Introduction to the classic gossip problem
@@ -99,15 +94,39 @@ More specifically, the concrete aims are:
       the gossip problem; to make it clear that the project is important. 
       We should add some more of these; there's not really enough right now.
       There are very many though so I'm sure we can find some!
+***** TODO Find an example of the gossip problem requiring that every agent knows everyone is an expert. 
 ***** TODO Provide some examples of gossip solvers / model checkers from the literature. 
       We need to find out if SMCDEL is capable of planning, or just
       verification. 
-***** TODO An introduction to planning, especially epistemic planning. 
-***** TODO Find an example of the gossip problem requiring that every agent knows everyone is an expert. 
+***** DONE An introduction to planning, especially epistemic planning. 
+      CLOSED: [2019-04-13 Sat 10:53]
+***** Introduce model checking
+**** Three questions
+***** What is the project topic, or problem being investigated?
+      This will be covered in the brief intro...
+***** Why is the topic important, or why should the reader care?
+      We need to communicate that there is a need for this project. We don't
+      have an end-user as such - however, if we can communicate that this topic
+      is frequently researched then we should be able to show the reader that
+      the project is worthwhile?
+
+      It would be good here to emphasise that our technique is very different to
+      the methods used in the existing tools; that no one has yet implemented
+      this system through use of automata. This will kind of say that it's a
+      worthwhile thing in itself - good. 
+***** What are the central challenges involved and why are they significant? 
+      One central challenge is the mass of new background required - a
+      significant amount of theory beyond what's covered on the core degree. 
 **** Declare contributions
      Bezier curve example has a good section on this; just bullet pointing them.
      It would be good to talk about the *challenges*; this would convey to the
      marker where the difficulties came from. 
+***** Research and survey literature on the topic & identify the state of the art
+***** Implement a system to solve the planning problem for the gossip problem 
+***** Ensure that this system will also successfully plan for other models of knowledge
+***** Implement a testing system with which we can check that our results are correct
+***** Perform a study of performance in terms of time and space, and explain this. 
+***** --------------------------
 ***** Formalising the algorithm discussed in the paper
 ***** Implementation in Haskell
 ***** How our system improves on the existing software available? 
@@ -175,22 +194,17 @@ communicate highly technical material.
       do an example in gossip problem, as we won't have introduced it yet
 **** Formalise the gossip problem
 ***** DONE Introduce it as in Tij71?
-      CLOSED: [2019-04-07 Sun 13:11]
       Phone calls between one another... 
 ***** DONE Then introduce dynamic gossip
-      CLOSED: [2019-04-07 Sun 15:40]
       Mainly highlight that the graph changes over time. Show some examples
 ***** DONE Definitely mention something about protocols. 
-      CLOSED: [2019-04-07 Sun 15:40]
       We will need to mention the restriction of just propositional protocols;
       however, this should come after we've introduced planning and the
       restriction that this puts on us. 
 ***** TODO Then formalise everything afterwards. 
 **** Formalising of Planning
 ***** DONE General overview - what it is
-      CLOSED: [2019-04-08 Mon 17:44]
 ***** DONE Then talk about the epistemic variant of it? 
-      CLOSED: [2019-04-08 Mon 18:23]
       This might not really make sense - there's no particular distinction
       between the two
 ***** We should mention the effect of this on what we want to do
@@ -207,6 +221,7 @@ communicate highly technical material.
 **** General theory of Uniform Strategies
 ***** DONE A recap on what transducers are
       CLOSED: [2019-04-10 Wed 11:27]
+***** TODO Also add something about FSMs?
 ***** DONE Game Arenas
       CLOSED: [2019-04-10 Wed 09:42]
 ***** DONE Powerset Arenas & Construction
@@ -215,27 +230,46 @@ communicate highly technical material.
       CLOSED: [2019-04-10 Wed 11:27]
 
 ** Algorithm & Implementation (10-20 pages)
-*** Purpose 
+*** Purpose
     The purpose of this section is to back up what we said in the initial
     section; that our work has been difficult and challenging. We want to
     communicate that we have indeed done a substantial piece of work.
-
- 
 *** Algorithm
     In here, we want to give an overview of what the algorithm consists of. This
     should include an example run. We also need to make clear our contributions;
     what does this do, what does it add, etc
-**** Some kind of introduction
-     Mention that the algorithm stated is a valuable addition to the thesis and
-     is one of the goals
+**** Differences from literature
+***** Our Epistemic Models have initial states. 
+***** In ME* we never really make any transitions where we read a world. 
+      Indeed we need to change this in the code - eek !
+***** Knowledge Filter !!! 
+      DEFINITELY mention this... 
+**** Structure
+     We need to remember to highlight our contributions here. 
+     * Definitely highlight the specialisation of the uniform strategies 
+     * 
+***** DONE Some kind of introduction
+      CLOSED: [2019-04-12 Fri 10:36]
+      Mention that the algorithm stated is a valuable addition to the thesis and
+      is one of the goals
      
-     Also discuss where it came from and how it differs from existing processes? 
-**** ME* - what it is and does, and how it is built
-***** 
-**** Our version of the powerset construction
-**** Compositions of automata (union, negation of formulas etc)
-
-*** Implementation 
+      Also discuss where it came from and how it differs from existing processes? 
+****** Perhaps it would be good here to give a general overview of the algorithm before getting into the details. 
+***** ME* - what it is and does, and how it is built
+****** How it represents all possible paths through the automata it can take
+****** Problems with it (i.e, lack of powerset-ness)
+***** Our version of the powerset construction
+****** We need to address what precisely it is that our transducer does in this case. 
+       Mention construction of call-relating transducer, and then composition w/ identity.
+***** BFS on the resulting graph. 
+***** Compositions of automata (union, negation of formulas etc)
+      Quite straightforward to talk about ..
+***** Example run thru of algorithm
+****** First, the construction of ME*
+****** Construction of composed transducer 
+****** Next the powersetification of it
+****** And finally a run thru of BFS on it? 
+*** Implementation
     Here we would like to discuss implementation details and design choices.
 **** Why Haskell
       In this we can mention exploiting laziness, etc
@@ -243,11 +277,62 @@ communicate highly technical material.
 **** Why not to use an automata library 
      Not a particular reason for this as it stands lol. Perhaps this can be to do with the weirdness w/ the SSFST and normal FST composition? 
     
+**** Structure
+***** Introduction
+***** Discussion of software structure
+****** Model.hs 
+       This is the start of it all. 
+       * Discuss support for epistemic models and event models; 
+       * definitely highlight the difference btwn maths defn for ep models and
+         implementation. 
+       * Also update function
+       * MultiParamTypeClass
+****** ME.hs
+       This one keeps MEstar in it.
+       * Mention similarity of transition in ME to the formal representation
+       * Again, multi param type class to ensure a state can be evaluated 
+****** FSM and FST
+       These guys contain the machines. 
+       
+       We should address in here why we chose not to use an external library for
+       our machines. 
+       * We do perform some non-standard operations. Hence it would be nice to
+         have a good understanding and access to the foundations of the
+         machines.
+       * Lack of particularly good existing implementations (either very old or
+         overcomplicated [Kmett])
+
+****** Powerset.hs
+       * In here discuss how it slightly varies from the algorithmic
+         specification.
+       * Most pertinently, we need to address the filter that we use. Recognise
+         that this is rather dirty, yet we had to add it so as to force software
+         to match Malvin's. 
+       * Also mention the more tricky things about how we construct the
+         powersets recursively and so on. 
+
+****** BFSM,hs
+       * Just give a brief overview of how we implemented BFS.
+       * Here we could also mention difference lists? 
+***** Discussion of design decisions
+****** Why Haskell
+       * First-class functions and ease of partial application. This makes the
+         creation of the transition functions super simple, as we can just do it
+         during runtime ?
+       * Laziness
+       * Ability to have this set of states, but never truly enumerate it
+       * Similarity to mathematical notation - this pushed a lot of the
+         implemnetation difficulty onto the algorithm derivation
+****** Why not an automata library
+****** 
 ** Evaluation (5-10 pages)
 *** Purpose
-    Here we need to argue that we have *evidence* that we've *achieved* that which we say we had in the beginning. This is *backing up* our claims.
-    Note that the evaluation is commonly seen as a mark of a good project; a flimsy evaluation suggests that the writer has not really considered their work.
-    It is *definitely* in our interest to work hard on this section and fill it with good information. 
+    Here we need to argue that we have *evidence* that we've *achieved* that
+    which we say we had in the beginning. This is *backing up* our claims. Note
+    that the evaluation is commonly seen as a mark of a good project; a flimsy
+    evaluation suggests that the writer has not really considered their work. It
+    is *definitely* in our interest to work hard on this section and fill it
+    with good information.
 
     This chapter often acts to differentiate project quality: even if the work
     completed is of a high technical quality, critical yet objective evaluation
@@ -269,21 +354,28 @@ communicate highly technical material.
             draw some form of conclusion wrt. the aims and objectives,
             and
       \item evaluation of options and decisions within the project, and/or a
-          comparison with alternatives.
+            comparison with alternatives.
       \end{enumerate}
 
 *** Content
 **** Plan for testing 
-     Here we can talk about why we did testing in the way that we did and so on. 
-     Make sure to emphasise that we did consider the test plan prior to starting, and that it's been thought over heavily; this will no doubt reflect well than just going in willy-nilly
+     Here we can talk about why we did testing in the way that we did and so on.
+     Make sure to emphasise that we did consider the test plan prior to
+     starting, and that it's been thought over heavily; this will no doubt
+     reflect well than just going in willy-nilly
 **** Test results and comparison 
-     This is going to attest to what we say in the intro, about whether or not our implementation is optimal and so on. Make sure to profile Malvin's stuff and whatever. Would be great to discuss why these things occur. 
+     This is going to attest to what we say in the intro, about whether or not
+     our implementation is optimal and so on. Make sure to profile Malvin's
+     stuff and whatever. Would be great to discuss why these things occur.
 **** Sketch proof of correctness
-     Unsure about this. Perhaps this will just come as a direct consequence of it being derived from the uniform strategies section? 
+     Unsure about this. Perhaps this will just come as a direct consequence of
+     it being derived from the uniform strategies section?
 **** Point out negatives and explain
-     This is a really important part; if we have any negatives (trust me we DO) it would be very good to explain where these negatives come from. 
+     This is a really important part; if we have any negatives (trust me we DO)
+     it would be very good to explain where these negatives come from.
 **** Discussion of optimisation
-     Again this is just a chance to mention how we made it quick. Got a good history of this in the notes so this should be fine!
+     Again this is just a chance to mention how we made it quick. Got a good
+     history of this in the notes so this should be fine!
 
 ** Conclusion and Future Work (~3 pages)
 **** Reflection, summary, future work 
