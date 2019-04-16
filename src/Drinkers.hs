@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Drinkers where
 
@@ -10,9 +11,11 @@ import FSM
 import FST
 import Powerset
 
+import GHC.Generics (Generic)
 import Prelude hiding (fst, snd)
 import Data.Maybe (fromMaybe)
 import Data.List (nub)
+import Data.Hashable
 import qualified Data.Set as Set
 
 bools = [True, False]
@@ -119,12 +122,15 @@ dPSA = createSolvingAutomata (K a allBeer) initBar barEv idFilter
 
 -- Alice and Bob ---------
 
-data Pos     = Succ         deriving (Eq, Ord, Show)
-data Outcome = Get | NotGet deriving (Eq, Ord, Show)
+data Pos     = Succ         deriving (Eq, Ord, Show, Generic)
+data Outcome = Get | NotGet deriving (Eq, Ord, Show, Generic)
 
 instance Prop Pos where
   evalProp pr m w = (P pr) `elem` tval m w
 
+instance Hashable Pos
+
+instance Hashable Outcome
 
 abModel :: EpistM (State Outcome) Pos
 abModel = Mo

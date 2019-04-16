@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module AutoTests where
 
 import Verify
@@ -10,11 +12,13 @@ import ME
 import Powerset
 import RS
 
+import Test.QuickCheck
+
 import Data.Maybe (isJust, fromJust, isNothing)
 import Data.Either (rights)
 
 -- TODO: A lot of this could probably have been done with zip.
--- Perhaps it would be nice to update it to use this at a later date.
+-- Perhaps it wouldbe nice to update it to use this at a later date.
 
 runTests size n = putStrLn $ prettyPrintResults $ getWithNothings size n
 
@@ -81,13 +85,13 @@ abKnowAllExperts :: [Agent] -> Form GosProp
 abKnowAllExperts ags = And [K c (allExpertsAg ags), K d (allExpertsAg ags)]
 
 aKnowExperts :: [Agent] -> Form GosProp
-aKnowExperts ags = K d (allExpertsAg ags)
+aKnowExperts ags = K a (allExpertsAg ags)
 
 dKnowExperts :: [Agent] -> Form GosProp
 dKnowExperts ags = K d (allExpertsAg ags)
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula ags = allKnowAllExperts ags --K a (K b (dKnowExperts ags))
+successfulFormula = allExpertsAg --abKnowAllExperts
 
 
 prettyPrintResults :: [(Maybe [CallChar], Bool)] -> [Char]
@@ -130,6 +134,13 @@ getPhonebookModels size n = take n $ generateModelsPhonebook (getAgents size) pr
 mapBFS :: (Show p, Ord p) => [PSA Call p] -> [Maybe [CallChar]]
 mapBFS psas = map (extractCalls . doBFS) psas
 
--- This takes the number of agnets and generates the correct number of agents.
-getAgents :: Int -> [Agent]
-getAgents n = Ag <$> [0 .. (n - 1)]
+-- QuickCheck stuff
+
+getPSA :: EpistM StateC GosProp -> PSA Call GosProp
+getPSA mo = createSolvingAutomata (successfulFormula $ agents mo) mo (standardEventModel (agents mo) prec postUpdate) knowFilter
+
+getSolution :: PSA Call GosProp -> Maybe [CallChar]
+getSolution = extractCalls . doBFS
+
+qcfn :: EpistM StateC GosProp -> Bool
+qcfn model = snd $ verify (model, getSolution $ getPSA model)

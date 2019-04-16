@@ -25,13 +25,13 @@ allKnowExperts = Conj [K 0 precon allExperts, K 1 precon allExperts, K 2 precon 
 abKnowExperts = Conj [K 2 precon allExperts, K 3 precon allExperts]
 
 aKnowsExperts :: Form
-aKnowsExperts = K 3 precon allExperts
+aKnowsExperts = K 0 precon allExperts
 
 dKnowsExperts :: Form
 dKnowsExperts = K 3 precon allExperts
 
 winningFormula :: Form
-winningFormula = K 0 lns (K 1 lns dKnowsExperts)
+winningFormula = allExperts --abKnowExperts --abKnowExperts
 
 t = eval (graph4, [(0, 2), (1, 0), (0, 3), (1, 3), (2, 3)]) winningFormula
 

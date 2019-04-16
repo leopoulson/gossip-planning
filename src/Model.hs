@@ -1,17 +1,27 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model where
+
+import GHC.Generics (Generic) -- For hashing
 
 import Debug.Trace
 import Data.Maybe
-import qualified Data.Set as S 
+import qualified Data.Set as S
+
+import Data.Hashable
 -- import qualified Data.HashSet as S
 import Control.Applicative (liftA2)
 
-newtype Agent = Ag Int deriving (Eq)
+newtype Agent = Ag Int deriving (Eq, Generic)
+
+instance Hashable Agent
 
 type World = Int
 
-newtype State ev = State (World, [ev]) 
-    deriving (Eq, Ord)
+newtype State ev = State (World, [ev])
+    deriving (Eq, Ord, Generic)
+
+instance Hashable ev => Hashable (State ev)
 
 type StateC = State Call
 
@@ -19,7 +29,27 @@ type Rel a = [[a]]
 type AgentRel a = [(Agent, Rel a)]
 type Valuation st prp = [(st, [Form prp])]
 
-data Form prp = Top | P prp | Not (Form prp) | And [(Form prp)] | Or [(Form prp)] | K Agent (Form prp) deriving (Eq, Ord, Show)
+data Form prp = Top | P prp | Not (Form prp) | And [(Form prp)] | Or [(Form prp)] | K Agent (Form prp) deriving (Eq, Ord, Show, Generic)
+
+instance Hashable prp => Hashable (Form prp)
+
+-- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
+class (Show p, Ord p, Hashable p) => Prop p where
+  evalProp :: Eq st => p -> EpistM st p -> st -> Bool
+  allProps' :: [Agent] -> S.Set p
+
+data GosProp = S Agent Agent | N Agent Agent deriving (Eq, Show, Generic)
+
+instance Hashable GosProp
+
+instance Prop GosProp where
+    evalProp (N i j) m w
+      | i == j    = True
+      | otherwise = P (N i j) `elem` tval m w
+    evalProp (S i j) m w
+      | i == j    = True
+      | otherwise = P (S i j) `elem` tval m w
+    allProps' ags = S.fromList $ ([N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags])
 
 instance Functor (Form) where
   fmap f Top = Top
@@ -95,22 +125,6 @@ instance Ord GosProp where
 instance Ord Call where
     (Call a1 a2) `compare` (Call b1 b2) = if (a1 == b1) then a2 `compare` b2 else a1 `compare` b1
 
--- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
-class (Show p, Ord p) => Prop p where
-  evalProp :: Eq st => p -> EpistM st p -> st -> Bool
-  allProps' :: [Agent] -> S.Set p
-
-data GosProp = S Agent Agent | N Agent Agent deriving (Eq, Show)
-
-instance Prop GosProp where
-    evalProp (N i j) m w 
-      | i == j    = True
-      | otherwise = P (N i j) `elem` tval m w
-    evalProp (S i j) m w 
-      | i == j    = True
-      | otherwise = P (S i j) `elem` tval m w
-    allProps' ags = S.fromList $ [N i j | i <- ags, j <- ags] ++ [S i j | i <- ags, j <- ags]
-
 
 -- This lets us access the relations for a given agent
 rel :: EpistM st p -> Agent -> Rel st
@@ -157,7 +171,7 @@ standardEpistModel :: [Agent] -> [GosProp] -> EpistM StateC GosProp
 standardEpistModel ags fs = Mo
   [State (0, [])]
   ags
-  [(State (0, []), map P fs ++ map P (midProps ags))]
+  [(State (0, []), map P $ fs ++ midProps ags)]
   (map (\ag -> (ag, [[State (0, [])]])) ags)
   [State (0, [])]
   (produceAllProps ags)
@@ -207,7 +221,7 @@ update' epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
                                       ss <- fromMaybe [] (lookup agent $ eprel epm),
                                       es <- fromMaybe [] (lookup agent $ evrel evm)]
     val' = [(s, ps s) | s <- states']
-    ps s = S.toList $ S.mapMonotone P $ S.filter (\p -> satisfies (epm, trimLast s) (post evm (lastEv s, p))) props
+    ps s = S.toList $ S.map P $ S.filter (\p -> satisfies (epm, trimLast s) (post evm (lastEv s, p))) props
       -- [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
     props = allProps' (agents epm)
 
@@ -220,7 +234,7 @@ updateSingle epm (evm, ev) = Mo states' (agents epm) val' rels' (actual epm) (al
                                       ss <- fromMaybe [] (lookup agent $ eprel epm),
                                       es <- fromMaybe [] (lookup agent $ evrel evm)]
     val' = [(s, ps s) | s <- states']
-    ps s = S.toList $ S.mapMonotone P $ S.filter (\p -> satisfies (epm, trimLast s) (post evm (lastEv s, p))) props
+    ps s = S.toList $ S.map P $ S.filter (\p -> satisfies (epm, trimLast s) (post evm (lastEv s, p))) props
      -- [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
     props = allProps' (agents epm)
 

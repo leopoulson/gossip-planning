@@ -1,7 +1,10 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module MakeGraphs where
 
 import Model
 
+import Test.QuickCheck
 import Data.Maybe (fromMaybe)
 import Data.List (subsequences, sort)
 
@@ -9,6 +12,15 @@ import Data.List (subsequences, sort)
 type CallM = (Int, Int)
 type SequenceM = [CallM]
 type Phonebook = [[Int]]
+
+agentN :: Int
+agentN = 4
+
+instance Arbitrary (EpistM StateC GosProp) where
+  arbitrary = standardEpistModel (getAgents agentN) <$> (sublistOf $ allNumbers agentN)
+
+allNumbers :: Int -> [GosProp]
+allNumbers n = [N i j | i <- (getAgents agentN), j <- getAgents agentN, i /= j]
 
 -- This is just like generateModels, except we only have phone number knowledge;
 -- no one knows each others secret already
@@ -19,7 +31,7 @@ generateModels :: [Agent] -> Precondition Call GosProp -> [(EpistM StateC GosPro
 generateModels ags pre = map (\ps -> (standardEpistModel ags ps, standardEventModel ags pre postUpdate)) $ validKnowledgeStates ags
 
 validPhonebooks :: [Agent] -> [[GosProp]]
-validPhonebooks ags = map ((++) (idProps ags)) <$> subsequences . allPhonebooks $ ags
+validPhonebooks ags = subsequences . allPhonebooks $ ags
 
 idProps :: [Agent] -> [GosProp]
 idProps ags = [S i i | i <- ags] ++ [N i i | i <- ags]
@@ -84,3 +96,6 @@ fromProp _     = error "Not prop"
 isProp :: Form p -> Bool
 isProp (P _) = True
 isProp _     = False
+
+getAgents :: Int -> [Agent]
+getAgents n = Ag <$> [0 .. (n - 1)]
