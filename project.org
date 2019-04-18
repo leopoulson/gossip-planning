@@ -1,5 +1,6 @@
 * Main Project TODOs
-** TODO Change meTrans to not use list comprehension
+** DONE Change meTrans to not use list comprehension
+   CLOSED: [2019-04-18 Thu 09:33]
    Rather, we want to keep the set of all props in the epistemic model as a Set
    rather than a list. This will give us a speed increase, as we don't have to
    call Set.fromList all the time.
@@ -342,7 +343,6 @@ This is a weird result, as we suddenly lose all of the enqueue time from the pro
 
    Weirdly we need to put the protocol into the epistemic operator, but that is okay!
    
-
 * Optimisations & Improvements
 ** QState / PState
    Essentially 

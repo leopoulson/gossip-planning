@@ -1547,6 +1547,7 @@ allowing for simple visual verification that the code that we've written matches
 the specification. 
 
 \subsection{\texttt{ME.hs}}
+\label{sec:MEHaskell}
 
 We now come onto the module that handles construction of the automata \mestar.
 This is a slightly more interesting case.
@@ -1636,8 +1637,173 @@ transition $\delta(q, e')$.
 
 \subsection{\texttt{Powerset.hs}}
 
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \begin{center}
+    \begin{minted}{haskell}
+      data PState st = PList [PState st] 
+                     | PCon (PState st) 
+                            [PState st] 
+                     | PVar st 
+    \end{minted}
+  \end{center}
+  \caption{The \texttt{PState} datatype.}
+\end{wrapfigure}
+
 This module contains all of the functions pertaining to the powerset
 construction, as specified in \secref{sec:PowersetAdapted}.
+
+As before, we keep definitions very close to the mathematical specification. We
+introduce a new datatype, \texttt{PState}, which holds our states in the
+powerset. \texttt{PVar} is the ``atomic'' constructor, and it is here that the
+formulae are actually evaluated. \texttt{PCon} represents an actual state and
+the set of states indistinguishable from this state; such states arise when we
+want to evaluate a modal formula. Finally the \texttt{PList} constructor is used for
+conjunctions; we pass through all of the states in the list simultaneously.
+
+The reason we do this is so that we can create our automata recursively.
+Consider the function in \figref{fig:createSolvingAutomata}\footnote{For clarity
+  and brevity, we omit some of the supporting function calls, and also omit some
+  of the cases.}. This is the function we use to create the automata we traverse
+to find successful sequences of events; it pattern matches on the formula given
+in the first argument to decide the ``shape'' of the returned automata.
+
+Let us first consider the bottom case. We receive some formula, e.g. $S_{ab}
+\land S_{bc}$. Then we build an automata \mestar whose successful states are
+those which satisfy the formula $S_{ab} \land S_{bc}$, through the procedure in
+\secref{sec:MEHaskell}. 
+
+If it receives a formula $K_a \phi$, then we call the \texttt{buildPSA}
+function, which performs the powerset creation process as detailed earlier. Note
+that it does so with the automata that solves the formula $\phi$, invariant of
+the form of $\phi$ - it could be an atomic proposition or another modality, or a
+conjunction of modalities. 
+
+\begin{figure}[h]
+  \centering
+    \begin{minted}{haskell}
+      cSA :: Form p -> EpistM (State ev) p -> EventModel ev p
+             -> FSM (Character ev) (PState (QState p))
+      cSA form@(K agent phi) ep ev
+        = buildPSA 
+                   (cSA phi ep ev) 
+                   (buildComposedSS agent ep ev (cSA phi ep ev)) 
+
+      cSA (Not phi) ep ev = complement $ cSA phi ep ev tfilter
+
+      cSA (And phis) ep ev = case includesK (And phis) of
+        True  -> toPList $ intersection $ map (\phi -> cSA phi ep ev) phis
+        False -> makeP $ buildMEStar (And phis) ep ev
+
+      cSA phi ep ev = makeP $ buildMEStar phi ep ev
+    \end{minted}
+  \caption{The \texttt{createSolvingAutomata} function.}
+  \label{fig:createSolvingAutomata}
+\end{figure}
+
+\newpage
+
+\section{Evaluation}
+
+\subsection{Plan for Testing}
+
+Throughout development we used the Haskell library \texttt{HUnit}. This provides
+a wealth of combinators that we can use to tersely write unit tests for our
+functions. This was used in a standard manner; before implementing a function we
+would write tests for it, and then implement the function, ensuring it passes
+all tests and as such functions correctly.
+
+\bigskip
+
+However, more interesting is our plan for functional testing. This is the part
+of testing in which we check that the system \textit{correctly functions}, and
+will tell us if what we have implemented is correct or not.
+
+Although our system is capable of planning for any epistemic model and
+propositional event model, we chose to test solely on gossip models. This is
+for several reasons:
+
+\begin{itemize}
+\item Gossip models cover every part of the system (epistemic models, \mestar,
+  the powerset construction) and as such give us maximal test coverage;
+\item Testing with a certain class of models tells us that all of the code
+  works; the algorithm does not depend on what the particular model is. Hence if
+  we know it is correct for a certian class of models, it will also be correct
+  for any other class of models;
+\item We have an existing model checker speciailised for the Gossip problem that we can use
+  (\cite{GithubGossip});
+\item It is the class of models best understood by myself; hence if an error
+  arises it should be quite easy to understand. 
+\end{itemize}
+
+This in mind, we chose to use \cite{GithubGossip} to verify our results. It was
+chosen over the other two tools (\cite{SMCDEL}, \cite{DEMO-S5}) due to its ease
+of accessibility; we can provide it with just a list of lists encoding who knows
+who's phone number, and it will produce an epistemic model for us. This is very
+easily produced from the epistemic models in our software. This is a sharp
+contrast to \cite{SMCDEL}, which uses a text file based input - output interface
+which would have added significant complication to the testing process. We could
+have very easily used \cite{DEMO-S5}, given the similarity betweeen the Kripke
+models in our code and in \cite{DEMO-S5}, however \cite{GithubGossip} was
+eventually chosen due to the conversion between the two representations of a
+Gossip graph being so straightforward. The last thing we wanted to do was create
+some kind of bug within the testing software!
+
+\subsection{Testing Frameworks}
+
+The next decision to be made was how to actually go through with the testing
+process. Haskell offers the seminal property-based library \texttt{QuickCheck},
+which, when given a function $\texttt{a} \rightarrow \texttt{Bool}$ and a way to
+generate arbitrary values of type \texttt{a}, will test the function on these
+arbitrary values and ensure that the function returns $True$. All that we need
+to provide in order to generate these arbitrary values is an instance of the
+\texttt{Arbitrary} typeclass. We can see an example of this in \figref{fig:Arbitrary}.
+
+\begin{figure}[h]
+  \centering
+  \begin{minted}{haskell}
+      instance Arbitrary (EpistM StateC GosProp) where
+        arbitrary = standardEpistModel agents <$> (sublistOf $ allNumbers agents)
+  \end{minted}
+  \caption{An \texttt{Arbitrary} instance for an epistemic model.}
+  \label{fig:Arbitrary}
+\end{figure}
+
+Once we have this, we perform a breadth-first search on the automata generated
+by this epistemic model and the target formula in order to find either a path
+that takes us to a successful state, or a response telling us that no such path
+exists. Whatever the outcome, we then send this result and the original model to
+a function that converts our model to a model in the style of
+\cite{GithubGossip} and uses the model checker there to verify our answer.
+
+\bigskip
+
+\texttt{QuickCheck} was working well, however I quickly wanted to be able to
+check for every possible gossip graph. QuickCheck will sometimes repeat
+instances \footnote{To verify this, simply open up your nearest Haskell REPL,
+  import \texttt{QuickCheck}, and run the line of code \texttt{verboseCheck
+    (($\lambda$ s -> s == s) :: Bool -> Bool)}}; hence to get every single
+possible gossip graph I simply created a list with every single graph in and
+performed the same process of using the model checker from \cite{GithubGossip}
+on each graph.
+
+\bigskip
+
+The creation of gossip graphs is very straightforward; we just produce some set
+of propositions $N = \left\{ N_{ij} \right\}$ where $\forall N_{ij} \in N, i
+\not = j$. We only look for cases where the agents start out not knowing the
+phone number of any agent apart from each other - we call these
+\textit{phonebook} graphs. There are a few reasons for this;
+
+\begin{itemize}
+\item These cases are the only interesting ones. Any gossip graph where some
+  agent already knows the secret of another will either have the same call
+  sequence or a shorter one than the same graph, where no agent knows the secret
+  of any other.
+\item These cases are the most faithful to the applications of the gossip
+  problem in reality.
+\item On a pragmatic note, it is more straightforward to convert phonebook
+  graphs to the representation in \cite{GithubGossip} than non-phonebook graphs.
+\end{itemize}
 
 
 

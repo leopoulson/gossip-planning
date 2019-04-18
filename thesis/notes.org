@@ -324,7 +324,6 @@ communicate highly technical material.
        * Similarity to mathematical notation - this pushed a lot of the
          implemnetation difficulty onto the algorithm derivation
 ****** Why not an automata library
-****** 
 ** Evaluation (5-10 pages)
 *** Purpose
     Here we need to argue that we have *evidence* that we've *achieved* that
@@ -376,6 +375,25 @@ communicate highly technical material.
 **** Discussion of optimisation
      Again this is just a chance to mention how we made it quick. Got a good
      history of this in the notes so this should be fine!
+*** Structure
+**** Introduction
+**** Plan for Testing
+     Here we shoul discuss why we tested the way we did and so on. We want to
+     emphasise that we considered the plan prior to starting. 
+     
+     Address:
+     * Why we used the existing tool to compare against
+     * Why not QuickCheck
+     * How we created the arbitrary gossip graphs
+**** Test Results
+     Basically we want to talk about whether or not our stuff is correct or not. 
+     This is where the going gets tough. Mention KK not working and also conjunction... 
+**** Profiling? 
+     Discuss how we profile, and the benefits of our approach vs others?
+     Then discuss results. 
+***** Speed analysis; mention that it is slower and analyse why. 
+***** Space analysis - again just address where the shortcomings come from. 
+**** Point out negatives of the design
 
 ** Conclusion and Future Work (~3 pages)
 **** Reflection, summary, future work 
