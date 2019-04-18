@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Main where
 
 import BFSM
@@ -10,6 +12,11 @@ import Powerset
 import RS
 import MakeGraphs
 
+import System.IO.Unsafe
+-- import Unsafe.Coerce
+
+import Profile
+
 import Test.QuickCheck
 
 import Verify
@@ -19,9 +26,7 @@ import Data.Maybe (fromJust)
 import Data.Either (rights)
 
 main :: IO ()
--- main = putStrLn $ show $ verifyAllExperts threeModel (rights $ fromJust $ threeCalls)
--- main = putStrLn $ show $ take 1 $ getIncorrects 4 100 -- runTests 4 100
-main = runTests 4 5000
+main = putStrLn $ show $ unsafePerformIO $ performN 2
 
 
 
@@ -33,7 +38,6 @@ thesisEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saThesis :: FSM CallChar (PState (QState GosProp))
 saThesis = createSolvingAutomata (K b $ K a (allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
-
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
