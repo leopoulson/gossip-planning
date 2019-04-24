@@ -27,7 +27,6 @@ statistics' proto (g,sigma) form =
     sequ = sequences proto (g,sigma) \\ [[]]
     succSequ = filter (\cs -> eval (g,sigma ++ cs) form) sequ
 
-
 strengthenEnough :: Int -> Strengthening -> Protocol -> State -> IO ()
 strengthenEnough k streng proto state = do
   let (suc,unsuc) = statistics proto state

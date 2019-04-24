@@ -2,6 +2,9 @@ module Malvin.Gossip.Examples where
 
 import Malvin.Gossip
 
+teEx :: Graph
+teEx = exampleFromList [[0, 2], [0, 1, 2, 3], [2], [1, 3]]
+
 -- | execution tree example, three agents:  a -> b <--> c
 threeExample :: Graph
 threeExample = exampleFromList [[0,1],[1,2],[1,2]]

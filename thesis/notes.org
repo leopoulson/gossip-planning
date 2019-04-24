@@ -1,5 +1,3 @@
-* Thesis Notes
-
 * Thesis Structure
 ** Introduction (<5 pages)
 *** Motivate
@@ -82,7 +80,6 @@ More specifically, the concrete aims are:
 
 *** Structure 
 **** General Introduction
-     Introduce the problem, etc
 **** Motivation
      Talk about why it's interesting and why to spend so much time on it
 ***** DONE Introduction to the classic gossip problem
@@ -103,7 +100,10 @@ More specifically, the concrete aims are:
 ***** Introduce model checking
 **** Three questions
 ***** What is the project topic, or problem being investigated?
-      This will be covered in the brief intro...
+      This will be covered in the brief intro
+****** Planning
+       Planning is the task of taking a model in some state to a successful
+       state through a finite set of actions.
 ***** Why is the topic important, or why should the reader care?
       We need to communicate that there is a need for this project. We don't
       have an end-user as such - however, if we can communicate that this topic
@@ -391,10 +391,44 @@ communicate highly technical material.
 **** Profiling? 
      Discuss how we profile, and the benefits of our approach vs others?
      Then discuss results. 
+***** We shoudl mention any infrastructure we use for profiling. 
+      We should probably build some kind of auto-generator for gossip graphs and
+      just use these.
 ***** Speed analysis; mention that it is slower and analyse why. 
-***** Space analysis - again just address where the shortcomings come from. 
-**** Point out negatives of the design
+      Ok, so why?
+     
+      We spend the bulk of our time in the `models` function. This is quite
+      unavoidable; we use it basically all the time; mainly when transitioning.
+      Short of changing it to be a hashable set there's little we can do to
+      avoid this "knot". 
 
+      Similarly, it seems that Malvin's code spends the bulk of its time in
+      EpistAlt, which, given a 
+***** Space analysis - again just address where the shortcomings come from. 
+***** Differences between the two
+      The main way seems to be the way that we perform the task of planning. The
+      other tool computes the set of all call sequences and then checks each
+      one, in a convential, model-checking manner. This means that it can
+      perform a lot of the checking "in hindsight"; it works backwards, whereas
+      we work forwards. 
+***** Results 
+****** Our tool is quicker than theirs for returning a single path
+       This is naturally because they have to return a set; we need only return
+       a single one. Can we give a more profound analysis? 
+****** However, when we change the code in the other tool to return the 1st path
+       It's quicker. This is quite nice, and it means that we have something to
+       write about. However it does NOT guarantee that the path returned is
+       optimal as our tool does. 
+**** Point out negatives of the design
+***** The fact that we carry our set of states along with us
+      We might be able to change this s.t we keep track of th set of calls
+      indistinguishable from ours so far and update this as we go? And then when
+      it comes to evaluation we apply them? However we need to evaluate *at each
+      state*, so this might not be very good. 
+***** We could have utilised the monotonicity of the true propositions
+      For instance, we know that in the gossip problem there is no way that a
+      proposition, when true at a given state, can then become untrue. However
+      this could not be the case for another epistemic model. 
 ** Conclusion and Future Work (~3 pages)
 **** Reflection, summary, future work 
 * To ask about 

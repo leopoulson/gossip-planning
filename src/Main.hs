@@ -26,9 +26,9 @@ import Data.Maybe (fromJust)
 import Data.Either (rights)
 
 main :: IO ()
-main = putStrLn $ show $ unsafePerformIO $ performN 2
-
-
+main = runTests 4 200
+-- main = print $ unsafePerformIO $ performN 20
+-- main = performNMine 300 >>= print
 
 thesisModel :: EpistM StateC GosProp
 thesisModel = standardEpistModel [a, b, c, d] $ [N a b, N a c, N a d] 
@@ -37,7 +37,7 @@ thesisEvModel :: EventModel Call GosProp
 thesisEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saThesis :: FSM CallChar (PState (QState GosProp))
-saThesis = createSolvingAutomata (K b $ K a (allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
+saThesis = createSolvingAutomata ((allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
@@ -104,7 +104,6 @@ sixModel = Mo
 
 saSix :: FSM CallChar (PState (QState GosProp))
 saSix = createSolvingAutomata (allExpertsAg [a, b, c, d, e, f]) sixModel sixEvModel knowFilter
-
 
 diaModel :: EpistM StateC GosProp
 diaModel = Mo

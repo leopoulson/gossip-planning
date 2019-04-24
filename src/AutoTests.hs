@@ -25,14 +25,8 @@ runTests size n = putStrLn $ prettyPrintResults $ getWithNothings size n
 getIncorrectsIn :: [(EpistM StateC GosProp, PSA Call GosProp)] -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getIncorrectsIn pairs = filter (not . snd . verify) $ getModelCalls pairs
 
-oddModel :: EpistM StateC GosProp
-oddModel = Mo
-  [State (0, [])]
-  [a, b, c, d]
-  [(State (0, []), [P (N a b), P (N c a), P (N c b), P (N c d)])]
-  [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]]), (d, [[State (0, [])]])]
-  [State (0, [])]
-  (produceAllProps [a, b, c, d])
+oddModel :: EpistM StateC GosProp 
+oddModel = standardEpistModel [a, b, c, d] [N a c, N b a, N b c, N b d, N d c, N d b]
 
 oddEvModel :: EventModel Call GosProp
 oddEvModel = standardEventModel [a, b, c, d] prec postUpdate
@@ -40,37 +34,25 @@ oddEvModel = standardEventModel [a, b, c, d] prec postUpdate
 oddPSA :: PSA Call GosProp
 oddPSA = createSolvingAutomata (successfulFormula $ agents oddModel) oddModel oddEvModel knowFilter
 
-oddTrans = getTransducer d (buildMEStar oddModel oddEvModel)
-oddTransition = FST.bitransition oddTrans
+trans = FSM.transition oddPSA
 
-oddPSAC = createSolvingAutomata (K c (allExpertsAg [a, b, c, d])) oddModel oddEvModel knowFilter
-oddPSAD = createSolvingAutomata (K d (allExpertsAg [a, b, c, d])) oddModel oddEvModel knowFilter
+-- t1 = trans (oddinit, Right (Call b a))
+-- t2 = trans (fromJust t1, Right (Call a c))
+-- t3 = trans (fromJust t2, Right (Call a d))
+-- t4 = trans (fromJust t3, Right (Call b c))
+-- t5 = trans (fromJust t4, Right (Call b d))
+-- t6 = trans (fromJust t5, Right (Call c d))
 
-ts1 = oddTransition (fromPState $ head $ FSM.initial $ oddPSA, Right (Call c a))
+t1 = trans (oddinit, Right (Call b a))
+t2 = trans (fromJust t1, Right (Call a c))
+t3 = trans (fromJust t2, Right (Call c d))
+t4 = trans (fromJust t3, Right (Call a d))
+t5 = trans (fromJust t4, Right (Call b c))
 
-s1 = FSM.transition oddPSA (head $ FSM.initial $ oddPSA, Right (Call c a))
-sc1 = FSM.transition oddPSAC (head $ FSM.initial $ oddPSAC, Right (Call c a))
-sd1 = FSM.transition oddPSAD (head $ FSM.initial $ oddPSAD, Right (Call c a))
-
-s2 = FSM.transition oddPSA (fromJust s1, Right (Call a b))
-sc2 = FSM.transition oddPSAC (fromJust sc1, Right (Call a b))
-sd2 = FSM.transition oddPSAD (fromJust sd1, Right (Call a b))
-
-
-s3 = FSM.transition oddPSA (fromJust s2, Right (Call a d))
-sc3 = FSM.transition oddPSAC (fromJust sc2, Right (Call a d))
-sd3 = FSM.transition oddPSAD (fromJust sd2, Right (Call a d))
+-- So this sequence of calls is successful; but it's not finding it. 
 
 
-s4 = FSM.transition oddPSA (fromJust s3, Right (Call b d))
-sc4 = FSM.transition oddPSAC (fromJust sc3, Right (Call b d))
-sd4 = FSM.transition oddPSAD (fromJust sd3, Right (Call b d))
-
-
-s5 = FSM.transition oddPSA (fromJust s4, Right (Call c b))
-sc5 = FSM.transition oddPSAC (fromJust sc4, Right (Call c b))
-sd5 = FSM.transition oddPSAD (fromJust sd4, Right (Call c b))
-
+oddinit = head $ FSM.initial oddPSA
 
 getIncorrects :: Int -> Int -> [(EpistM StateC GosProp, Maybe [CallChar])]
 getIncorrects size n = getIncorrectsIn . getModelPSAPairs size . getPhonebookModels size $ n
@@ -82,7 +64,7 @@ allKnowAllExperts :: [Agent] -> Form GosProp
 allKnowAllExperts ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
 
 abKnowAllExperts :: [Agent] -> Form GosProp
-abKnowAllExperts ags = And [K c (allExpertsAg ags), K d (allExpertsAg ags)]
+abKnowAllExperts ags = And [K a (allExpertsAg ags), K b (allExpertsAg ags)]
 
 aKnowExperts :: [Agent] -> Form GosProp
 aKnowExperts ags = K a (allExpertsAg ags)
@@ -91,7 +73,7 @@ dKnowExperts :: [Agent] -> Form GosProp
 dKnowExperts ags = K d (allExpertsAg ags)
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula = allExpertsAg --abKnowAllExperts
+successfulFormula = allKnowAllExperts
 
 
 prettyPrintResults :: [(Maybe [CallChar], Bool)] -> [Char]

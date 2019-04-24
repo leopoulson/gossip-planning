@@ -3,6 +3,7 @@
 module Malvin.Gossip.General where
 
 import Malvin.Gossip
+import Malvin.Gossip.Examples
 import Malvin.Gossip.Internal
 import Data.List
 import Data.Set (Set)
@@ -55,6 +56,35 @@ data Prog = Test Form
           | CupAg ProgWithAgentVar
           | Star Prog
           deriving (Eq,Ord,Show)
+
+-- Leo add 
+
+allKnowExpertsG = Conj [K 0 lns allExperts, K 1 lns allExperts, K 2 lns allExperts, K 3 lns allExperts]
+
+
+firstSucc :: Protocol -> State -> Form -> Maybe Sequence
+firstSucc proto (g,sigma) form = firstSucc' (g,sigma) form (sequences proto (g, sigma) \\ [[]])
+
+shortest :: [[a]] -> [[a]]
+shortest = sortBy (\x y -> length x `compare` length y)
+
+firstSucc' :: State -> Form -> [Sequence] -> Maybe Sequence
+firstSucc' (g,sigma) form [] = Nothing
+firstSucc' (g,sigma) form (s : ss) = 
+  if eval (g, sigma ++ s) form
+    then Just (sigma ++ s)
+    else firstSucc' (g, sigma) form ss
+
+succs :: Protocol -> State -> Form -> [Sequence]
+succs proto (g, sigma) form = succs' (g, sigma) form (sequences proto (g, sigma) \\ [[]])
+
+succs' :: State -> Form -> [Sequence] -> [Sequence]
+succs' (g, sigma) form [] = []
+succs' (g, sigma) form (s : ss) = 
+  if eval (g, sigma ++ s) form 
+    then (sigma ++ s) : succs' (g, sigma) form ss
+    else succs' (g, sigma) form ss
+
 
 
 -- useful abbreviations --

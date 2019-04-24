@@ -21,113 +21,202 @@
 
 \section{Introduction}
 
-\subsection{Motivation}
+Planning is the task of computing a set of actions to take some state within a
+model to a successful state. In such a model we have a set of \textit{actors},
+who will perform these actions that we search for.
 
-\subsubsection{The Gossip Problem} 
-The gossip problem is a problem regarding peer-to-peer information sharing. A
-set of agents start out with some secret information, and their goal is to
-transfer this information across the whole network, thus finding out the secret
-of all of the other agents. This information is transferred through a phone call
-from one agent to another. When two agents communicate they tell each other all
-the secrets that they know; hence the name \textit{gossip}. %This process of
-% gossiping is heavily used in networks, and the investigation of epidemic
-% information spreading. \textbf{add citations}.
+Planning, as put forward in \cite{PlanningBook}, covers a wide range of
+applications; from making a robot enter a room to synchronising multiple
+computers working on the same document. In this project we concern ourselves
+with a special case of planning; namely \textit{epistemic planning}. In this we
+begin with a state embodying the knowledge states for a set of agents. We then
+want to compute a set of actions the agents may perform in order to take the
+knowledge state of the agents to a successful one.
 
-In the original problem formulation (\cite{Tijdeman:1971}), each agent began
-with the phone number of every other agent, and hence the starting network is a
-complete graph. Recently, there has been a lot of work in studying a variation
-of this problem named the \textit{dynamic} gossip problem. In this, the agents
-start out with an incomplete set of phone numbers, and as they call the other
-agents, they exchange all of the phone numbers they know and so the graph's
-edges grow in number.
-
-% This paragraph is good; keep this. 
-The dynamic gossip problem is a popular research topic (\cite{DynamicGossip},
-\cite{EpProforDyGo}), with applications in work in epidemics and research
-discoverd (\cite{DiscoverythruGossip}) \textbf{Add more references.}. In such
-scenarios, our network may be some peer to peer network, with our agents as
-computers and the goal to be finding the IP addresses of all of the other
-computers; or our network might be a social network, where we have people as
-agents who want to connect with everyone around them. In both cases, our network
-is updated as the agents communicate and they learn the contact details of other
-agents.
-
-\textbf{Applications of DEL here \ldots}
-
-% Perhaps move this to a different section? E.g. when we survey the existing stuff
-There are several existing implementations of model checkers for epistemic logic
-and gossip problems; three of them are \cite{DEMO-S5}, \cite{GithubGossip},
-\cite{SMCDEL}. The three all differ in implementation style, but they all aim to
-solve the same problem; given some system with an initial state and a way to
-move between states, what events can occur to take the system from its initial
-state to a successful one? \cite{GithubGossip} aims to give the user the events
-required to take the system to the state, whereas the other two aim to tell the
-user if a string of events given are successful. 
-
-\subsubsection{Planning}
-
-Automated planning is the act of computing a finite sequence of actions to take
-some system from a given initial state to some successful state. Recently, a
-variant of this has been studied by the dynamic epistemic logic community,
-called \textit{epistemic} planning. Given an initial set of knowledge states of
-a set of agents, a finite set of available events, and an epistemic objective,
-the epistemic planning problem consists of computing the finite sequence of
-events whose occurence takes us from the initial state to a state satisfying the
-epistemic objective. 
-
-\subsubsection{Model Checking}
-
-Model checking is the process of, given some model \tmc{M} and some formula
-$\phi$, checking if $\mc{M} \models \phi$.
-
-In the case of the gossip problem, this might be checking if given some
-knowledge state between agents, if they are all experts. In \cite{GithubGossip},
-this is done through being given an initial state and a sequence of calls.
+Epistemic planning is a relatively young area of research, first put forward in
+\cite{BolanderEP}. It rests upon work done in Dynamic Epistemic Logic, which is
+a logic used to reason about knowledge and how it is changed by actions. Despite
+epistemic planning being proved to be undecidable in a lot of cases
+\footnote{It is undecidable for models where the number of agents is greater
+  than 1 (\cite{UndecidabilityEP}), and also in single-agent models where the
+  accessibility relation is not an equivalence relation. It is however decidable
+  for models where the event models are propositional (\cite{DecidabilityEp}).},
+interest in the area has been maintained since its birth
+(\cite{AutomataTechniques}), leading to the work that this project uses.
 
 \bigskip
 
-We can see Model Checking as the dual of planning; planning is finding some
-sequence of calls, and then model checking is the act of checking that these
-calls satisfy the formula we want to plan for. Any system capable of planning
-needs to be able to model check - otherwise how would it know if the formula to
-be planned for is actually satisfied? 
+The gossip problem is a problem regarding peer-to-peer information sharing. A
+set of agents start out with some \textit{secret information}, and their goal is
+to transfer this information across the network, such that every other agent
+finds out their secret. We call an agent who knows the secret of every other
+agent to be an \textit{expert}; we want to reach a state where every agent is an
+expert. When two agents communicate they tell each other all of the secrets they
+know; hence the slightly frivolous but very apt title of the \textit{gossip}
+problem.
+
+The gossip problem was first put forward in \cite{Tijdeman:1971}, and was such
+that each agent began with the phone number of every other agent. We can hence
+visualise the set of agents as nodes and the fact of agent $a$ knowing the phone
+number of $b$ as a directed edge, and so such a formulation would be a complete
+graph as in \figref{fig:classicgossipex}.
+
+\bigskip
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[c]{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      [every node part/.style={align=center}]
+      \node (a) [] at (0, 3) {$a$};
+      \node (b) [] at (3, 3) {$b$};
+      \node (c) [] at (0, 0) {$c$};
+      \node (d) [] at (3, 0) {$d$};
+
+      \draw [<->, dashed] (a) -- (b);
+      \draw [<->, dashed] (a) -- (c);
+      \draw [<->, dashed] (a) -- (d);
+      \draw [<->, dashed] (b) -- (c);
+      \draw [<->, dashed] (b) -- (d);
+      \draw [<->, dashed] (c) -- (d);
+    
+    \end{tikzpicture}
+    \caption{An example of a gossip graph in the classical formulation.}
+    \label{fig:classicgossipex}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[c] {0.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      [every node part/.style={align=center}]
+      \node (a) [] at (0, 3) {$a$};
+      \node (b) [] at (3, 3) {$b$};
+      \node (c) [] at (0, 0) {$c$};
+      \node (d) [] at (3, 0) {$d$};
+      
+      \draw [->, dashed] (b) -- (d);
+      \draw [<->, dashed] (a) -- (c);
+      \draw [->, dashed] (b) -- (c);
+    \end{tikzpicture}
+    \caption{An example of an incomplete gossip graph. }
+    \label{fig:dynamicgossipex}
+
+  \end{subfigure}
+  \caption{Some exemplar gossip graphs.}
+\end{figure}
+
+Recently a variation of this problem has been studied, entitled the
+\textit{dynamic} gossip problem(\cite{DynamicGossip}, \cite{EpProforDyGo}). This
+is a popular research topic, with applications in the study of epidemics and
+information discovery (\cite{DiscoverythruGossip}, \textbf{Find some more
+  refs}). In these scenarios our network may model some peer to peer network
+where our agents are computers, where the goal is to find the IP addresses of
+all of the other computers in the network; or a social network, where our nodes
+are people who want to connect with every other user in their circle of friends. 
+
+In this, we begin with each agent knowing some subset of the phone
+numbers of every other agent. Hence a starting configuration of the dynamic
+gossip problem may look like \figref{fig:dynamicgossipex}. When two agents
+converse on the phone, they also exchange all of the phone numbers that they
+know as well as all of the secrets. As such, the graph's edges increase in
+number as phone calls occur.
+
+\subsection{Existing Software}
+
+As research work is done into a topic, it is only natural that software is
+developed to support it. The three related pieces of software are
+\cite{DEMO-S5}, \cite{SMCDEL} and \cite{GithubGossip}. These three tools are all
+\textit{model checkers} for dynamic epistemic logic. A model checker is a
+program that, given a model \tmc{M} and a formula $\phi$, tells the user whether
+or not $\mc{M} \models \phi$. Given the setting, they specifically answer the
+question ``given an initial state and a set of events, does the state reached by
+the occurence of these events at the initial state satisfy some property?''.
+
+We can see model checking as the \textit{dual} of planning; in planning we want
+to find such a sequence of events, whilst model checking verifies that these
+events do indeed bring the system to a successful state. \cite{GithubGossip} is
+also capable of planning, however in a na{\"i}ve way; it enumerates the set of
+all possible calls and then checks if any of these are successful. As we see
+later, this is a very inefficient method for planning. 
+
+Despite this, there does not exist any software to solve the epistemic planning
+problem as envisioned in the literature; indeed, the only software to solve any
+epistemic planning problem is restricted to just gossip models.
 
 \subsection{Contributions}
 
-At a high level, our aim in this project is to put forward a novel way to solve
-the planning problem for the dynamic gossip problem. This entails use of
-automata, a technique discussed in the literature but yet to be unified and
+At a high level, our aim in this project is to put forward a process to solve
+the planning problem for epistemic models and propositional event models. This
+is motivated by the dynamic gossip problem; despite the literature on the topic
+there is little work done on the topic of planning for it. Dynamic Gossip can be
+modelled perfectly by epistemic models and propositional event models, and hence
+is a very fitting case study for the tool we will develop. Although our
+algorithm is designed to work for any models, it is hoped that the work done in
+this thesis can shed light on how a specialised process could be designed for
+the dynamic gossip problem.
+
+Our process uses the algorithm outlined in \cite{AutomataTechniques}. This paper
+provides an outline of an algorithm which could be used, however much work
+remains to be done in order to make this outline into an implementable
+algorithm. 
+
+As a testament to the functionality of the algorithm, we give an implementation
+of the process in Haskell. There is currently no existing algorithm or software
+that performs planning for epistemic models. 
+
+This process will entail use of automata, a method discussed in the literature
+however yet to be formalised to the point at which it can be implemented, nor
 implemented. The literature surrounding the task spans from epistemic logic to
-game theory and is well outside the scope of the normal degree course, and as
-such the collection and combination of the literature is a significant task and
-forms a large part of the thesis. 
+game theory, and as such is far outside the reach of the standard degree
+content. In this thesis we hope to present all of the related literature in a
+simple manner, so that the reader may understand all of the concepts used. 
 
-\bigskip \bigskip \bigskip
+\bigskip
 
-More concretely, our aims are: 
+This project puts forward several challenges. The first challenge is compiling
+the assorted literature on the topic. As we come to see later, the literature
+stretches very far and wide; the collection, comprehension and recollection of
+this literature is a substantial piece of work in itself.
+
+\bigskip
+
+The second is the act of designing the algorithm that we will use to solve the
+planning problem. Whilst the algorithm is roughly laid out in
+\cite{AutomataTechniques} and \cite{UniformStrategies}, this is but a sketch.
+There still remains a lot of work to be done on it in order to make it an easy
+to understand and implement process. The development of this forms our second
+challenge.
+
+\bigskip
+
+The third is the implementation in Haskell of the designed process. Due to
+Haskell's syntactic similarity to the mathematical notation we use to formalise
+the problem\footnote{This similarity is discussed again later, and is one of the
+  reasons Haskell was chosen for the task.} this is easier than it would be in
+some languages, however this still has its difficulties.
+
+\subsection{Aims}
+
+Concretely, our aims are as follows:
 
 \begin{itemize}
-\item Research, survey and combine the surrounding literature
-\item Put forward an algorithm and process through which we can plan for the
-  gossip problem. 
-\item Give an implementation in Haskell of this process, and ensure that it will
-  plan for other epistemic models too
-\item Design and implement a testing system, to check the correctness of our
-  program against existing software
-\item Perform a study into the performance of the program in terms of time and
-  space, and explain any strengths or shortcomings
+  \item Research and survey the literature on the topic of planning and the
+    gossip problem, with an aim to combining them.
+  \item Review the extant software on model checking and planning for epistemic
+    models, with an aim to drawing comparions between the existing tools and the
+    one developed. 
+  \item Design an algorithm to solve the planning problem for epistemic models
+    and propositional event models.
+  \item Provide an implementation of the developed algorithm in Haskell.
+  \item Design and implement a testing system, to check the correctness of the
+    program and also aid with profiling.
+  \item Perform a study of performance in terms of time and space, and explain
+    any strengths or shortcomings in comparison to existing tools. 
 \end{itemize}
 
-% In this thesis, we put forward a process to solve the decidable epistemic planning
-% problem. We also give an implementation of this process in Haskell. This process
-% also will solve the gossip problem, by finding a sequence of calls to make every
-% agent know the secret of every other agent; however it is also capable of
-% finding sequences of calls that lead to a situation in which every agent knows
-% that every agent is a secret. \textbf{TODO: Find applications for this}. 
-
-% Given that our software solves just the epistemic planning problem and not
-% strictly the gossip problem, it can plan for any appropriate models. There is no
-% other software currently that solves this problem.  
+% We hope that the work done in this thesis can help to unify work done on both
+% dynamic gossip and epistemic planning, and 
 
 \newpage
 
@@ -139,25 +228,38 @@ More concretely, our aims are:
 \subsubsection{Epistemic Logic}
 
 Epistemic Logic is the logical language that we use to reason about knowledge.
-It is a modal logic; a logic with some operator, that can be used to model the
-passage of time, knowledge, obligation, or any other modality. The essential
-reference on epistemic logic is \cite{ReasoningAboutKnowledge}, and it is from
-here that most of the information in this section comes. 
+It is a modal logic; this is a \textbf{type / class} of logic that supplements
+the language of propositional logic\footnote{By which we mean the language
+  defined by the grammar $\phi ::= \top \mid p \mid \neg \phi \mid \phi \land
+  \phi$, as well as the abbreviations $\bot, \lor, \rightarrow$ as is classic.}
+with some operator $\boxdot$. Modal logic can be used to model the passage of
+time, knowledge, obligation or any other modality. For example, $\boxdot \phi$
+in temporal logic can be read as ``at all points in the future, $\phi$ holds'';
+in deontic (obligation) logic, we can read $\boxdot \phi$ as ``it is morally
+necessary that $\phi$ holds''. We see that the addition of the $\boxdot$
+operator provides us with much more expressivity than the standard language of
+propositional logic.
+
+In this thesis, we concern ourselves with \textit{epistemic} logic; here we
+interpret $\boxdot \phi$ as ``it is known that $\phi$ holds''. However, we
+change the operator slightly; we index it with the name of an agent, and we
+write it as $K_i \phi$\footnote{Where the K stands for \textbf{K}nows.} Hence,
+we interpret $K_i \phi$ as ``Agent $i$ knows that $\phi$ is true.''.
+
+The essential reference on epistemic logic is \cite{ReasoningAboutKnowledge},
+and it is from here that most of the information in this section comes.
   
 If we have some set of agents $A$ and some set of propositions $\Lambda$, then
 we define the language of epistemic logic over this set of propositions,
 $\mc{L}(\Lambda)$, with the following BNF;
 
-
 \begin{equation*}
   \phi ::= \top \mid p \mid \neg \phi \mid \phi \land \phi \mid K_i \phi
 \end{equation*}
 
-\noindent where $p \in \Lambda$ and $i \in A$. We also can define false,
-conjunction and implication in the classic way. We read $K_i \phi$ as ``agent
-$i$ knows that $\phi$ is true''. We can also define the dual to $K$, in the
-classic way as $\widehat K_i \phi ::= \neg K_i \neg \phi$. We read this as
-``agent $i$ considers it possible that $\phi$ is true''. We can give our
+\noindent where $p \in \Lambda$ and $i \in A$. We can also define the dual to
+$K$, in the classic way as $\widehat K_i \phi ::= \neg K_i \neg \phi$. We read
+this as ``agent $i$ considers it possible that $\phi$ is true''. We can give our
 epistemic logic a semantics through use of \textit{Kripke models}.
 
 We refer to $\mc{L}(\Lambda)$ without the knowledge operator $K_i$ as
@@ -291,7 +393,7 @@ Formally, an event model \tmc{E} is a tuple $(E, Q, \pre, \post)$. $E$ is a fini
 of events; $Q$ is a set of relations $Q_i$ for each $i \in Ag$, such that $Q_i
 \subseteq E \times E$. As before, we make all relations $Q$ equivalence
 relations. $\pre : E \rightarrow \mc{L}(\Lambda) $ is the \textit{precondition
-  function}; given an event $e \in E$, it returns to us a formula that has to be
+  function}; given an event $e \in E$, it returns to us a formula that must be
 true in order for $e$ to occur. $\post : E \times \Lambda \rightarrow
 \mc{L}(\Lambda)$ is the \textit{postcondition function}; given an event $e \in
 E$ and a proposition $p \in \Lambda$, it returns to us some formula that had to
@@ -314,69 +416,63 @@ event.
 \bigskip \bigskip \bigskip
 
 As above, we now show some example event models, and show the effects of
-updating an epistemic model with an event model. 
+updating an epistemic model with an event model.
 
-\begin{figure}[h]
+\begin{figure}
   \centering
-  \begin{subfigure}[c] {0.3\textwidth}
-     \begin{tikzpicture}
-      % [every node part /. style={align=center}]
-      \node(1) [draw, circle, accepting] {
-        \begin{tabular} {c}
-          $w_1$ \\
-          $q$
-        \end{tabular}
-      };
-      \node(2) [draw, circle, right = of 1] {
-        \begin{tabular}{c}
-          $w_2$ \\
-          $$
-        \end{tabular}
-      };
-      \draw[-, shorten >= 1pt] (1) -- (2) node [midway, below = 2pt] {Alice, Bob};
-    \end{tikzpicture}
-    \caption{\tmc{M}}
-  \end{subfigure}
-  \begin{subfigure}[c] {0.3\textwidth}
+  \begin{tikzpicture}
+    \node(1) [draw, circle, accepting] at (0, 1) {
+      \begin{tabular}{c}
+        $w_1$ \\
+        $q$
+      \end{tabular}
+    };
+
+    \node(2) [draw, circle] at (4, 1) {
+      \begin{tabular}{c}
+        $w_2$ \\
+        $$
+      \end{tabular}
+    };
+    \draw[-, shorten >= 1pt] (1) -- (2) node [midway, below = 2pt] {Alice, Bob};
+
+    \node(times) [] at (6, 1) {$\times$};
     
-      \begin{tikzpicture}
-        \node(1) [draw, rectangle, accepting] {
-          \begin{tabular}{c}
-            $\alpha$ \\
-            $?p$
-          \end{tabular}
-        };
-        \node(2) [draw, rectangle, below = of 1] {
-          \begin{tabular}{c}
-            $\beta$ \\
-            $?\neg p$
-          \end{tabular}
-        };
-        \draw[-, shorten >= 1pt] (1) -- (2) node [midway, left = 2pt] {Bob};
-      \end{tikzpicture}
-      \caption{\tmc{E}}
-    \end{subfigure}
+    \node(3) [draw, rectangle, accepting] at (8, 2) {
+      \begin{tabular}{c}
+        $\alpha$ \\
+        $?p$
+      \end{tabular}
+    };
+    \node(4) [draw, rectangle, below = of 3] {
+      \begin{tabular}{c}
+        $\beta$ \\
+        $?\neg p$
+      \end{tabular}
+    };
+    \draw[-, shorten >= 1pt] (3) -- (4) node [midway, left = 2pt] {Bob};
 
-    \begin{subfigure}[c] {0.3\textwidth}
-      \begin{tikzpicture}
-        \node(1) [draw, circle, accepting] {
-          \begin{tabular}{c}
-            $(w_1, \alpha)$ \\
-            $p$
-          \end{tabular}
-        };
-        \node(2) [draw, circle, right = of 1] {
-          \begin{tabular}{c}
-            $(w_2, \beta)$ \\
-            $$
-          \end{tabular}
-        };
+    \node (equals) [] at (10, 1) {$=$};
 
-        \draw[-, shorten >= 1pt] (1) -- (2) node [midway, below = 2pt] {Bob};
-      \end{tikzpicture}
-      \caption{$\mc{M} \times \mc{E}$}
-    \end{subfigure}
+    \node(5) [draw, circle, right = of equals] {
+      \begin{tabular}{c}
+        $(w_1, \alpha)$ \\
+        $p$
+      \end{tabular}
+    };
+    \node(6) [draw, circle, right = of 5] {
+      \begin{tabular}{c}
+        $(w_2, \beta)$ \\
+        $$
+      \end{tabular}
+    };
+
+    \draw[-, shorten >= 1pt] (5) -- (6) node [midway, below = 2pt] {Bob};
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:PhDExample}
 \end{figure}
+
 
 In this example, consider two agents, again Alice and Bob. They are waiting in
 the same room to receive a letter about Alice's entrance onto a PhD program.
@@ -387,16 +483,17 @@ knows whether she got it, but he does not know if she did get it or not.
 
 Here, $p$ stands for the proposition ``Alice gets the position''. This initial
 situation is represented by model \tmc{M}. Both Alice and Bob cannot distinguish
-between the worlds where $p$ is true and where $p$ is not true.
+between the worlds where $p$ is true and where $p$ is not true. 
 
 Then the event model \tmc{E} represents the event of Alice reading the letter
 from the unviersity. $\alpha$ represents the event of Alice getting the position
-and $\beta$ that she doesn't - and hence the preconditions are $?p$ and $?\neg
+and $\beta$ that she doesn't - hence the preconditions are $p$ and $\neg
 p$ respectively; that is, $\pre(\alpha) = p$ and $\pre(beta) = \neg p$. Bob
 cannot distinguish between either of these events, but Alice can.
 
 Then finally the event model $\mc{M} \times \mc{E}$ represents the situation
-in \tmc{M} after the event \tmc{E} has occured.
+in \tmc{M} after the event \tmc{E} has occurred. We can see the epistemic model \tmc{M},
+event model \tmc{E} and updated model \tmc{M \times E} in \figref{fig:PhDExample}.
 
 \bigskip
 
@@ -406,9 +503,21 @@ proposition $p$. Alice and Bob can both see the coin face up. This situation is
 modelled by event model \tmc{M}.
 
 Then Bob picks up the coin and flips it in the air. Bob sees the result of this
-coin flip, but does not show Alice.
+coin flip, but does not show Alice. We can see the event model and epistemic
+model, and their update in \figref{fig:cointoss}.
 
-\begin{center}
+Our epistemic model has just one state - that is, the state where the coin is on
+the table face up. Both Alice and Bob can see the coin, and as such they both
+know that $p$ holds. Then our event model has two events; $\alpha$, in which the
+coin lands face-up, and $\beta$, in which the coin lands face-down. Bob can
+distinguish between these two events as he can see the result of the coin toss,
+but Alice cannot, because she does not see it. In the former $p$ is set to true,
+and in the latter $p$ is set to false. Hence in the epistemic model $(\mc{M}
+\times \mc{E})$ we have two states; that in which the coin landed face-up and
+that in which the coin landed face-down.
+
+\begin{figure}[h]
+  \centering
   \begin{tikzpicture}
     [every node part/.style={align=center}]
     \node (0) [draw, circle, accepting] at (0, 2) {
@@ -453,7 +562,10 @@ coin flip, but does not show Alice.
     \draw [-, shorten >= 1pt] (1) -- (2) node [midway, left = 2pt] {Alice};
     \draw [-, shorten >= 1pt] (3) -- (4) node [midway, left = 2pt] {Alice};
   \end{tikzpicture}
-\end{center}
+  \label{fig:cointoss}
+  \caption{An event model and epistemic model for the coin toss example, and the
+  updated event model. }
+\end{figure}
     
 
 \subsection{The Gossip Problem}
@@ -474,7 +586,7 @@ greater than 4, is $2n - 4$.
 Dynamic Gossip is a variant of the classical gossip problem, in which we start
 off with an incomplete graph, representing the fact that the agents have only
 the phone numbers of some of the other agents. In this case, when two agents
-talk on the phone, they also exchange all of the phone numbers that they know as
+talk on the phone, they also exchange all of the phone numbers that they know, as
 well as the secrets that they know.
 
 \subsubsection{Protocols}
@@ -526,9 +638,170 @@ pairs of agents such that $(u, v) \in N$ (or $Nuv$) iff $u$ knows the phone
 number of $v$. $S \subseteq A \times A$ is a set of ordered pairs of agnets such
 that $(u, v) \in S$ (or $Suv$) iff $u$ knows the \textit{secret} of $v$.
 
-We have that for all gossip graphs, for any agent $a$, $(a, a) \in N$ and $(a, a)
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \node (a) [] at (0, 1) {$a$};
+      \node (b) [] at (2, 0) {$b$};
+      \node (c) [] at (3, 2) {$c$};
+
+      \draw [<->, dashed] (a) -- (b);
+      \draw [->, dashed] (b) -- (c);
+    \end{tikzpicture}
+    \caption{An exemplar gossip graph.}
+    \label{fig:GossipSize3}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.4\textwidth}
+      \centering
+    \begin{tikzpicture}
+      \node (a) [draw, rounded rectangle, accepting] {
+        \begin{tikzpicture}
+          \node (a) [] at (0, 1) {$a$};
+          \node (b) [] at (2, 0) {$b$};
+          \node (c) [] at (3, 2) {$c$};
+
+          \draw [<->, dashed] (a) -- (b);
+          \draw [->, dashed] (b) -- (c);
+        \end{tikzpicture}
+      };
+    \end{tikzpicture}
+    \caption{A Kripke model $\mc{G}$ for a Gossip State}
+    \label{fig:KripkeGossip}
+  \end{subfigure}
+  \caption{}
+\end{figure}
+
+
+We also have that for all gossip graphs, for any agent $a$, $(a, a) \in N$ and $(a, a)
  \in S$, expressing that any agent always knows their own phone number and
- secret. 
+ secret.
+
+\bigskip
+ 
+We can use the notation above to formally describe a gossip graph. For instance,
+the gossip graph that we can see in \figref{fig:GossipSize3} can be expressed as
+the triple $\mc{G} = (\left\{ a, b, c \right\},$ $ \left\{ (a, a), (a, b), (b, a), (b,
+  b), (b, c), (c, c) \right\},$ $ \left\{ (a, a), (b, b), (c, c) \right\})$.
+However given that we have the proprety described above, we can represent this
+as the more terse $\mc{G} = (\left\{ a, b, c \right\},$ $ \left\{ (a, b), (b,
+  a), (b, c)
+\right\}, $ $ \left\{ \right\})$
+
+\bigskip
+
+
+One might ask how gossip fits into the picture we drew above of Kripke models
+and event models. We can see a gossip state as a very boring Kripke model drawn
+in \figref{fig:KripkeGossip}, where we have just one state, which is the one
+that we are in. We can then create an event model that enumerates all of the
+calls in this example, which can be seen in \figref{fig:GossipEvMo}\footnote{We
+  omit the two calls $ac$ and $ca$ to make the example shorter, and also because
+their preconditions are not satisfied by the only state in the Kripke model and
+as such will have no effect.}.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture} [every node/.style={draw,rectangle}]
+    \node (ab) [] {
+      \begin{tabular}{c}
+        $ab$ \\
+        $N_{ab}$ 
+      \end{tabular}
+    };
+    \node (ba) [right = of ab] {
+      \begin{tabular}{c}
+        $ba$ \\
+        $N_{ba}$ 
+      \end{tabular}
+    };
+    \node (bc) [right = of ba] {
+      \begin{tabular}{c}
+        $bc$ \\
+        $N_{bc}$ 
+      \end{tabular}
+    };
+    \node (cb) [right = of bc] {
+      \begin{tabular}{c}
+        $cb$ \\
+        $N_{cb}$ 
+      \end{tabular}
+    };
+    
+    \draw [-] (ab) -- (ba) node [draw=none, midway, below = 2pt] {$c$};
+    \draw [-] (bc) -- (cb) node [draw=none, midway, below = 2pt] {$a$};
+  \end{tikzpicture}
+  \caption{An Event model $\mc{E_G}$ for the calls associated with \figref{fig:GossipSize3}.}
+  \label{fig:GossipEvMo}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node (0) [draw, rounded rectangle] at (0, 4) {
+      \begin{tabular}{c}
+        $(w, ab)$ \\
+        \begin{tikzpicture}
+          \node (a) [] at (0, 1) {$a$};
+          \node (b) [] at (2, 0) {$b$};
+          \node (c) [] at (3, 2) {$c$};
+
+          \draw [<->] (a) -- (b);
+          \draw [->, dashed] (a) -- (c);
+          \draw [->, dashed] (b) -- (c);
+        \end{tikzpicture} 
+      \end{tabular}
+    };
+    \node (1) [draw, rounded rectangle] at (8, 4) {
+      \begin{tabular}{c}
+        $(w, ba)$ \\
+        \begin{tikzpicture}
+          \node (a) [] at (0, 1) {$a$};
+          \node (b) [] at (2, 0) {$b$};
+          \node (c) [] at (3, 2) {$c$};
+
+          \draw [<->] (a) -- (b);
+          \draw [->, dashed] (a) -- (c);
+          \draw [->, dashed] (b) -- (c);
+        \end{tikzpicture} 
+      \end{tabular}
+    };
+    \node (2) [draw, rounded rectangle] at (4, 0) {
+      \begin{tabular}{c}
+        $(w, bc)$ \\
+        \begin{tikzpicture}
+          \node (a) [] at (0, 1) {$a$};
+          \node (b) [] at (2, 0) {$b$};
+          \node (c) [] at (3, 2) {$c$};
+
+          \draw [<->, dashed] (a) -- (b);
+          \draw [<->] (b) -- (c);
+          \draw [->, dashed] (c) -- (a);
+        \end{tikzpicture} 
+      \end{tabular}
+    };
+
+    \draw [-] (0) -- (1) node [midway, above = 2 pt] {$c$};
+  \end{tikzpicture}
+  \caption{The Kripke model $\mc{G} \times \mc{E_G}$.}
+  \label{fig:UpdatedGossip}
+\end{figure}
+
+In \figref{fig:UpdatedGossip} we can see the result of updating the Kripke model
+\tmc{G} with the event model \tmc{E_G}. We see that the call $cb$ does not have
+a corresponding state; its precondition was not satisfied by any of the states
+in \tmc{G}. Also note that the states $(w, ab)$ and $(w, ba)$ are
+indistinguishable to $c$; this is because $c$ cannot distinguish between calls
+$ab$ and $ba$ as $c$ is not included in it. Also note that the two states $(w,
+ab)$ and $(w, ba)$ have the exact same graph representing them\footnote{We
+  revisit this idea of gossip graphs with three agents being ``boring'' again
+  later. This ``boring''-ness comes from the fact that calls $ab$ and $ba$ are
+  essentially the same thing.}; in the future we
+will not make this distinction. In the implementation a state is represented
+\textit{just by the propositions that are true at it}; in our case, this is the
+graph. 
 
 \subsection{Planning}
 
@@ -577,10 +850,10 @@ given a pointed epistemic model $(\mc{M}, w)$ and an event model $\mc{E}$, and
 some goal formula $\phi$, find some set of events ${e_1, e_2, \ldots, e_n}$ such
 that $(\mc{M}, w) \otimes (\mc{E}, e_1) \otimes \ldots \otimes (\mc{E}, e_n)
 \models \phi$. The \textit{propositional epistemic planning problem} is the
-restriction of this to event models with pre- and post-condition functions whose
-codomains are in the propositional fragment of \tmc{L}; that is, they do not
-contain the modal operator $K$. These event models are what we call
-propositional event models. 
+restriction of the epistemic planning problem to event models with pre- and
+post-condition functions whose codomains are in the propositional fragment of
+\tmc{L}; that is, they do not contain the modal operator $K$. These event models
+are what we call propositional event models.
 
 It is proven in \cite{BolanderEP} that the multi-agent epistemic planning
 problem is undecidable for an aribtrary system. However, placing certain
@@ -626,7 +899,7 @@ Unfortunately we cannot use this to model check a gossip problem, as events in
 the gossip problem are neither of these; they are private one-to-one
 communications. Furthermore, the software is incapable of planning; simply
 checking. Despite this, the software was incredibly useful in our project in
-order to aid understanding of epistemic and event models. Indeed, the
+aiding the understanding of epistemic and event models. Indeed, the
 formalisation of epistemic and event models demonstrated here was used in the
 code associated with this thesis.
 
@@ -676,12 +949,16 @@ representing states of the model and events in the event model as the states and
 transitions respectively. This then references a process in
 \cite{UniformStrategies} for the creation of an automata which has a set of the
 other indistinguishable states baked into the states of the automata. This is a
-very useful thing for our context, as it means that we can evaluate formulas of
+very useful method for our context, as it means that we can evaluate formulas of
 the form $K_a \phi$ \textit{positionally}; that is, we need only to look at the
-state to be able to evaluate the formula. This is in contrast to the
-alternative, which is to check our current state then compute the possible call
-sequences that are indistinguishable from our current one, and then go and check
-there too, and so on.
+state to be able to evaluate the formula. We often want to reach states in the
+gossip problem which satisfy the property ``everyone knows that everyone knows
+everyone's secret''. This is formalised as $\forall a, i, j \in Ag, K_a (S
+_{ij})$.
+
+This method is much more practical than the alternative, which is to check our current
+state then compute the possible call sequences that are indistinguishable from
+our current one, and then go and check there too, and so on.
 
 The process in \cite{UniformStrategies} is very verbose and is beyond the scope
 of this thesis; however, in order to illustrate the fact that our algorithm is a
@@ -758,7 +1035,7 @@ Finally, we say that the relation recognised by some transducer $T$ is
 \end{align*}
 
 \subsubsection{The Powerset Arena}
-\label{sec:PowersetArena}
+\label{sec:PowersetArenaena}
 
 In games with imperfect information, the information set of a player after a
 certain play is the set of positions she may possibly be in, consistent with
@@ -1749,6 +2026,7 @@ Gossip graph being so straightforward. The last thing we wanted to do was create
 some kind of bug within the testing software!
 
 \subsection{Testing Frameworks}
+\label{sec:TestingFrameworks}
 
 The next decision to be made was how to actually go through with the testing
 process. Haskell offers the seminal property-based library \texttt{QuickCheck},
@@ -1804,6 +2082,276 @@ phone number of any agent apart from each other - we call these
 \item On a pragmatic note, it is more straightforward to convert phonebook
   graphs to the representation in \cite{GithubGossip} than non-phonebook graphs.
 \end{itemize}
+
+\subsection{Profiling}
+
+One of the project aims was to perform a space and time analysis of our
+implemented system. We have a number of reasons to do this;
+
+\begin{itemize}
+\item Firstly, it lets us give a quantitative comparison of our program's
+  efficacy compared to the existing tools.
+\item It also lets us find the parts of our code to try and optimise. It is said
+  that a program spends $90\%$ of its time in $10\%$ of its code; a profiler helps
+  us find this $10\%$.
+\item It also lets us find the weaknesses of our program in comparison to other
+  tools, and as such find the weaknesses of the algorithm put forward. 
+\end{itemize}
+
+In order to do this we used the profiling tool built into GHC. This gives us a
+detailed cost-centre breakdown of in which functions the majority of the time is
+spent, as well as the space used by these functions. We can see an example in
+\figref{fig:costcentre}.
+
+\begin{figure}[h]
+% This is after.prof.   
+\begin{minted}{text}
+	Mon Apr 15 14:23 2019 Time and Allocation Profiling Report  (Final)
+
+	   Main +RTS -p -RTS
+
+	total time  =        1.46 secs   (1457 ticks @ 1000 us, 1 processor)
+	total alloc = 1,036,538,824 bytes  (excludes profiling overheads)
+
+  COST CENTRE            MODULE                 %time %alloc
+
+  models                 ME                      20.7    3.3
+  compare                Model                   14.3    0.0
+  compare                ME                       9.7   22.0
+  meTrans                ME                       9.2   11.5
+  enqueue                BFSM                     5.2   10.8
+\end{minted}
+  \caption{An example cost centre output from GHC.}
+  \label{fig:costcentre}
+\end{figure}
+
+In the following section, we will give an analysis of the time and space used
+for several sizes of gossip graph and several different winning formulae, and
+compare them against the corresponding results in \cite{GithubGossip}. We use
+\cite{GithubGossip} as it is the only tool capable of planning.
+
+Note that the way that our tool and \cite{GithubGossip} plan are quite
+different. In our tool we return just one successful sequence of events; in
+\cite{GithubGossip} all possible sequences are returned. It is unclear how to
+use the latter tool to return just one; hence in the interests of fairness we
+just use the function that returns all the possible paths.
+
+
+\subsubsection{Profiling Framework}
+
+In our profiling we will generate random graphs as in
+\secref{sec:TestingFrameworks}, use them in both tools and then take averages.
+This is because certain graphs will take much less time than others
+\footnote{Consider a graph where no one knows anyone elses phone number; both
+  tools will very quickly decide that there is no successful path through this.
+  A graph where there is a successful path will take much longer to compute the
+  path, in comparison.}, and we want to give the most accurate statistics.
+
+We then perform the planning process on the generated gossip graph. As mentioned
+earlier we run for some amount of graphs and then take the average.
+
+\subsubsection{Profiling Results}
+
+When profiling, we generated gossip graphs of size 4 (by which we mean graphs
+with 4 agents in). This is not an arbitrary number; 4 is the smallest
+``interesting'' gossip graph, meaning the smallest graph where a call occuring,
+not including some arbitrary agent $a$, has interesting other options; it could
+be from $b$ to $c$, or $b$ to $d$, or $c$ to $d$ \footnote{Compare this to a
+  gossip graph of size 3; a call not involving some agent $a$ can only be from
+  either $b$ to $c$ or $c$ to $b$.}. Furthermore, graphs of size greater than 4
+take an impractically long time - it is in the interests of time to use graphs
+of size 4.
+
+When testing, the variable that we varied is the complexity of target formula.
+This might seem like an odd choice, but it is well-motivated;
+
+\begin{itemize}
+\item In \cite{AutomataTechniques}, it is postulated that the runtime and space
+  complexity of the program is $k$-exponential, where $k$ is the maximal depth
+  of the nesting of our $K$ modalities. We want to investigate this claim.
+\item This will give us a handle to compare the methodologies in the two tools,
+  and spot the differences in how knowledge is handled.
+\end{itemize}
+
+\bigskip
+
+We tabulate the results here. We abbreviate the statement ``all agents are
+experts'' to the propositional variable $E$. 
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c||c|c|c|}
+    \hline
+    & $E$ & $ K_a E$ & $K_b K_a E$  \\ \hline 
+    Our tool   & 0.00917s, 7.36Mb  & 0.0150s, 10.15Mb & 0.0239s, 14.12Mb \\ \hline 
+    Other tool & 0.1449s, 251Mb & 0.724s, 1.25Gb & 3.849s, 6.425Gb \\ 
+    \hline
+  \end{tabular}
+  \caption{Profiling Results between our tool and \cite{GithubGossip}}
+  \label{tab:Proflining1}
+\end{table}
+
+We can clearly see that our tool is much more time and space efficient than the
+existing tool. However this is a quite straightforward victory; the other tool
+enumerates \textit{all} of the possible paths through a gossip graph (for a
+graph of size 4, there thousands of these), and then checks the success of each
+one. Compare this to our tool, which simply find the first, shortest, successful
+path it can take to reach some successful state.
+
+Hence to get a more accurate comparison, we slightly modify the code of the
+existing tool to exit once it finds a single successful path. This means that it
+closer mimics our tool, and as such will let us get a better performance
+comparison between the two. 
+
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c||c|c|c|c|}
+    \hline
+    & $E$ & $ K_a E$ & $K_b K_a E$ & $K_c K_b K_a E$ \\ \hline 
+    Our tool   & 0.00917s, 7.36Mb  & 0.0150s, 10.15Mb & 0.0239s, 14.12Mb & 0.0965s, 65.094Mb \\ \hline 
+    Other tool & 0.0006s, 0.694Mb  & 0.0015s, 2.006Mb & 0.0042s, 4.6104Mb & 0.0074s, 11.077Mb \\
+    \hline
+  \end{tabular}
+  \caption{Profiling Results between our tool and \cite{GithubGossip}, with modification}
+  \label{tab:Proflining2}
+\end{table}
+
+We see that the other tool now outperforms ours, in both space and time
+efficiency. 
+
+\subsubsection{Conclusions from Profiling}
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \begin{center}
+    \begin{minted}{haskell}
+      models :: Prop p => Set.Set p -> Form p -> Bool
+      models _  Top         = True
+      models ps (Not form)  = not $ models ps form
+      models ps (P form)    = Set.member form ps
+      models ps (Or forms)  = any (models ps) forms
+      models ps (And forms) = all (models ps) forms
+    \end{minted}
+  \end{center}
+  \caption{The \texttt{models} function}
+  \label{fig:modelsfunction}
+\end{wrapfigure}
+
+
+
+Through looking at the cost centres given to us by GHC, we can see where our
+program spends the bulk of the time computing. In our tool, the culprit is
+\texttt{models}, which can be seen in \figref{fig:modelsfunction}. Unfortunately
+there's no more we can do to speed up this function \footnote{Short of using a
+  HashSet, which gives us quicker lookup times.}, suggesting that the problem
+lies in the amount of times we call it. The function is one of the essential
+parts of the program; it lets us move from state to state.
+
+The issue seems to arise from the final part of the definition of transitions in
+\mestar. Recall that this is defined as:
+
+\begin{equation} \label{eq:delta1}
+  \delta(q_v, e) = q_{v'}, \text{where } v' = \{p \in \Lambda \mid v \models \post(e, p)\}
+  \text{ if } 
+  \models \pre(e)
+\end{equation}
+
+\noindent where, given a world where a set of propositions $v$ is true and an
+event $e$, we go through each proposition $p$ in the set of propositions for the
+current model and check if the set of propositions $v$ \textit{model} the postcondition
+of the given proposition $p$ and the event $e$. This occurs every time we wish
+to make a transition between two sets in our automata; clearly, this piece of
+code is being called a lot. However, this does not seem to be a particularly bad
+thing in itself; rather the opposite, it seems essential that this piece of code
+would be called a lot.
+
+\bigskip
+
+To understand the differences, we mainly need to consider the algorithmic
+differences. The other tool first enumerates the possible set of call sequences
+in a depth-first manner, after which it finds the first successful sequence of
+these calls. It does this latter task like a conventional model checker, and as
+such can use more powerful model checking techniques. In contrast, our tool
+performs a slightly different task; it builds a structure with which it can find
+paths through the gossip graph, and then finds the shortest.
+
+The point at which this difference is really shown is in the generation of
+indistinguishable states. In our tool we progressively keep track of the states
+indistinguishable from our current one, and update each of these states with
+each transition, leading to a lot of time spent in the \texttt{models} function.
+In contrast, the other tool takes the string of calls to be checked against and
+generates all of the other strings of calls indistinguishable to it, and then
+checks if these model the target formula. The latter technique is much more
+computationally efficient than ours; the generation of these indistinguishable
+call sequences is much more straightforward and requires much less heavy lifting
+than maintaining this set of indistinguishable states.
+
+% However, the method of computing these other call sequences is one that can only
+% be effectively utilised when we know the 
+
+One might ask why we don't copy this method of simply maintaining the set of
+strings of indistinguishable events which could have happened in the states of
+our automaton. This is a fine idea, however a problem arises when we come to
+considering the successful states. In the other tool it is known that the
+sequence of calls is ``final'', in the sense of a model checker - we want to
+know if this is successful or it isn't. But in ours we only stop either when we
+can make no more calls, or we are in a successful state. As such, we need to
+know if we are in a successful state \textit{every time we enter one}, and the
+only way we can do this is by performing each string of indistinguishable calls
+on the initial state and evaluating the target formula at the resultant states;
+it is clear that this will be less efficient.
+
+\bigskip
+
+Another method we spend a lot of time on is the BFSM method \texttt{enqueue}. In
+this we take the existing queue and append onto it the set of states that are
+next to be visited. This function uses a lot of memory and time as it has two
+memory-costly functions inside it; namely \texttt{filter} and \texttt{(++)}.
+This was an interesting function to investigate and try and optimise. We only
+need to perform two actions on our queue:
+
+\begin{enumerate}
+\item Read an item from the front
+\item Append items onto the back
+\end{enumerate}
+
+In Haskell, list concatenation has runtime $O(n)$, where $n$ is the length of
+the list being appended to\footnote{I.e., in the command \texttt{xs ++ ys}, $n$
+  is the length of \texttt{xs}.}. This is far from ideal - however the
+\texttt{Data.Seq} package offers us constant-time access to the first and last
+element of a sequence. This seems like it would be perfect for our situation,
+however \textbf{for some reason currently beyond me} the time nearly doubles and
+the space used balloons.
+
+\bigskip
+
+Another thing we could have used to reduce computation is the monotonicity of
+the propositions true at a state. At a state in the gossip protocol, if some set
+$v$ of propositions are true and we make some call $e$, then the set of
+propositions at the state we move to, $v'$, is guaranteed to be a superset of
+$v$. Consider what this means; there is no phone call that can be made that will
+make anyone know any \textit{less}. Hence we could change Equation
+\ref{eq:delta1} to
+
+\begin{equation} \label{eq:delta2}
+  \delta(q_v, e) = q_{v'}, \text{where } v' = \{p \in \Lambda \setminus v \mid v \models \post(e, p)\} \cup v
+  \text{ if } 
+  \models \pre(e)
+\end{equation}
+
+This is because we know that the propositions in $v$ will be true at the state
+$\delta(q_v, e)$; hence we do not need to check again whether or not they will
+be true. 
+
+However I fear this would be an irresponsible change to make to our code.
+Remember that we do not want our system to solely plan for the Gossip problem;
+rather we want it to be capable of doing so for \textit{any} epistemic model and
+propositional event model. We have an example of a model where this occurs in
+\figref{fig:cointoss}; although this is quite a toy example, it does indeed show
+that such cases are possible. In the interests of portability then, it would be
+unwise to make such a change. 
+
+\subsection{Negatives of Design}
 
 
 

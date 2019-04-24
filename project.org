@@ -4,6 +4,9 @@
    Rather, we want to keep the set of all props in the epistemic model as a Set
    rather than a list. This will give us a speed increase, as we don't have to
    call Set.fromList all the time.
+** TODO Change PCon to use a *set* of states, rather than a list
+   We spend a lot of time in the compare function, so it would give us a speed
+   increase if we chose to use this. 
 ** TODO Think about OR again
    We might be able to just do this by taking the intersection and setting the
    successful states to be those where *any* of the states in the list are
@@ -210,7 +213,7 @@
 
   Remember that Steven said that Meng likes automated testing; it would be cool to have an automated way to test all of these things.  
   Perhaps we should just run all of the generated graphs, somehow check that they are correct (e.g. against Malvin gattinger's?) and then use the total profiling information to analyse. 
-
+  
 ** Comparisons
 
    It would be good to find some other examples of software that does the same job as we're trying to do, and then compare our runtime and space usage against theirs. Even if this means just to compare against our own previous times.
