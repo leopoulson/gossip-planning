@@ -60,6 +60,7 @@ that each agent began with the phone number of every other agent. We can hence
 visualise the set of agents as nodes and the fact of agent $a$ knowing the phone
 number of $b$ as a directed edge, and so such a formulation would be a complete
 graph as in \figref{fig:classicgossipex}.
+colour
 
 \bigskip
 
@@ -131,7 +132,7 @@ developed to support it. The three related pieces of software are
 program that, given a model \tmc{M} and a formula $\phi$, tells the user whether
 or not $\mc{M} \models \phi$. Given the setting, they specifically answer the
 question ``given an initial state and a set of events, does the state reached by
-the occurence of these events at the initial state satisfy some property?''.
+the occurrence of these events at the initial state satisfy some property?''.
 
 We can see model checking as the \textit{dual} of planning; in planning we want
 to find such a sequence of events, whilst model checking verifies that these
@@ -216,7 +217,30 @@ Concretely, our aims are as follows:
 \end{itemize}
 
 % We hope that the work done in this thesis can help to unify work done on both
-% dynamic gossip and epistemic planning, and 
+% dynamic gossip and epistemic planning, and
+
+\subsection{Road Map}
+
+In Section 2, we introduce, formalise and explain the concepts and tools needed
+to understand the work in the rest of the thesis. This constitutes the first of
+our challenges; collecting and displaying all of the surrounding literature in a
+pleasant, simple manner is a goal of this thesis and this section achieves this.
+
+In Section 3 we put forward the algorithm we designed in order to solve the
+epistemic planning problem. This uses a simplified version of the process put
+forward in \secref{sec:PowersetAutomata}. We also give an exemplar execution of
+the algorithm, in order to show how it functions.
+
+Section 4 discusses the Haskell implementation of the algorithm designed in
+Section 3. We discuss the design decisions taken throughout the implementation,
+including motivation for the use of Haskell to solve this problem.
+
+In Section 5 we evaluate the algorithm and its implementation. To do this we
+use \cite{GithubGossip} as both a model checker, to validate our results
+returned from our planning tool, and also as a tool capable of planning, in
+order to analyse the space and time efficiency of our tool. 
+
+In Section 6 we conclude the thesis. 
 
 \newpage
 
@@ -590,6 +614,7 @@ talk on the phone, they also exchange all of the phone numbers that they know, a
 well as the secrets that they know.
 
 \subsubsection{Protocols}
+\label{sec:Protocols}
 
 The gossip problem, as we have mentioned so far, can rely on some central
 scheduler to tell the agents what call to make, and lets them know when to stop.
@@ -672,6 +697,7 @@ that $(u, v) \in S$ (or $Suv$) iff $u$ knows the \textit{secret} of $v$.
     \label{fig:KripkeGossip}
   \end{subfigure}
   \caption{}
+  \label{fig:Gossip2Kripke}
 \end{figure}
 
 
@@ -692,15 +718,58 @@ as the more terse $\mc{G} = (\left\{ a, b, c \right\},$ $ \left\{ (a, b), (b,
 
 \bigskip
 
-
 One might ask how gossip fits into the picture we drew above of Kripke models
-and event models. We can see a gossip state as a very boring Kripke model drawn
-in \figref{fig:KripkeGossip}, where we have just one state, which is the one
-that we are in. We can then create an event model that enumerates all of the
-calls in this example, which can be seen in \figref{fig:GossipEvMo}\footnote{We
-  omit the two calls $ac$ and $ca$ to make the example shorter, and also because
-their preconditions are not satisfied by the only state in the Kripke model and
-as such will have no effect.}.
+and event models. We give a way to generically define Kripke models and event
+models for an arbitrary gossip graph $\mc{G} = (A, N, S)$. A Kripke model for a
+graph \tmc{G} uses the set of propositions $\{N_{ij} \mid i \in A, j \in A\}
+\cup \{S_{ij} \mid i \in A, j \in A\}$. The Kripke model for a graph \tmc{G} has
+just one state, $q$, which is the state that models the graph. We define
+$\mc{M_G} = (W, R, V)$ where $W = \left\{ q \right\}$, $R_i = \left\{ (q, q)
+\right\}$ for every agent $i \in A$, and $V(q) = \{N _{ij} \mid (i, j) \in N\}
+\cup \{S_{ij} \mid (i, j) \in S\}$. An example of this is just in
+\figref{fig:Gossip2Kripke}; we see that the Kripke model for the graph is not
+particularly complicated. 
+
+An event model can also be produced in a similar way. We make an event model
+$\mc{E} = (E, P, \pre, \post)$, where
+
+\begin{itemize}
+\item $E = \{ij \mid i \in A, j \in A, i \not = j\}$. Our set of events is the
+  calls between agents, however an agent cannot call themself. 
+\item $P_i = \left\{(jk, j'k') \mid j, k, j', k' \in A, i \not \in \{j, k, j',
+    k'\}\right\} \cup \left\{ (ij, ij) \mid j \in A\right\} \cup \left\{ (ji,
+    ji) \mid j \in A \right\}$, for every $i \in A$. We can read this as agent
+  $i$ cannot distinguish between a call that it is not a part of; hence the
+  former part of the definition. The later two sets say that agent $i$ does not
+  confuse a call that it's a part of with any other call. 
+\item $\pre(ij) = N_{ij}$. By this we mean that the precondition for a call from
+  agent $i$ to $j$ is that $i$ knows the phone number of $j$. \\
+  It is here that we
+  can add in protocols from \secref{sec:Protocols}; for instance, in an event
+  model where we follow the protocol \textsf{LNS}, we add the condition $\neg
+  S_{ij}$ to the precondition; hence $\pre_{\textsf{LNS}}(ij) = N_{ij} \land
+  \neg S_{ij}$.
+\item $\post(ij, N_{nm}) = \left\{ \begin{array}{ll}
+                                     N_{im} \lor N_{jm} & \text{if $n == i$ or $n ==
+                                                     j$} \\
+                                     N_{nm} & \text{otherwise} 
+                                   \end{array}
+                           \right.$ \\
+$\post(ij, S_{nm}) = \left\{ \begin{array}{ll}
+                                     S_{im} \lor S_{jm} & \text{if $n == i$ or $n ==
+                                                     j$} \\
+                                     S_{nm} & \text{otherwise} 
+                                   \end{array}
+                           \right.$ \\
+ This states that if a call occurs, then for an agent $n$ to know the number of
+ an agent $m$, either $n$ was a part of the call and $n$ either knew the number
+ of $m$ before or learned it from speaking to the other agent in the call, or
+ $n$ was not a member of the call and knew the number of $m$ anyway. The same
+ goes for secrets. 
+\end{itemize}
+
+We now give the event model for the graph \figref{fig:GossipGraph3} as an
+example. 
 
 \begin{figure}[h]
   \centering
@@ -729,9 +798,22 @@ as such will have no effect.}.
         $N_{cb}$ 
       \end{tabular}
     };
+    \node (ac) [right = of cb] {
+      \begin{tabular}{c}
+        $ac$ \\
+        $N_{ac}$ 
+      \end{tabular}
+    };
+    \node (ca) [right = of ac] {
+      \begin{tabular}{c}
+        $ca$ \\
+        $N_{ca}$ 
+      \end{tabular}
+    };
     
     \draw [-] (ab) -- (ba) node [draw=none, midway, below = 2pt] {$c$};
     \draw [-] (bc) -- (cb) node [draw=none, midway, below = 2pt] {$a$};
+    \draw [-] (ca) -- (ac) node [draw=none, midway, below = 2pt] {$b$};
   \end{tikzpicture}
   \caption{An Event model $\mc{E_G}$ for the calls associated with \figref{fig:GossipSize3}.}
   \label{fig:GossipEvMo}
@@ -1204,62 +1286,76 @@ system.
 \label{subsec:mestar}
 
 Put forward in \cite{AutomataTechniques}, \mestar is a structure we use to
-represent \textit{any} epistemic model and event model pair. We slightly adjust
-the definition given in the literature to a version much more suited to our
-situation. 
+represent the states that can be reached given an epistemic model \tmc{M} and an
+event model \tmc{E}. It consists of an automata \tmc{A_D} and a set of
+transducers $\mc{T} = \left\{ \mc{T}_i \mid i \in A \right\}$. The automata
+\tmc{A_D} holds the information about the set of possible states that can be
+reached using \tmc{M} and \tmc{E}, whilst $\mc{T}_i$ relates pairs of events
+that agent $i$ cannot distinguish between. We revisit \tmc{T} later in this
+section; for now, we address \tmc{A_D}.
 
-It represents the application of some event model \tmc{E} onto an epistemic
-model \tmc{M} repeatedly. Consider that $\mc{ME}^0$ represents $\mc{M}$,
+\bigskip
+
+\tmc{A_D} represents the application of some event model \tmc{E} onto an epistemic
+model \tmc{M} infinitely. Consider that $\mc{ME}^0$ represents $\mc{M}$,
 $\mc{ME}^1$ would be $\mc{M} \times \mc{E}$, and $\mc{ME}^2$ represents $\mc{M}
 \times \mc{E} \times \mc{E}$, and so on and so forth. Then we define \mestar as
 
-% \begin{align*}
-  % \mestar = \bigcup_{n \geq 0} \mc{ME}^n \\
-% \end{align*}
+\begin{equation*}
+  \mc{ME}^\ast = \bigcup_{n \geq 0} \mc{ME}^n
+\end{equation*}
 
-We can picture \mestar as having layers, where each node in a layer $\mc{ME}^n$ has taken
-exactly $n$ events to arrive there.
+One might wonder how we can reason about this; it's a seemingly infinite
+structure. The key thing to realise is that our states in \mestar are indexed by
+the set of propositions that hold true at the state. For instance,
+\figref{fig:KripkeGossip} would be represented by the state $q_{\{N_{aa},
+  N_{ab}, N_{ba}, N_{ba}, N_{bc}, N_{cc}\}}$. Recall that the set of propositions that
+our epistemic model ranges over has to be finite; consequently, our set of
+states is finite\footnote{Indeed, we know the exact size of our set of states in
+\mestar, which is $2^{|\Lambda|}$.}. The transitions in \mestar are exactly
+those from states in \tmc{M} from \tmc{E}. It becomes very clear to see how this
+works once we inspect the definition of \mestar. 
 
-\begin{center}
-  \begin{tikzpicture}[every node part/.style={align=center}]
-    \node(0) [draw, rounded rectangle] at (0, 4) {Nodes in $\mc{ME}^0$};
-    \node(1) [draw, rounded rectangle] at (0, 2) {Nodes in $\mc{ME}^1$};
-    \node(2) [draw, rounded rectangle] at (0, 0) {Nodes in $\mc{ME}^2$};
-    \node(3) at (0, -2) {\ldots};
+% We can picture \mestar as having layers, where each node in a layer $\mc{ME}^n$ has taken
+% exactly $n$ events to arrive there.
 
-    \draw[->, shorten >= 1pt] (0) -- (1) node [midway, left = 3pt] {Calls in \tmc{E}};
-    \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
-    \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
-  \end{tikzpicture}
-\end{center}
+% \begin{center}
+%   \begin{tikzpicture}[every node part/.style={align=center}]
+%     \node(0) [draw, rounded rectangle] at (0, 4) {States in $\mc{ME}^0$};
+%     \node(1) [draw, rounded rectangle] at (0, 2) {States in $\mc{ME}^1$};
+%     \node(2) [draw, rounded rectangle] at (0, 0) {States in $\mc{ME}^2$};
+%     \node(3) at (0, -2) {\ldots};
 
-\mestar consists of an automaton $A_{\mc{D}}$ and a set of transducers $\left\{
-\mc{T}_i \mid i \in A \right\}$. $A_{\mc{D}}$ represents the states in our
-epistemic model \tmc{M} and the transitions between these states due to the
-events in \tmc{E}. The $^\ast$ of \mestar refers to the fact that the event
-model has been applied to the original model maximally; it contains $\mc{M}
-\cup \left( \mc{M} \times \mc{E}  \right) \cup \left( \mc{M} \times \mc{E}
-  \times \mc{E} \right) \cup \ldots$. $\mc{T}_i$ represents the events that are
-indistinguishable to agent $i$.
+%     \draw[->, shorten >= 1pt] (0) -- (1) node [midway, left = 3pt] {Calls in \tmc{E}};
+%     \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
+%     \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
+%   \end{tikzpicture}
+% \end{center}
 
-\bigskip \bigskip \bigskip
+% \mestar consists of an automaton $A_{\mc{D}}$ and a set of transducers $\left\{
+% \mc{T}_i \mid i \in A \right\}$. $A_{\mc{D}}$ represents the states in our
+% epistemic model \tmc{M} and the transitions between these states due to the
+% events in \tmc{E}. The $^\ast$ of \mestar refers to the fact that the event
+% model has been applied to the original model maximally; it contains $\mc{M}
+% \cup \left( \mc{M} \times \mc{E}  \right) \cup \left( \mc{M} \times \mc{E}
+%   \times \mc{E} \right) \cup \ldots$. $\mc{T}_i$ represents the events that are
+% indistinguishable to agent $i$.
 
-The roles of these structures will become more clear once we see how they are
-constructed. 
+% \bigskip \bigskip \bigskip
 
 \bigskip 
 
-Let $\mc{M} = (W, R, V)$ be an epistemic model and let $\mc{E} = (E, Q, \pre,
+Let $\mc{M} = (W, R, V)$ be an epistemic model and let $\mc{E} = (E, \mc{R_E}, \pre,
 \post)$ be an event model. 
 
-Then define the automaton $A_{\mc{D}} = (\Sigma, Q, \delta, q_i, F)$, where
+Then define the automaton $\mc{A_D} = (\Sigma, Q, \delta, q_i, F)$, where
 $\Sigma = W \cup E, F = \left\{ q_v \mid v \subseteq \Lambda \right\}$ and $Q =
 F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
 
 \begin{centermath}
     \begin{array}{ll}
         \forall w \in W, \forall e \in E, & \\
-        \delta(q_0, w) = q_{v(w)} & \delta(q_0, e) = \bot \\
+        \delta(q_0, w) = q_{V(w)} & \delta(q_0, e) = \bot \\
         \delta(q_v, w) = \bot & \delta(q_v, e) = \left\{
             \begin{array}{ll}
                 q_{v'}, \text{where } v' = \{p \mid v \models \post(e, p)\} & \text{if } v \models \pre(e) \\
@@ -1268,6 +1364,70 @@ F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
         \right.
     \end{array}
 \end{centermath}
+
+We now explain the definition here. We can see that our alphabet is the set of
+worlds in \tmc{M} and the events in \tmc{E}. See that $\delta(q, \sigma)$ is
+undefined when $q \not = q_i$ and $\sigma \in W$; we may only make a transition
+when $\sigma \in W$ if $q$ is the initial state. Recall that the worlds in
+\mestar are indexed just by the propositions that hold true at them; we can see
+this in the definition of Q above. Then when we make a transition $\delta(q_i,
+w)$ we move to the state $q_{V(w)}$, where $V$ is the valuation function from
+\tmc{M}. This means that we move to the world indexed by the propositions true
+at $w$.
+
+\begin{wrapfigure}{r}{0.2\linewidth}
+  \centering
+  {
+  \begin{tikzpicture}
+      \node (a) [] at (0, 1) {$a$};
+      \node (b) [] at (2, 0) {$b$};
+      \node (c) [] at (3, 2) {$c$};
+
+      \draw [<->, dashed] (a) -- (b);
+      \draw [->, dashed] (b) -- (c);
+    \end{tikzpicture}
+    \subcaption{}
+    \label{fig:GossipWrap1}
+  }
+  {
+    \begin{tikzpicture}
+      \node (a) [] at (0, 1) {$a$};
+      \node (b) [] at (2, 0) {$b$};
+      \node (c) [] at (3, 2) {$c$};
+
+      \draw [<->] (a) -- (b);
+      \draw [->, dashed] (b) -- (c);
+      \draw [->, dashed] (a) -- (c);
+    \end{tikzpicture}
+    \subcaption{}
+    \label{fig:GossipWrap2}
+  }
+  \caption{}
+\end{wrapfigure}
+
+After this, we can make no more transitions $\delta(q, \sigma)$ where $\sigma
+\in W$. The only other transitions we can make are when $q \in F$ and $\sigma
+\in E$. In these cases, $q$ is indexed by some set of propositions $v \subseteq
+\Lambda$. Then given this, we transition to a state $q_{v'}$ where $v'$ is the
+set of all propositions $p$ where the postcondition $\post(e, p)$ is modelled by
+the set of propositions $v$. 
+
+This is quite an odd definition, and we give an example to try and aid
+understanding. Consider the gossip graph in \figref{fig:GossipWrap1}. In
+\mestar, this would be modelled by the state $q_v$ where $v = \left\{ N_{aa},
+  N_{ab}, N_{ba}, N_{bb}, N_{bc}, N_{cc}, S_{aa}, S_{bb}, S_{cc} \right\}$. When
+call $ab$ occurs at \figref{fig:GossipWrap1}, \figref{fig:GossipWrap2} is the
+result. We see that this matches up with the definition of $\delta$ for \mestar;
+take for example $S_{ba}$. $\post(ab, S_{ba}) = S_{ba} \lor S_{aa}$ is clearly
+modelled by $v$, hence this becomes true at our new state. Contrarily, consider
+$S_{cb}$. $\post(ab, S_{cb}) = S_{cb}$, as $c$ is not involved in the call $ab$.
+Clearly $v \not \models S_{cb}$, and as such $S_{cb}$ is not included in the set
+of propositions that are true at the new state.
+
+We also see that if the precondition of the event is not satisfied then the
+state moved to is undefined; we cannot make a transition with an event that may
+not happen at a state. 
+
 
 \bigskip \bigskip \bigskip
 
@@ -2353,7 +2513,51 @@ unwise to make such a change.
 
 \subsection{Negatives of Design}
 
+\newpage
 
+\section{Conclusion}
+
+We now take some time to reflect on the work done in this project. Our
+overarching aim in the project was to design an implement a system with which we
+can perform epistemic planning. This document's ordering reflects the order in
+which the challenges of the project were accomplished; we first reviewed the
+literature, then designed the algorithm, and then implemented it. Chapters 2, 3
+and 4 are respectively dedicated to each subtask.
+
+\bigskip
+
+In Chapter 2, we explained the concepts necessary to understand the algorithm
+put forward. When starting work on this project the understanding of the
+processes put forward in the literature was the first major difficulty, and as
+such care has been taken in the writing process to make these definitions as clear
+as possible. 
+
+\bigskip
+
+In Chapter 3, we put forward the algorithm designed to perform the task of
+planning.
+
+\subsection{Future Work}
+
+It is clear to see that our system is very slow; when run on a gossip graph with
+greater than 6 agents the takes so long that it's not worth waiting for the
+results. Whilst there is scope for implementation-based
+optimisations\footnote{By which we mean optimisations like changing a
+  \texttt{Set} to a \texttt{HashSet} and so on.}, this is mainly due to the
+algorithm; in \cite{AutomataTechniques} it is shown that the propositional
+epistemic planning problem is in \textsf{$k + 1$-EXPTIME}, where $k$ is the
+depth of the deepest-nested knowledge operator. 
+
+The method that we use is very explicit; we will always explore a branch, no
+matter what its state is. We may be wasting computation by either exploring a
+branch that is never going to succeed, or is identical to another branch. It
+would be interesting to see the implementation of some checker for recomputed
+branches, a la dynamic programming.
+
+\bigskip
+
+It also seems possible that there's scope for a symbolic approach, like in
+\cite{MalvinThesis}.
 
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
