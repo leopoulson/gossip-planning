@@ -886,6 +886,7 @@ will not make this distinction. In the implementation a state is represented
 graph. 
 
 \subsection{Planning}
+\label{sec:Planning}
 
 Automated planning is the process of computing which set of events must occur to
 take a system from some given initial state to some successful state. Such a
@@ -1238,44 +1239,96 @@ in the literature.
 We first give a rough explanation of the process, before getting into the
 details of the process later in this chapter.
 
-As input, we receive an epistemic model \tmc{M}, an event model \tmc{E}, and
-some formula $\phi \in \mc{L}(\Lambda)$, for some set of propositions $\Lambda$.
-First, we construct an automata called \mestar, by simulating the repeated
-application of \tmc{E} on \tmc{M}. This lets us easily traverse the space of
-possible states we could be in, after applying the events in \tmc{E} to the
-model \tmc{M}.
+\bigskip
 
-For the next step, we need to consider the shape of the formula $\phi$. If it
-does not include a knowledge modality $K_i$ then we proceed to the next stage.
-If it does, then we need to perform the process detailed in Section
-\ref{sec:PowersetAdapted}, where the transducer $\mc{T}_i$ used is the
-transducer relating the events that are indistinguishable to agent $i$. This is
-a powerful procedure that brings the information regarding the states that are
-indistinguishable to the agent $i$ into the state we are currently in. Then, in
-order to check if a formula of the form $K_i \phi$ is true, we just need to
-check that $\phi$ holds at all of the states that are indistinguishable from our
-current one. We can now do this in a very straightforward manner, given that the
-information regarding the states we could be in is now baked-into the state.
+\textbf{Step one}; we receive as input an epistemic model \tmc{M}, a
+propositional event model \tmc{E} and some formula $\phi \in \mc{L}(\Lambda)$,
+for some set of propositions $\Lambda$. We first construct an automata called
+\mestar, by simulating the repeated application of \tmc{E} onto \tmc{M}. This
+lets us easily traverse the set of possible states we can reach from our initial
+model.
 
-We repeat the process in Section \ref{sec:PowersetAdapted} each time we
-encounter a $K$ modality \footnote{Note that in a situation where we have a
+Here, recall the definition of a planning problem from \secref{sec:Planning}. We
+require a planning system with a set $S$ of states, a set $A$ of actions and a
+partial transition function $\gamma : S \times A \hookrightarrow S$. \mestar
+provides us will all of these; our set of states $S$ is the state space $Q$, the
+set of actions $A$ is the alphabet $\Sigma$ and the transition function $\gamma$
+is exactly the transition function $\delta$ of \mestar. Furthermore, we can we
+the set of goal states to be the set of states that model the winning condition,
+and let the initial state be the initial state of \mestar.
+
+\bigskip
+
+\textbf{Step two}; we now need to consider the success formula $\phi$. If it
+does not consider a knowledge modality $K_i$ then we proceed to the next stage.
+However, if it does, the process changes. Recall that the way we find out the
+truth value of a formula $K_i \phi$ is to go to all of the states
+indistinguishable from the current state to agent $i$ and check if $\phi$ holds
+at all of these. In \mestar we have no way of knowing which states are
+indistinguishable from the states we're currently looking at; hence it's very
+difficult to check the truth-value of these modal formulae.
+
+To this end, we perform the process detailed in Section
+\ref{sec:PowersetAdapted}. In this, we build a transducer $\mc{T}_i$ which
+relates pairs of events that are indistinguishable to one another. We then step
+through \mestar again, building another automata where the states are
+\textit{sets of states} in \mestar. This is done by following the transitions in
+\mestar and, whenever we make a transition through the occurence of an event,
+computing the set of events that are indistinguishable to agent $i$ and applying
+this to all of the states in the set of states that we could be in. This means
+that at each state in this powerset automata, we have the set of states that $i$
+considers possible, and hence we can quickly check formulae of form $K_i \phi$. 
+
+We can repeat this process ad infinitum; for a formula of the form $K_b K_a
+\phi$, we need to find the set of states that agents $b$ considers possible, and
+then check $K_a \phi$ in these states\footnote{Note that in a situation where we have a
   formula $K_a K_a \phi$ we do not need to build another powerset automata as in
   an \textsf{S5} model, $KK \ldots KK = K$ (\cite{ModalLogic}). However, for a
   formula $K_a K_b \phi$ we do; this is because we can see $K_i$ and $K_j$ as
-  being different modalities for different agents $i$ and $j$.}; in cases where
-we have a conjunction or negation where one of the formulas
-included is a knowledge-based formula, then we perform intersection and
-complement of the resulting automata. This is a very pleasing result and is a
-great display of why finite-state automata are so well suited to this area.
+  being different modalities for different agents $i$ and $j$.}.
 
-Finally, once we have finished building automata we perform breadth-first search
-on the resulting machine. At this point, we have an automata in which formulae
-of the same shape \footnote{By shape, we mean that the propositions in the
-  formula may be anything in $\mc{L}_P(\Lambda)$, as long as the knowledge
-  modalities, conjunctions and negations remain in place} as $\phi$ can be
-evaluated positionally. Then we set the states which satisfy $\phi$ to
-be the successful states. We can now perform breadth-first search on the
-resulting automata to find the shortest path to a successful state.
+
+In cases where we have some conjunction or negation of formulae with a knowledge
+modality in, we can just respectively perform intersection and complement on the
+automata generated to solve the constituent formulae. This is a very pleasing
+method and is a great display of why finite-state machines are so well-suited to
+this task. 
+
+% We repeat the process in Section \ref{sec:PowersetAdapted} each time we
+% encounter a $K$ modality \footnote{Note that in a situation where we have a
+%   formula $K_a K_a \phi$ we do not need to build another powerset automata as in
+%   an \textsf{S5} model, $KK \ldots KK = K$ (\cite{ModalLogic}). However, for a
+%   formula $K_a K_b \phi$ we do; this is because we can see $K_i$ and $K_j$ as
+%   being different modalities for different agents $i$ and $j$.}; in cases where
+% we have a conjunction or negation where one of the formulas
+% included is a knowledge-based formula, then we perform intersection and
+% complement of the resulting automata. This is a very pleasing result and is a
+% great display of why finite-state automata are so well suited to this area.
+
+\bigskip
+
+In \textbf{step 3} we find paths through the finite-state machine we have built.
+In our implementation we simply search for a single path, using breadth-first
+search; however given that we have a conventional finite-state machine we can
+use a wide array of other techniques to enumerate the set of all successful
+paths through the automata.
+
+After performing the breadth-first search, we either return the path found - a
+string of events $e_1 e_2 \ldots e_n$ - or a negative response to say that no
+path to a successful state exists. This satisfies the return requirement of a
+planning problem; we return a set of actions that take us from the initial state
+to some successful state, as required. 
+
+% Finally, once we have finished building automata we perform breadth-first search
+% on the resulting machine. At this point, we have an automata in which formulae
+% of the same shape \footnote{By shape, we mean that the propositions in the
+%   formula may be anything in $\mc{L}_P(\Lambda)$, as long as the knowledge
+%   modalities, conjunctions and negations remain in place} as $\phi$ can be
+% evaluated positionally. Then we set the states which satisfy $\phi$ to
+% be the successful states. We can now perform breadth-first search on the
+% resulting automata to find the shortest path to a successful state. We either
+% return the path taken - that is, a string of events $e_1, e_2, e_3, \ldots,
+% e_n$ - or a negative response to say that no path to a successful state exists. 
 
 \bigskip \bigskip \bigskip
 
@@ -1285,18 +1338,15 @@ system.
 \subsection{\mestar}
 \label{subsec:mestar}
 
-Put forward in \cite{AutomataTechniques}, \mestar is a structure we use to
+Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
 represent the states that can be reached given an epistemic model \tmc{M} and an
-event model \tmc{E}. It consists of an automata \tmc{A_D} and a set of
-transducers $\mc{T} = \left\{ \mc{T}_i \mid i \in A \right\}$. The automata
-\tmc{A_D} holds the information about the set of possible states that can be
-reached using \tmc{M} and \tmc{E}, whilst $\mc{T}_i$ relates pairs of events
-that agent $i$ cannot distinguish between. We revisit \tmc{T} later in this
-section; for now, we address \tmc{A_D}.
+event model \tmc{E}. \mestar holds the information about the set of possible
+states that can be reached using \tmc{M} and \tmc{E}, and how we can move
+between them.
 
 \bigskip
 
-\tmc{A_D} represents the application of some event model \tmc{E} onto an epistemic
+\mestar represents the application of some event model \tmc{E} onto an epistemic
 model \tmc{M} infinitely. Consider that $\mc{ME}^0$ represents $\mc{M}$,
 $\mc{ME}^1$ would be $\mc{M} \times \mc{E}$, and $\mc{ME}^2$ represents $\mc{M}
 \times \mc{E} \times \mc{E}$, and so on and so forth. Then we define \mestar as
@@ -1316,39 +1366,12 @@ states is finite\footnote{Indeed, we know the exact size of our set of states in
 those from states in \tmc{M} from \tmc{E}. It becomes very clear to see how this
 works once we inspect the definition of \mestar. 
 
-% We can picture \mestar as having layers, where each node in a layer $\mc{ME}^n$ has taken
-% exactly $n$ events to arrive there.
-
-% \begin{center}
-%   \begin{tikzpicture}[every node part/.style={align=center}]
-%     \node(0) [draw, rounded rectangle] at (0, 4) {States in $\mc{ME}^0$};
-%     \node(1) [draw, rounded rectangle] at (0, 2) {States in $\mc{ME}^1$};
-%     \node(2) [draw, rounded rectangle] at (0, 0) {States in $\mc{ME}^2$};
-%     \node(3) at (0, -2) {\ldots};
-
-%     \draw[->, shorten >= 1pt] (0) -- (1) node [midway, left = 3pt] {Calls in \tmc{E}};
-%     \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
-%     \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
-%   \end{tikzpicture}
-% \end{center}
-
-% \mestar consists of an automaton $A_{\mc{D}}$ and a set of transducers $\left\{
-% \mc{T}_i \mid i \in A \right\}$. $A_{\mc{D}}$ represents the states in our
-% epistemic model \tmc{M} and the transitions between these states due to the
-% events in \tmc{E}. The $^\ast$ of \mestar refers to the fact that the event
-% model has been applied to the original model maximally; it contains $\mc{M}
-% \cup \left( \mc{M} \times \mc{E}  \right) \cup \left( \mc{M} \times \mc{E}
-%   \times \mc{E} \right) \cup \ldots$. $\mc{T}_i$ represents the events that are
-% indistinguishable to agent $i$.
-
-% \bigskip \bigskip \bigskip
-
 \bigskip 
 
 Let $\mc{M} = (W, R, V)$ be an epistemic model and let $\mc{E} = (E, \mc{R_E}, \pre,
 \post)$ be an event model. 
 
-Then define the automaton $\mc{A_D} = (\Sigma, Q, \delta, q_i, F)$, where
+Then define the automaton $\mc{ME}^\ast= (\Sigma, Q, \delta, q_i, F)$, where
 $\Sigma = W \cup E, F = \left\{ q_v \mid v \subseteq \Lambda \right\}$ and $Q =
 F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
 
@@ -1365,7 +1388,7 @@ F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
     \end{array}
 \end{centermath}
 
-We now explain the definition here. We can see that our alphabet is the set of
+We now explain the definition. We can see that our alphabet is the set of
 worlds in \tmc{M} and the events in \tmc{E}. See that $\delta(q, \sigma)$ is
 undefined when $q \not = q_i$ and $\sigma \in W$; we may only make a transition
 when $\sigma \in W$ if $q$ is the initial state. Recall that the worlds in
@@ -1428,21 +1451,8 @@ We also see that if the precondition of the event is not satisfied then the
 state moved to is undefined; we cannot make a transition with an event that may
 not happen at a state. 
 
+\bigskip 
 
-\bigskip \bigskip \bigskip
-
-In order to construct the set of transducers \tmc{T}, consider the one state
-transducer $\mc{T}_i = (\Sigma, Q', \Delta_i, q, F')$ where $Q' = \{q\}$, $F' =
-\{q\}$ and $\Delta_i = \left\{ (q, w, w', q \mid (w, w') \in R) \right\} \cup
-\left\{ (q, e, e', q \mid (e, e') \in Q) \right\}$ \textbf{TODO: Consider moving
-this to the earlier section?}.
-
-\subsubsection{\mestar in context}
-
-We adapt the definition slightly for our context. In our context, when we are
-starting to move through the automata we do not need to be able to dynamically
-pick the world; rather, we fix it in the code as the set of initial states of
-the epistemic model. Hence we l
 
 \subsection{Powerset Adapted}
 \label{sec:PowersetAdapted}
@@ -1454,6 +1464,25 @@ do not need as much information. We first show how the special transducer in
 this section is built. We will then define our version of the powerset
 construction, and then explain where the differences arise. This process puts
 the powerset construction in \ref{sec:PowersetArena} into context.
+
+\subsubsection{Event Transducers}
+
+In conjunction with \mestar, we also need to produce a set of transducers
+$\mc{T} = \{\mc{T}_i \mid i \in A\}$, for the model in question. $\mc{T}_i$
+relates pairs of events that agent $i$ cannot distinguish between. This becomes
+very useful later in this section, as it lets us easily compute states that an
+agent considers possible given a prior state and some event. Hence we want
+$\left[ \mc{T}_i \right]$ to be equal to the set of pairs of calls
+indistinguishable to agent $i$\footnote{As an example, consider the gossip graph
+  with three agents. Then $\left[ \mc{T}_a \right] = \left\{ (ab, ab), (ac, ac),
+    (ba, ba), (ca, ca), (bc, bc), (bc, cb), (cb, bc), (cb, cb) \right\} $.}.
+
+
+In order to do this we need just one state in our transducer, which we simply
+call $q$. Then we define $\mc{T}_i = (\Sigma, Q', \Delta_i, q, F')$. $Q' = F' =
+\{q\}$ and $\Delta_i = \left\{ (q, w, w', q \mid (w, w') \in R_i) \right\} \cup
+\left\{ (q, e, e', q \mid (e, e') \in Q_i) \right\}$. It is quite simple to see
+that this definition will satisfy the above requirement. 
 
 \subsubsection{Transducer Composition}
 \label{subsubsec:TransducerComposition}
@@ -2004,6 +2033,8 @@ evaluated at the states we want them to be evaluated at. This prevents us from
 trying to evaluate formula of a certain language on a world it is incompatible
 with.
 
+\textbf{TODO Add some to this}
+
 \subsection{\texttt{FSM.hs} and \texttt{FST.hs}}
 
 These two modules hold our finite state machines. Given how much of the
@@ -2226,11 +2257,16 @@ on each graph.
 
 \bigskip
 
-The creation of gossip graphs is very straightforward; we just produce some set
-of propositions $N = \left\{ N_{ij} \right\}$ where $\forall N_{ij} \in N, i
-\not = j$. We only look for cases where the agents start out not knowing the
-phone number of any agent apart from each other - we call these
-\textit{phonebook} graphs. There are a few reasons for this;
+The creation of gossip graphs is very straightforward; we just produce some
+random set of propositions $N = \left\{ N_{ij} \mid i, j \in A, i \not = j
+\right\}$. Once we have this set $N$ we union it with the set $\{N_{ij} \mid i,
+j \in A, i = j\}\ cup \{N_{ij} \mid i, j \in A, i = j\}$. This latter set is the
+set of ``identity'' propositions; we can see them as being vacuously true, as
+all of the agents are bound to know their own phone number and secret.
+
+We only look for cases where the agents start out not knowing the secret 
+of any agent, only phone numbers - we call these \textit{phonebook} graphs.
+There are a few reasons for this;
 
 \begin{itemize}
 \item These cases are the only interesting ones. Any gossip graph where some
@@ -2296,7 +2332,6 @@ different. In our tool we return just one successful sequence of events; in
 use the latter tool to return just one; hence in the interests of fairness we
 just use the function that returns all the possible paths.
 
-
 \subsubsection{Profiling Framework}
 
 In our profiling we will generate random graphs as in
@@ -2315,12 +2350,12 @@ earlier we run for some amount of graphs and then take the average.
 When profiling, we generated gossip graphs of size 4 (by which we mean graphs
 with 4 agents in). This is not an arbitrary number; 4 is the smallest
 ``interesting'' gossip graph, meaning the smallest graph where a call occuring,
-not including some arbitrary agent $a$, has interesting other options; it could
-be from $b$ to $c$, or $b$ to $d$, or $c$ to $d$ \footnote{Compare this to a
-  gossip graph of size 3; a call not involving some agent $a$ can only be from
-  either $b$ to $c$ or $c$ to $b$.}. Furthermore, graphs of size greater than 4
-take an impractically long time - it is in the interests of time to use graphs
-of size 4.
+not including some arbitrary agent $a$, has interesting indistinguishable calls;
+it could be from $b$ to $c$, or $b$ to $d$, or $c$ to $d$ \footnote{Compare this
+  to a gossip graph of size 3; a call not involving some agent $a$ can only be
+  from either $b$ to $c$ or $c$ to $b$.}. Furthermore, graphs of size greater
+than 4 take an impractically long time - it is in the interests of time to use
+graphs of size 4.
 
 When testing, the variable that we varied is the complexity of target formula.
 This might seem like an odd choice, but it is well-motivated;
@@ -2427,13 +2462,14 @@ would be called a lot.
 
 \bigskip
 
-To understand the differences, we mainly need to consider the algorithmic
-differences. The other tool first enumerates the possible set of call sequences
-in a depth-first manner, after which it finds the first successful sequence of
-these calls. It does this latter task like a conventional model checker, and as
-such can use more powerful model checking techniques. In contrast, our tool
-performs a slightly different task; it builds a structure with which it can find
-paths through the gossip graph, and then finds the shortest.
+To understand the differences in efficiency, we mainly need to consider the
+algorithmic differences. The other tool first enumerates the possible set of
+call sequences in a depth-first manner, after which it finds the first
+successful sequence of these calls. It does this latter task like a conventional
+model checker, and as such can use more powerful model checking techniques. In
+contrast, our tool performs a slightly different task; it builds a structure
+with which it can find paths through the gossip graph, and then finds the
+shortest.
 
 The point at which this difference is really shown is in the generation of
 indistinguishable states. In our tool we progressively keep track of the states
@@ -2535,7 +2571,7 @@ as possible.
 \bigskip
 
 In Chapter 3, we put forward the algorithm designed to perform the task of
-planning.
+planning. 
 
 \subsection{Future Work}
 
