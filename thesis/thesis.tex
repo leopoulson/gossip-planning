@@ -20,15 +20,33 @@
 \newpage
 
 \section{Introduction}
+\label{sec:Introduction}
+
+Often we come across situations, processes or phenomena in the real world that
+we want to reason about computationally. These real-world systems tend to
+contain lots of information that are useful to us - the state of knowledge of a
+certain agent, the wind speed on a certain day - and lots of information that is
+less useful - what an agent in question had for breakfast this morning, which
+day of the week it is. We use a \emph{model} to abstract away the unimportant
+information from a system and simplify the real world. 
+
+This use of mathematical models for real-world systems gives rise to the
+\emph{model checking} problem. This is the task of taking some model \tmc{M} and
+some formula $\phi$ and finding if the model \tmc{M} satisfies the formula
+$\phi$. \textbf{Perhaps we could add a little to this. }
+
+\bigskip
+
+% \textbf{Define models here. }
 
 Planning is the task of computing a set of actions to take some state within a
-model to a successful state. In such a model we have a set of \textit{actors},
+model to a successful state. In such a model we have a set of \emph{actors},
 who will perform these actions that we search for.
 
 Planning, as put forward in \cite{PlanningBook}, covers a wide range of
 applications; from making a robot enter a room to synchronising multiple
 computers working on the same document. In this project we concern ourselves
-with a special case of planning; namely \textit{epistemic planning}. In this we
+with a special case of planning; namely \emph{epistemic planning}. In this we
 begin with a state embodying the knowledge states for a set of agents. We then
 want to compute a set of actions the agents may perform in order to take the
 knowledge state of the agents to a successful one.
@@ -36,23 +54,27 @@ knowledge state of the agents to a successful one.
 Epistemic planning is a relatively young area of research, first put forward in
 \cite{BolanderEP}. It rests upon work done in Dynamic Epistemic Logic, which is
 a logic used to reason about knowledge and how it is changed by actions. Despite
-epistemic planning being proved to be undecidable in a lot of cases
-\footnote{It is undecidable for models where the number of agents is greater
-  than 1 (\cite{UndecidabilityEP}), and also in single-agent models where the
-  accessibility relation is not an equivalence relation. It is however decidable
-  for models where the event models are propositional (\cite{DecidabilityEp}).},
-interest in the area has been maintained since its birth
+epistemic planning being proved to be undecidable in a lot of cases \footnote{It
+  is undecidable for models where the number of agents is greater than 1
+  (\cite{UndecidabilityEP}), and also in single-agent models where the
+  accessibility relation (the relation between indistinguishable states) is not
+  an equivalence relation.}, it is decidable for models where the preconditions
+and consequences of events are \emph{propositional}\footnote{This means formulae
+  that do not include the modal knowledge operator $K$ which we come to define
+  later.}(\cite{DecidabilityEp}). It is this fragment of the planning problem
+that we work on in this project, due to its decidability property. This result
+means that interest in the area has been maintained since its birth
 (\cite{AutomataTechniques}), leading to the work that this project uses.
 
 \bigskip
 
 The gossip problem is a problem regarding peer-to-peer information sharing. A
-set of agents start out with some \textit{secret information}, and their goal is
+set of agents start out with some \emph{secret information}, and their goal is
 to transfer this information across the network, such that every other agent
 finds out their secret. We call an agent who knows the secret of every other
-agent to be an \textit{expert}; we want to reach a state where every agent is an
+agent an \emph{expert}; we want to reach a state where every agent is an
 expert. When two agents communicate they tell each other all of the secrets they
-know; hence the slightly frivolous but very apt title of the \textit{gossip}
+know; hence the slightly frivolous but very apt title of the \emph{gossip}
 problem.
 
 The gossip problem was first put forward in \cite{Tijdeman:1971}, and was such
@@ -60,7 +82,6 @@ that each agent began with the phone number of every other agent. We can hence
 visualise the set of agents as nodes and the fact of agent $a$ knowing the phone
 number of $b$ as a directed edge, and so such a formulation would be a complete
 graph as in \figref{fig:classicgossipex}.
-colour
 
 \bigskip
 
@@ -108,13 +129,14 @@ colour
 \end{figure}
 
 Recently a variation of this problem has been studied, entitled the
-\textit{dynamic} gossip problem(\cite{DynamicGossip}, \cite{EpProforDyGo}). This
+\emph{dynamic} gossip problem(\cite{DynamicGossip}, \cite{EpProforDyGo}). This
 is a popular research topic, with applications in the study of epidemics and
 information discovery (\cite{DiscoverythruGossip}, \textbf{Find some more
-  refs}). In these scenarios our network may model some peer to peer network
-where our agents are computers, where the goal is to find the IP addresses of
-all of the other computers in the network; or a social network, where our nodes
-are people who want to connect with every other user in their circle of friends. 
+  refs}), among others. In these scenarios our network may model some peer to
+peer computer network where our agents are computers, and the goal is to find
+the IP addresses of all of the other computers in the network; or a social
+network, where our nodes are people who want to connect with every other user in
+their circle of friends.
 
 In this, we begin with each agent knowing some subset of the phone
 numbers of every other agent. Hence a starting configuration of the dynamic
@@ -123,23 +145,63 @@ converse on the phone, they also exchange all of the phone numbers that they
 know as well as all of the secrets. As such, the graph's edges increase in
 number as phone calls occur.
 
+There are many other variants of the gossip problem studied in the literature,
+and many potential decisions to make when defining the way the agents in the
+gossip behave. We list the decisions taken in this thesis here;
+
+\begin{itemize}
+  \item We choose to use the \emph{synchronous} gossip problem. The asynchronous
+    gossip problem lets two agents call each other at the same time, and has no
+    way of controlling when agents can communicate each other. In contrast, the
+    synchronous version assumes the control of some global clock that lets
+    agents know when they may call each other, and when a call occurs. This has
+    implications that are later discussed in Section \ref{sec:Formalisation}.
+  \item We assume the existence of some global, omniscient \emph{observer} who
+    decides when the successful formula is satisfied. In the literature the
+    gossip problem is studied in its purely distributed form - in a practical
+    distributed system we cannot assume the existence of such a system to do
+    this. It goes without saying that systems of this kind are more difficult to
+    reason about and work with. Given the difficulty of the task being
+    undertaken in this project we chose to make it easier for ourselves here.
+  \item When agents communicate, they tell each other \emph{everything they
+      know}. Situations in which agents can communicate little information are
+    studied\footnote{With applications in practical networking; we can imagine a
+    network where communication over channels is expensive, and as such agents
+    want to minimise the amount of information transferred}, however for the
+  sake of ease and simplicity we choose to work with the fragment in which
+  agents share all of their knowledge when communicating. 
+\end{itemize}
+
+Recall that earlier we said that the epistemic planning problem is decidable for
+epistemic models where the preconditions and consequences of events are
+\emph{propositional}. Gossip models, like those in \figref{fig:dynamicgossipex},
+are an example of these\footnote{In \secref{sec:Formalisation} we show this, by
+giving a way to convert between the two algorithmically.}. Due to this, we are
+capable of performing planning on gossip models. In this thesis we put forward a
+process with which this can be performed, and an example implementation of this.
+
+Then given an input pair \tmc{M}, which is a gossip graph, and some formula
+$\phi$ we are given the sequence of calls $c_1, c_2, \ldots, c_n$ whose
+occurence on \tmc{M} will reach a state in which $\phi$ is modelled. For
+example, consider the below graph .... \textbf{Finish this}. 
+
 \subsection{Existing Software}
 
 As research work is done into a topic, it is only natural that software is
 developed to support it. The three related pieces of software are
 \cite{DEMO-S5}, \cite{SMCDEL} and \cite{GithubGossip}. These three tools are all
-\textit{model checkers} for dynamic epistemic logic. A model checker is a
+\emph{model checkers} for dynamic epistemic logic. A model checker is a
 program that, given a model \tmc{M} and a formula $\phi$, tells the user whether
 or not $\mc{M} \models \phi$. Given the setting, they specifically answer the
 question ``given an initial state and a set of events, does the state reached by
 the occurrence of these events at the initial state satisfy some property?''.
 
-We can see model checking as the \textit{dual} of planning; in planning we want
+We can see model checking as the \emph{dual} of planning; in planning we want
 to find such a sequence of events, whilst model checking verifies that these
 events do indeed bring the system to a successful state. \cite{GithubGossip} is
 also capable of planning, however in a na{\"i}ve way; it enumerates the set of
 all possible calls and then checks if any of these are successful. As we see
-later, this is a very inefficient method for planning. 
+later, this is a very inefficient method for planning.  
 
 Despite this, there does not exist any software to solve the epistemic planning
 problem as envisioned in the literature; indeed, the only software to solve any
@@ -247,24 +309,23 @@ In Section 6 we conclude the thesis.
 \section{Background}
 
 \subsection{Dynamic Epistemic Logic}
-\label{subsec:DEL}
+\label{sec:DEL}
 
 \subsubsection{Epistemic Logic}
 
 Epistemic Logic is the logical language that we use to reason about knowledge.
-It is a modal logic; this is a \textbf{type / class} of logic that supplements
-the language of propositional logic\footnote{By which we mean the language
-  defined by the grammar $\phi ::= \top \mid p \mid \neg \phi \mid \phi \land
-  \phi$, as well as the abbreviations $\bot, \lor, \rightarrow$ as is classic.}
-with some operator $\boxdot$. Modal logic can be used to model the passage of
-time, knowledge, obligation or any other modality. For example, $\boxdot \phi$
-in temporal logic can be read as ``at all points in the future, $\phi$ holds'';
-in deontic (obligation) logic, we can read $\boxdot \phi$ as ``it is morally
-necessary that $\phi$ holds''. We see that the addition of the $\boxdot$
-operator provides us with much more expressivity than the standard language of
-propositional logic.
+It is a modal logic; this is a class of logics that supplement the language of
+propositional logic\footnote{By which we mean the language defined by the
+  grammar $\phi ::= \top \mid p \mid \neg \phi \mid \phi \land \phi$, as well as
+  the abbreviations $\bot, \lor, \rightarrow$ as is standard.} with some operator
+$\boxdot$. Modal logic can be used to model the passage of time, knowledge,
+obligation or any other modality. For example, $\boxdot \phi$ in temporal logic
+can be read as ``at all points in the future, $\phi$ holds''; in deontic
+(obligation) logic, we can read $\boxdot \phi$ as ``it is morally necessary that
+$\phi$ holds''. We see that the addition of the $\boxdot$ operator provides us
+with much more expressivity than the standard language of propositional logic.
 
-In this thesis, we concern ourselves with \textit{epistemic} logic; here we
+In this thesis, we concern ourselves with \emph{epistemic} logic; here we
 interpret $\boxdot \phi$ as ``it is known that $\phi$ holds''. However, we
 change the operator slightly; we index it with the name of an agent, and we
 write it as $K_i \phi$\footnote{Where the K stands for \textbf{K}nows.} Hence,
@@ -284,7 +345,7 @@ $\mc{L}(\Lambda)$, with the following BNF;
 \noindent where $p \in \Lambda$ and $i \in A$. We can also define the dual to
 $K$, in the classic way as $\widehat K_i \phi ::= \neg K_i \neg \phi$. We read
 this as ``agent $i$ considers it possible that $\phi$ is true''. We can give our
-epistemic logic a semantics through use of \textit{Kripke models}.
+epistemic logic a semantics through use of \emph{Kripke models}.
 
 We refer to $\mc{L}(\Lambda)$ without the knowledge operator $K_i$ as
 $\mc{L}_P(\Lambda)$.
@@ -292,22 +353,37 @@ $\mc{L}_P(\Lambda)$.
 \bigskip
 
 A Kripke model $\mc{M}$ over a set of agents $I$ and a set of propositions
-$\Lambda$ is a triple $(W, R, V)$, where $W$ is a \textbf{(maybe)} finite set of
-worlds, $R$ is a set of binary relations over $W$ indexed by an agent, such that
-$R_i \subseteq W \times W$, and $V : W \rightarrow \mc{P}(\Lambda)$ is a
-valuation function that associates to every world in $W$ some set of
-propositions that are true at it.
+$\Lambda$ is a triple $(W, R, V)$, where $W$ is a set of worlds, $R$ is a set of
+binary relations over $W$ indexed by an agent, such that $R_i \subseteq W \times
+W$, and $V : W \rightarrow \mc{P}(\Lambda)$ is a valuation function that
+associates to every world in $W$ some set of propositions that are true at it.
 
 For epistemic logic, we think of $R_i$ as being the set of pairs of worlds that
-an agent $i$ cannot distinguish between, and thus considers possible. In our
-semantics, we use this relation to define knowledge in terms of possibility;
-agent $i$ knows that something is true if it is true at all of the worlds that
-$i$ cannot distinguish between.
+an agent $i$ cannot distinguish between, and thus considers \emph{possible}.
+This notion of epistemic possibility is essential, and is key to understanding
+the rest of the thesis. As an example, consider waking up in the morning with
+the curtains drawn. You cannot distinguish between the world in which it's sunny
+outside and the world in which it's cloudy outside; if it were sunny outside you
+could not tell, and likewise if it were cloudy outside. We label these two
+worlds \Sun and \Cloud, and at this state (\Sun, \Cloud) $\in R$
+\footnote{Respectively (\Cloud, \Sun) $\in R$; we later clarify that our
+  relations are all symmetric.}. Hence one
+considers both worlds \emph{possible}.
+
+However when you get out of bed, open the curtains and see that it is indeed
+another cloudy day in Bristol you can now distinguish between the current,
+cloudy world and a world in which it is sunny - formally, (\Sun, \Cloud) $\not
+\in R$. After one performs this action one no longer considers it possible that
+it is sunny.
+
+In our semantics, we use this relation to define knowledge in terms of
+possibility; agent $i$ knows that something is true if it is true at all of the
+worlds that $i$ cannot distinguish between.
 
 \bigskip
 
 When giving a semantics to a formula on a Kripke model, we need to use a
-\textit{pointed Kriple model}. This is just a pair $(\mc{M}, w)$ where $w$ is a
+\emph{pointed Kriple model}. This is just a pair $(\mc{M}, w)$ where $w$ is a
 world of $\mc{M}$. Then we read $(\mc{M}, w) \models \phi$ as ``$w$ satisfies
 $\phi$''. We define the evaluation as follows:
 
@@ -319,17 +395,28 @@ $\phi$''. We define the evaluation as follows:
   (\mc{M}, w) & \models K_i \phi \text{ iff for all $v$ such that } (w, v) \in R_i, (\mc{M}, v) \models \phi 
 \end{align*}
 
+We now shed some light on the semantics of $K_i \phi$. Recall that agent $i$
+\emph{knows} a proposition to be true if it holds at all worlds $i$ cannot
+distinguish from its current one. The semantics expresses this; we see that we
+go to each world $v$ such that $(w, v) \in R_i$ and check that $\phi$ holds
+there. This matches up with our specification, where a formula $K_i \phi$ holds
+if at all indistinguishable worlds from the current one $\phi$ holds.
+
 \bigskip 
 
-We need to give some properties to our knowledge operator in order to better
-understand it. We make all of our relations $R_i$ equivalence relations. This
-means three things;
+The knowledge operator $K$ is given several properties. These are done to make
+it better reflect the properties of human knowledge in the real world - thus
+bringing the model closer to reality - and also in order to make it more
+computationally tractable\footnote{Recall that the epistemic planning problem is
+  undecidable for single-agent models with an accessibility relation which is
+  not an equivalence relation.}. We make all of our relations $R_i$ equivalence
+relations. This means three things;
 
 \begin{itemize}
-\item $R_i$ is \textit{reflexive}; for all $w \in W$, $(w, w) \in R_i$.
-\item $R_i$ is \textit{symmetric}; for all $w, v \in W, (w, v) \in R_i$ iff $(v,
+\item $R_i$ is \emph{reflexive}; for all $w \in W$, $(w, w) \in R_i$.
+\item $R_i$ is \emph{symmetric}; for all $w, v \in W, (w, v) \in R_i$ iff $(v,
   w) \in R_i$.
-\item $R_i$ is \textit{transitive}; for all $w, v, u \in W$ if $(w, v) \in R_i$
+\item $R_i$ is \emph{transitive}; for all $w, v, u \in W$ if $(w, v) \in R_i$
   and $(v, u) \in R_i$, then $(w, u) \in R_i$.
 \end{itemize}
 
@@ -352,9 +439,8 @@ These axioms hold independent of which agent's knowledge we are reasoning about.
 
 \bigskip \bigskip \bigskip
 
-Let's now look at an example \textsf{S5} Kripke model.
-
-\begin{center}
+\begin{figure}[h]
+  \centering
   \begin{tikzpicture}
     [every node part/.style={align=center}]
     \node (1) [draw, circle, accepting] at (0, 0){
@@ -372,22 +458,30 @@ Let's now look at an example \textsf{S5} Kripke model.
 
     \draw [-, shorten >= 1pt] (1) -- (2) node [midway, below = 2pt] {Bob};
   \end{tikzpicture}
-\end{center}
+  \label{fig:EgS5}
+  \caption{}
+\end{figure}
+
+In Figure \ref{fig:EgS5}, we can see an exemplar Kripke Model.
 
 In this epistemic model, we have two agents, Alice and Bob, and two worlds,
 $w_1$ and $w_2$. Alice can distinguish between $w_1$ and $w_2$, and as such has
-no lines on the diagram. However Bob cannot, hence the line connecting $w_1$ and
-$w_2$. At $w_1$ the proposition $q$ is true, and at $w_2$ propositions $p$ and
-$q$ are true. Our ``actual'' world is $w_1$, and as such it is double ringed. 
+no lines on the diagram The implications of this with respect to $R_{Alice}$ are
+that $(w_1, w_2) \not \in R_{Alice}$. However Bob cannot, hence the line
+connecting $w_1$ and $w_2$. At $w_1$ the proposition $q$ is true, and at $w_2$
+propositions $p$ and $q$ are true. Our ``actual'' world is $w_1$, and as such it
+is double ringed. This means that any formula $\phi$ will be evaluated as
+$(\mc{M}, w_1) \models \phi$.
 
 To show some examples, let's evaluate some formulae on this model.
 
 \begin{itemize}
 \item $(\mc{M}, w_1) \models q$ as at $w_1$, $q$ is true.
-\item $(\mc{M}, w_1) \models K_{\text{Alice}} q$. To check that this is true, let's
-  consider all of the worlds Alice considers possible from $w_1$. The only world
-  is $w_1$ itself, and we know from above that $(\mc{M}, w_1) \models q$. Hence
-  $K_{\text{Alice}} q$ holds here.
+\item $(\mc{M}, w_1) \models K_{\text{Alice}} q$. To check that this is true,
+  let's consider all of the worlds Alice considers epistemically possible from $w_1$. This
+  entails computing the set of worlds $\left\{ v \mid (w_1, v) \in R_{Alice}
+  \right\}$. The only world is $w_1$ itself, and we know from above that
+  $(\mc{M}, w_1) \models q$. Hence $K_{\text{Alice}} q$ holds here.
 \item $(\mc{M}, w_1) \models \neg K_{\text{Bob}} \left( p \land q \right)$. Now
   let's consider all the worlds that Bob considers possible from $w_1$. This is
   both $w_1$ and $w_2$. But we see that $(\mc{M}, w_1) \not \models (p \land
@@ -397,52 +491,93 @@ To show some examples, let's evaluate some formulae on this model.
 \subsubsection{Event Models}
 \label{sec:Event Models}
 
-Public announcement logic was the first development in epistemic logic to
-support information change in epistemic logic, and is described in \cite{PAL}.
-However, in public annoucement logic, we may only model truthful, public
-communications; but we all know that there are many other types of communication
-and events after which some information has changed. An agent may communicate
-with another agent in a private phone call, or may be lying to them;
-furthermore, we may have some \textit{physical} action, like a coin flip
-occuring, after which some knowledge has changed.
+% Public announcement logic was the first development in epistemic logic to
+% support \emph{information change}, and is described in \cite{PAL}. The term
+% information change is quite vague; 
 
-To model these more complicated events, we use \textit{event models}. These
+Public announcement logic (PAL), first described in \cite{PAL}, was the first
+development in epistemic logic to support \emph{information change}. PAL
+supports truthful, public communications, and supplements the language of
+epistemic logic with an operator $[!\psi]$. This operator takes us to a new
+model consisting of only worlds in which $\psi$ holds. For example, consider a
+group of agents playing some card game. No agent knows what the others hold in
+their hands; hence the set of worlds in the model is vast, as the agents
+consider it possible that any player could have any card. Then agent $a$
+publicly announces that he holds the 3 of spades; hence the worlds of the model
+are restricted to those on which the proposition ``agent $a$ holds the 3 of
+spades'' is true.
+
+The problem with PAL is clear; we may only model truthful, public
+communications. What if agent $a$ were lying, or agent $a$ was able to
+communicate with agent $b$ secretively, without the other agents realising?
+Clearly PAL is insufficient to model all of the complicated types of
+communication that may occur. It also only is capable of modelling
+communications; often, the occurence of some \emph{physical} action can change
+the knowledge states of agents involved in a system\footnote{An example of this
+  is given in Figure \ref{fig:cointoss}}. 
+
+To model these more complicated events, we use \emph{event models}. These
 treat events in a very similar way to how Kripke models treat worlds; we think
 of a set of possible events that can occur, and encode the events that an agent
-can tell apart. We give the modern definition of event models, as in
+can tell apart. Just like worlds, it is possible for events to occur that an
+agent cannot tell apart; for example, consider a coin being tossed, and the
+result being hidden from an agent $a$. Then agent $a$ cannot distinguish between
+the event in which the coin landed face up, and the event in which it landed
+face down. As another example, consider a group of 4 people who can all call
+each other on the phone. Agent $a$ knows that a call occurs between the other
+agents, but does not know who between; hence $a$ cannot distinguish between a
+call from $b$ to $c$ and $c$ to $d$, and so on. 
+
+We give the modern definition of event models, as in
 \cite{MalvinThesis}, and \cite{AutomataTechniques}, however these were first
 defined in \textbf{Cite 1998 Baltag paper}
 
-Formally, an event model \tmc{E} is a tuple $(E, Q, \pre, \post)$. $E$ is a finite set
+Formally, an event model \tmc{E} is a tuple $(E, P, \pre, \post)$. $E$ is a finite set
 of events; $Q$ is a set of relations $Q_i$ for each $i \in Ag$, such that $Q_i
 \subseteq E \times E$. As before, we make all relations $Q$ equivalence
-relations. $\pre : E \rightarrow \mc{L}(\Lambda) $ is the \textit{precondition
+relations. $\pre : E \rightarrow \mc{L}(\Lambda) $ is the \emph{precondition
   function}; given an event $e \in E$, it returns to us a formula that must be
 true in order for $e$ to occur. $\post : E \times \Lambda \rightarrow
-\mc{L}(\Lambda)$ is the \textit{postcondition function}; given an event $e \in
+\mc{L}(\Lambda)$ is the \emph{postcondition function}; given an event $e \in
 E$ and a proposition $p \in \Lambda$, it returns to us some formula that had to
 be true at the prior state $s$ in order for $p$ to be true after event $e$
-occurs at $s$. We will later give examples for these two functions.
+occurs at $s$. We will later give examples for these two functions. 
 
 Updating a Kripke model \tmc{M} with an event model \tmc{E} is gives us another
 Kripke model $\mc{M} \times \mc{E} ::= (W', R', V')$, where:
 
 \begin{align*}
   W'   &::= \left\{(w, e) \in W \times E \mid (\mc{M}, w) \models \pre(e)\right\} \\
-  R_i' &::= \left\{((w, e), (v, f)) \mid (w, v) \in R_i, (e, f) \in Q_i \right\} \\
+  R_i' &::= \left\{((w, e), (v, f)) \mid (w, v) \in R_i, (e, f) \in P_i, (w, e), (v, f) \in W' \right\} \\
   V'(w, e) &::= \left\{ p \in \Lambda \mid (\mc{M}, w) \models \post(e, p) \right\}
 \end{align*}
 
-We see that it is the postcondition function that allows for factual change;
-that is, the update of what is true at a state given the occurence of some
-event.
+We can see that the precondition function is used to ask the question ``is it
+possible for the event in question to occur at the given world'', whilst the
+postcondition function lets us compute the \emph{consequences} of a given event
+occuring at a world. 
+
+We should give some insight on the definition of $W'$ and $R'$. We see that in
+our updated set of worlds, the worlds become pairs of elements in $W$ and events
+from $E$. This will telescope infinitely; for instance worlds in $\mc{M} x
+\mc{E} x \ldots x \mc{E}$ will be of the form $(\ldots (w ,e) \ldots, e)$, where
+$w \in W$ and $e \in E$. Hence the worlds are traces of events that happened.
+Similarly, $R'$ relates pairs of worlds from $W'$, which are again pairs of
+worlds and events. Here, the worlds remain indistinguishable only if they were
+indistinguishable before and both events are indistinguishable to $i$.
+
+We see that it is the postcondition function that allows for \emph{factual
+  change}; that is, the update of what is true at a state given the occurence of
+some event. We can see how this gives us a much more expressive model than
+simple PAL; with carefully selected \tpre and \tpost functions, we can express a
+very wide range of communications and events. 
 
 \bigskip \bigskip \bigskip
 
 As above, we now show some example event models, and show the effects of
 updating an epistemic model with an event model.
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}
     \node(1) [draw, circle, accepting] at (0, 1) {
@@ -498,16 +633,18 @@ updating an epistemic model with an event model.
 \end{figure}
 
 
-In this example, consider two agents, again Alice and Bob. They are waiting in
-the same room to receive a letter about Alice's entrance onto a PhD program.
-Suddenly the postman arrives, and Bob sees Alice pick up and open a letter with
-the University's logo on the front. Alice reads the letter and learns that she
-gets the position, but she does not tell Bob the result. Bob sees that Alice now
-knows whether she got it, but he does not know if she did get it or not.
+In this example from the literature (\cite{MalvinPhD}), consider two agents,
+again Alice and Bob. They are waiting in the same room to receive a letter about
+Alice's entrance onto a PhD program. Suddenly the postman arrives, and Bob sees
+Alice pick up and open a letter with the University's logo on the front. Alice
+reads the letter and learns that she gets the position, but she does not tell
+Bob the result. Bob sees that Alice now knows whether she got it, but he does
+not know if she did get it or not.
 
 Here, $p$ stands for the proposition ``Alice gets the position''. This initial
-situation is represented by model \tmc{M}. Both Alice and Bob cannot distinguish
-between the worlds where $p$ is true and where $p$ is not true. 
+situation is represented by model \tmc{M}. In this initial situation, both Alice
+and Bob cannot distinguish between the worlds where $p$ is true and where $p$ is
+not true.
 
 Then the event model \tmc{E} represents the event of Alice reading the letter
 from the unviersity. $\alpha$ represents the event of Alice getting the position
@@ -515,7 +652,7 @@ and $\beta$ that she doesn't - hence the preconditions are $p$ and $\neg
 p$ respectively; that is, $\pre(\alpha) = p$ and $\pre(beta) = \neg p$. Bob
 cannot distinguish between either of these events, but Alice can.
 
-Then finally the event model $\mc{M} \times \mc{E}$ represents the situation
+Then finally the epistemic model $\mc{M} \times \mc{E}$ represents the situation
 in \tmc{M} after the event \tmc{E} has occurred. We can see the epistemic model \tmc{M},
 event model \tmc{E} and updated model \tmc{M \times E} in \figref{fig:PhDExample}.
 
@@ -524,7 +661,7 @@ event model \tmc{E} and updated model \tmc{M \times E} in \figref{fig:PhDExample
 As a second example, consider that Alice and Bob are in a room. There's a coin
 on the table with the heads face up - we set this to be represented by the
 proposition $p$. Alice and Bob can both see the coin face up. This situation is
-modelled by event model \tmc{M}.
+modelled by epistemic model \tmc{M}.
 
 Then Bob picks up the coin and flips it in the air. Bob sees the result of this
 coin flip, but does not show Alice. We can see the event model and epistemic
@@ -601,7 +738,7 @@ forward in \cite{Tijdeman:1971}, where the network is a complete graph; all
 agents can contact one another. One question here was to find how many calls are
 needed for every agent to learn the secret of every other agent. We will
 henceforth describe an agent knowing the secret of every other agent as this
-agent being an \textit{expert}. It was quickly proved (\cite{TelephoneDisease},
+agent being an \emph{expert}. It was quickly proved (\cite{TelephoneDisease},
 \cite{GandT}) that this number, for a network where the number of agents $n$ is
 greater than 4, is $2n - 4$.
  
@@ -621,7 +758,7 @@ scheduler to tell the agents what call to make, and lets them know when to stop.
 However in distributed computing, methods that do not require this central
 authority are desirable. In such a situation, the agents need to have some form
 of rules to follow to decide how to behave and who to call next. This is the
-motivation for a \textit{gossip protocol}, which are short conditions that must
+motivation for a \emph{gossip protocol}, which are short conditions that must
 be fulfilled in order for an agent to make a specific call. These protocols were
 first proposed in \cite{EPfDG}, \cite{KnowledgeandGossip}, and some exemplar
 ones are:
@@ -650,6 +787,7 @@ It should also be noted that there are certain classes of graphs for which
 and as such this will no longer be mentioned. 
 
 \subsubsection{Formalisation}
+\label{sec:Formalisation}
 
 We now go on to formalise some of the ideas mentioned so far in this section.
 The definitions of gossip graphs are classic and can be found in all of the
@@ -660,8 +798,8 @@ related literature (e.g. \cite{DynamicGossip}, \cite{MalvinThesis})
 We formally denote a gossip graph \tmc{G} with a triple $(A, N, S)$. $A$ is a
 finite set of agents in the graph; $N \subseteq A \times A$ is a set of ordered
 pairs of agents such that $(u, v) \in N$ (or $Nuv$) iff $u$ knows the phone
-number of $v$. $S \subseteq A \times A$ is a set of ordered pairs of agnets such
-that $(u, v) \in S$ (or $Suv$) iff $u$ knows the \textit{secret} of $v$.
+number of $v$. $S \subseteq A \times A$ is a set of ordered pairs of agents such
+that $(u, v) \in S$ (or $Suv$) iff $u$ knows the \emph{secret} of $v$.
 
 \begin{figure}[h]
   \centering
@@ -711,7 +849,7 @@ We can use the notation above to formally describe a gossip graph. For instance,
 the gossip graph that we can see in \figref{fig:GossipSize3} can be expressed as
 the triple $\mc{G} = (\left\{ a, b, c \right\},$ $ \left\{ (a, a), (a, b), (b, a), (b,
   b), (b, c), (c, c) \right\},$ $ \left\{ (a, a), (b, b), (c, c) \right\})$.
-However given that we have the proprety described above, we can represent this
+However given that we have the property described above, we can represent this
 as the more terse $\mc{G} = (\left\{ a, b, c \right\},$ $ \left\{ (a, b), (b,
   a), (b, c)
 \right\}, $ $ \left\{ \right\})$
@@ -722,8 +860,9 @@ One might ask how gossip fits into the picture we drew above of Kripke models
 and event models. We give a way to generically define Kripke models and event
 models for an arbitrary gossip graph $\mc{G} = (A, N, S)$. A Kripke model for a
 graph \tmc{G} uses the set of propositions $\{N_{ij} \mid i \in A, j \in A\}
-\cup \{S_{ij} \mid i \in A, j \in A\}$. The Kripke model for a graph \tmc{G} has
-just one state, $q$, which is the state that models the graph. We define
+\cup \{S_{ij} \mid i \in A, j \in A\}$. We will hereafter refer to this set of
+propositions as $\Lambda_{\mc{G}}$. The Kripke model for a graph \tmc{G} has
+just one world, $q$, which is the world that models the graph. We define
 $\mc{M_G} = (W, R, V)$ where $W = \left\{ q \right\}$, $R_i = \left\{ (q, q)
 \right\}$ for every agent $i \in A$, and $V(q) = \{N _{ij} \mid (i, j) \in N\}
 \cup \{S_{ij} \mid (i, j) \in S\}$. An example of this is just in
@@ -735,13 +874,17 @@ $\mc{E} = (E, P, \pre, \post)$, where
 
 \begin{itemize}
 \item $E = \{ij \mid i \in A, j \in A, i \not = j\}$. Our set of events is the
-  calls between agents, however an agent cannot call themself. 
+  calls between agents, however an agent cannot call themself. A call is
+  represented by a pair of agents; $ij$ represents a call from $i$ to $j$.
 \item $P_i = \left\{(jk, j'k') \mid j, k, j', k' \in A, i \not \in \{j, k, j',
     k'\}\right\} \cup \left\{ (ij, ij) \mid j \in A\right\} \cup \left\{ (ji,
     ji) \mid j \in A \right\}$, for every $i \in A$. We can read this as agent
   $i$ cannot distinguish between a call that it is not a part of; hence the
   former part of the definition. The later two sets say that agent $i$ does not
-  confuse a call that it's a part of with any other call. 
+  confuse a call that it's a part of with any other call. This means that $a$
+  cannot distinguish between the world reached by the call $bc$
+  happening and the world reached by the call $cd$ happening; however $a$ can
+  tell the difference between worlds reached by calls it is a member of. 
 \item $\pre(ij) = N_{ij}$. By this we mean that the precondition for a call from
   agent $i$ to $j$ is that $i$ knows the phone number of $j$. \\
   It is here that we
@@ -750,19 +893,19 @@ $\mc{E} = (E, P, \pre, \post)$, where
   S_{ij}$ to the precondition; hence $\pre_{\textsf{LNS}}(ij) = N_{ij} \land
   \neg S_{ij}$.
 \item $\post(ij, N_{nm}) = \left\{ \begin{array}{ll}
-                                     N_{im} \lor N_{jm} & \text{if $n == i$ or $n ==
+                                     N_{im} \lor N_{jm} & \text{if $n = i$ or $n =
                                                      j$} \\
                                      N_{nm} & \text{otherwise} 
                                    \end{array}
                            \right.$ \\
 $\post(ij, S_{nm}) = \left\{ \begin{array}{ll}
-                                     S_{im} \lor S_{jm} & \text{if $n == i$ or $n ==
+                                     S_{im} \lor S_{jm} & \text{if $n = i$ or $n =
                                                      j$} \\
                                      S_{nm} & \text{otherwise} 
                                    \end{array}
                            \right.$ \\
  This states that if a call occurs, then for an agent $n$ to know the number of
- an agent $m$, either $n$ was a part of the call and $n$ either knew the number
+ an agent $m$ afterwards, either $n$ was a part of the call and $n$ either knew the number
  of $m$ before or learned it from speaking to the other agent in the call, or
  $n$ was not a member of the call and knew the number of $m$ anyway. The same
  goes for secrets. 
@@ -819,6 +962,23 @@ example.
   \label{fig:GossipEvMo}
 \end{figure}
 
+Note that this matches up with our earlier description; every agent cannot
+distinguish between the calls they are not involved with. 
+
+Recall the discussion in Section \ref{sec:Introduction}, where we say that we
+choose to use the synchronous variant of the gossip problem. In this we assume
+the existence of a central clock, which synchronises the calls between agents.
+The implications of this are that when a call occurs, all of the other agents
+are aware that a call occurs; but only the agents involved in the call are aware
+of who is involved in the call. Hence when a call occurs between agents $a$ and
+$b$, they know that precisely this call occured; however the other agents have
+no idea which call happened; they \emph{consider it possible} that any call
+between any pair of agents (excluding themselves) could have happened. 
+
+This has implications later on in the algorithm,
+but it is important to address it now. \textbf{Reference later section when we
+  get there}. 
+
 \begin{figure}
   \centering
   \begin{tikzpicture}
@@ -873,17 +1033,23 @@ example.
 
 In \figref{fig:UpdatedGossip} we can see the result of updating the Kripke model
 \tmc{G} with the event model \tmc{E_G}. We see that the call $cb$ does not have
-a corresponding state; its precondition was not satisfied by any of the states
-in \tmc{G}. Also note that the states $(w, ab)$ and $(w, ba)$ are
-indistinguishable to $c$; this is because $c$ cannot distinguish between calls
-$ab$ and $ba$ as $c$ is not included in it. Also note that the two states $(w,
-ab)$ and $(w, ba)$ have the exact same graph representing them\footnote{We
-  revisit this idea of gossip graphs with three agents being ``boring'' again
-  later. This ``boring''-ness comes from the fact that calls $ab$ and $ba$ are
-  essentially the same thing.}; in the future we
-will not make this distinction. In the implementation a state is represented
-\textit{just by the propositions that are true at it}; in our case, this is the
-graph. 
+a corresponding world; its precondition was not satisfied by any of the world in
+\tmc{G}. Also note that the world $(w, ab)$ and $(w, ba)$ are indistinguishable
+to $c$; this is because $c$ cannot distinguish between calls $ab$ and $ba$ as
+$c$ is not included in it. Also note that the two world $(w, ab)$ and $(w, ba)$
+have the exact same graph representing them\footnote{We revisit this idea of
+  gossip graphs with three agents being ``boring'' again later. This
+  ``boring''-ness comes from the fact that calls $ab$ and $ba$ are essentially
+  the same thing.}; in the future we will not make this distinction.
+
+In the implementation a world is represented \emph{just by the propositions that
+  are true at it}. This makes use of the bijection from
+$\mc{P}(\Lambda_{\mc{G}})$ to the set of gossip graphs. By this we mean that
+every gossip graph (e.g. Figure \ref{fig:GossipSize3}) is represented by exactly
+one set of propositions $S \subseteq \Lambda_{\mc{G}}$, and vice versa. This
+gives us the useful property of being able to encode these gossip graphs with
+sets of propositions in the implementation, which makes gossip graphs much easier to
+deal with and reason about.
 
 \subsection{Planning}
 \label{sec:Planning}
@@ -894,7 +1060,7 @@ system is defined as a triple $\Sigma = (S, A, \gamma)$, where:
 
 \begin{itemize}
 \item $S$ is some set of states;
-\item $A$ is some set of \textit{actions};
+\item $A$ is some set of \emph{actions};
 \item $\gamma : S \times A \hookrightarrow S$ is a state-transition function. It
   is partial; for $s \in S, a \in A$, either $\gamma(s, a) \in S$ or it is
   undefined. 
@@ -909,18 +1075,18 @@ where;
 \item $S_g \subseteq S$ is some set of goal states.  
 \end{itemize}
 
-A \textit{solution} to the planning problem is some ordered set of actions
+A \emph{solution} to the planning problem is some ordered set of actions
 ${a_0, a_1, \ldots, a_n}$ such that $\gamma(\gamma(\ldots \gamma(s_0, a_0)
 \ldots ,a_{n-1}) ,a_n) \in S_g$. 
 
-Note that we call a planning problem \textit{multi-agent} if the number of
-agents in the system is greater than 1, and \textit{single-agent} if the number
+Note that we call a planning problem \emph{multi-agent} if the number of
+agents in the system is greater than 1, and \emph{single-agent} if the number
 of agents is equal to 1. 
 
 \subsubsection{Epistemic Planning}
 
 The dynamic epistemic logic community has recently been investigating a special case
-of planning, namely \textit{epistemic} planning (\cite{BolanderEP},
+of planning, namely \emph{epistemic} planning (\cite{BolanderEP},
 \cite{UndecidabilityEP}). This is planning where we may have some initial
 epistemic state (e.g. agent $a$ knows $\phi$), some actions that update these
 epistemic states, and some accepting epistemic state (e.g. agent $b$ knows
@@ -932,7 +1098,7 @@ literature are equivalent. Then the epistemic planning problem is as follows;
 given a pointed epistemic model $(\mc{M}, w)$ and an event model $\mc{E}$, and
 some goal formula $\phi$, find some set of events ${e_1, e_2, \ldots, e_n}$ such
 that $(\mc{M}, w) \otimes (\mc{E}, e_1) \otimes \ldots \otimes (\mc{E}, e_n)
-\models \phi$. The \textit{propositional epistemic planning problem} is the
+\models \phi$. The \emph{propositional epistemic planning problem} is the
 restriction of the epistemic planning problem to event models with pre- and
 post-condition functions whose codomains are in the propositional fragment of
 \tmc{L}; that is, they do not contain the modal operator $K$. These event models
@@ -945,7 +1111,7 @@ restrictions on the system used yields decidability (\cite{DecidabilityEp},
 propositional epistemic planning problem is decidable; indeed, it is this result
 that this thesis relies on. 
 
-\bigskip \bigskip \bigskip
+% \bigskip \bigskip \bigskip
 
 In this thesis, we focus on solving the epistemic planning problem by means of
 the automata constructions described in \cite{AutomataTechniques}. These
@@ -955,11 +1121,37 @@ model. This unfortunately means that we cannot plan for situations like muddy
 children or drinking logicians (\cite{DEMO-S5}) as they require epistemic pre-
 or post-conditions. 
 
+The question arises of the significance of the gossip problem to the epistemic
+planning problem. There are several reasons for the use of the gossip problem
+as the lens through which we study epistemic planning; 
+
+\begin{itemize}
+\item It is a widely-studied problem with lots of applications already listed in
+  this thesis. The consequences of this are that we have a wealth of literature
+  to be used. We give examples of this in Section \ref{sec:ExistingTools}. Its
+  applicability sets it apart from many other epistemic problems that are
+  studied; these mainly are sorts of logic puzzles. Examples of these can be
+  seen in \cite{DEMO-S5}.
+\item It encapsulates very easily all of the aspects of epistemic planning that
+  we're interested in - namely the indistinguishability of events from one
+  another, leading to epistemic possibility from the point of view of agents -
+  whilst still being a simple enough problem to understand intuitively.  
+\end{itemize}
 
 \subsection{Existing Tools}
+\label{sec:ExistingTools}
 
 We now give an overview of existing software in the realm of model checking or
 planning for epistemic systems.
+
+Recall that model checking for an epistemic model is the question: given an
+epistemic model \tmc{M} and a formula $\phi \in \mc{L}(\Lambda)$ for some set of
+propositions $\Lambda$, decide if $\mc{M} \models \phi$. Dually, planning for an
+epistemic model is the question: given an epistemic model \tmc{M}, an event
+model \tmc{E} and a formula $\phi \in \mc{L}(\Lambda)$ for some set of
+propositions $\Lambda$, compute a sequence of events $e_1, e_2, \ldots, e_n$
+where $\forall e_i$ in the sequence $e_i \in \mc{E}$ whose occurence takes the
+model \tmc{M} to a state in which the formula $\phi$ is satisfied. 
 
 \subsubsection{DEMO-S5}
 
@@ -968,6 +1160,13 @@ $S5$ models. It is also limited in that it only supports events that are either
 public announcements (e.g. an agent telling every other agent some statement) or
 publicly observable factual change (e.g. the flip of a coin, where the result is
 seen by every agent).
+
+This limitation removes support for indistinguishable events; the occurence of
+each event is seen by each agent and is perceived in the same way. This means
+that the occurence of an event never increases the amount of worlds considered
+possible by an agent; conversely, the number of worlds considered possible only
+stays the same or decreases when some event occurs. This can be seen in the
+``Drinking Logicians'' section of \cite{DEMO-S5}.
 
 It performs the task of model checking by taking an epistemic model and a
 formula representing either the announcement or the fact that changed, and
@@ -988,14 +1187,14 @@ code associated with this thesis.
 
 \subsubsection{Gossip}
 
-\cite{GithubGossip} is another model checker, however now for strictly the
-gossip problem. This program has a significant advantage over the other two
-pieces of software; namely that it is capable of planning. It does this by
-generating all of the possible sequences of calls on the graph and then checking
-which of these are successful (i.e., after execution of all of the calls the
-graph is in some successful state) and which are not. It also has further
-capabilities for studying protocols deeply, however these are not relevant to
-our thesis.
+\cite{GithubGossip} is another model checker, however for strictly the gossip
+problem. This program has a significant advantage over the other two pieces of
+software; namely that it is capable of planning. It does this by generating all
+of the possible sequences of calls on the graph and then checking which of these
+are successful (i.e., after execution of all of the calls the graph is in some
+successful state) and which are not. 
+It also has further capabilities for
+studying protocols deeply, however these are not relevant to our thesis.
 
 Although the methods used within this software are very different to the ones
 used in our implementation, this system proved to be very useful for testing
@@ -1007,13 +1206,21 @@ One limitation of this system is that is may only handle gossip states, and not
 generic epistemic models. Also limiting is that it enumerates all possible call
 sequences from the initial state; we are only interested in successful ones.
 This means that we have the possibility of lots of wasted computation if we need
-to validate lots of unsuccessful paths before we get to a successful one. 
+to validate lots of unsuccessful paths before we get to a successful one.
+
+However, the biggest problem is its handling of protocols like \textsf{ANY},
+which allow for infinite call sequences. The way that the call sequences is
+depth-first, and the system will only check the sequences generated once they
+have all been produced. This means that \textsf{ANY} it eternally generates
+these call sequences, and never reaches the point at which it checks the
+successful call sequences. This is clearly a big limitation and in our system we
+aim to avoid this. 
 
 \subsubsection{SMCDEL}
 
 SMCDEL is the most sophisticated of the three pieces of software. A technical
 report is given in \cite{SMCDEL}, whilst a lot of the underlying theory is in
-\cite{MalvinThesis}. The main difference is that it uses \textit{symbolic model
+\cite{MalvinThesis}. The main difference is that it uses \emph{symbolic model
   checking}, a method put forward in \cite{SymbolicModelChecking}. This gives a
 much more efficient implementation \textbf{why}?, as can be seen in the
 Chapter 4 of \cite{MalvinThesis}.
@@ -1024,39 +1231,76 @@ not well-displayed, and it is unclear precisely how to use it. Furthermore, due
 to a reasonably unpleasant interface we choose not to use this software for
 benchmarking and instead use the simpler \cite{GithubGossip}. 
 
+
 \subsection{Uniform Strategies}
+\label{sec:UniformStrategies}
 
-In this thesis, we use a lot of ideas from \cite{AutomataTechniques}. This paper
-puts forward a method for epistemic planning, through use of automata
-representing states of the model and events in the event model as the states and
-transitions respectively. This then references a process in
-\cite{UniformStrategies} for the creation of an automata which has a set of the
-other indistinguishable states baked into the states of the automata. This is a
-very useful method for our context, as it means that we can evaluate formulas of
-the form $K_a \phi$ \textit{positionally}; that is, we need only to look at the
-state to be able to evaluate the formula. We often want to reach states in the
-gossip problem which satisfy the property ``everyone knows that everyone knows
-everyone's secret''. This is formalised as $\forall a, i, j \in Ag, K_a (S
-_{ij})$.
+\subsubsection{A Quick Signpost}
 
-This method is much more practical than the alternative, which is to check our current
-state then compute the possible call sequences that are indistinguishable from
-our current one, and then go and check there too, and so on.
+Recall that in the introduction we outlined that one of our contributions was a
+tool to perform epistemic planning on epistemic models and propositional event
+models. So far in this chapter we have introduced the language we use to reason
+about knowledge and structures with which we can model knowledge and its
+dynamics. We then discussed the dynamic gossip problem, and how it can be
+modelled with the techniques introduced in Section \ref{sec:DEL}, and we then
+went on to introduce the planning problem. 
 
-The process in \cite{UniformStrategies} is very verbose and is beyond the scope
-of this thesis; however, in order to illustrate the fact that our algorithm is a
-special case of the process, we give a brief introduction to the process and its
-theory. We slightly change some of the definitions to lend itself better to our
-scenario. The setting is game theory; hence the frequent references to plays and
-strategies.
+This background constitutes nearly everything we need to know to understand the
+problem that we are solving and the process we use to do so. Section
+\ref{sec:UniformStrategies} introduces \emph{uniform strategies}, to finish off
+the background. Uniform strategies are the most abstract and difficult part of
+this background chapter, however they end up also being the most useful tool in
+our \textbf{range of tools}.
+
+Recall that in order to verify the truth or falsity of a formula of the form
+$K_i \phi$, we need to visit all the worlds that agent $i$ cannot distinguish
+from their current world and see whether or not $\phi$ holds there. Doing this
+quickly and easily is of great importance to our system. However, we see that in
+Section \ref{subsec:mestar}, this is not extremely simple to do; whilst it is
+straightforward to enumerate the set of states that can be reached through
+application of an event model to a Kripke model, it is not so straightforward to
+consider the states that an agent may consider possible from some state. We
+would need to consider the call sequence we made and compute the call sequences
+that are indistinguishable to the current one. This is a slow, costly process.
+What we want is to be able to evaluate epistemic formulae \emph{positionally};
+that is, by only looking at the state in question.
+
+In \cite{UniformStrategies} - the reference for uniform strategies - a process
+is detailed that helps us towards this goal of positional evaluation of a
+formula of form $K_i \phi$. This process takes as input an automaton \tmc{A},
+whose successful states are those in which the formula $\phi$ is true, and a
+transducer $\mc{T}_i$\footnote{We give a recap of transducers in Section
+  \ref{subsec:Transducers}.}, which relates pairs of events that are
+indistinguishable to agent $i$. As output, we are returned an automata
+$\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
+  a word accepted by \tmc{A} will also be accepted by $\widehat{\mc{A}}$. The
+  difference between the two is that the states in $\widehat{\mc{A}}$ contain
+  much more information than those in \tmc{A}.}, but whose states
+contain in them all of the states indistinguishable to agent $i$. This lets us
+positionally verify formulae of the shape $K_i \phi$.
+
+\bigskip
+
+We first introduce this process - named the \emph{powerset construction} - in
+the context of game arenas. These are automata-like structures, arising from
+game theory, that are used in \cite{UniformStrategies} to investigate uniformity
+properties of sequences of plays through graphs. In this, a modality $R$ is
+introduced, meaning ``for all related plays''.
+
+We give an overview of game arenas, a brief reintroduction to transducers and
+a definition of the powerset construction. The algorithm that we later give for
+epistemic planning relies heavily on this process, however uses a simplified
+version. In order to illustrate that our algorithm is a special case of this
+process, we introduce the powerset construction in its natural game theory
+setting. 
 
 \subsubsection{Game Arenas}
 
-A game with \textit{imperfect information} is a game in which the players have
+A game with \emph{imperfect information} is a game in which the players have
 some uncertainty concerning hte current configuration of the game (for example
 Poker; a player does not know which cards are in the other players' hands). A
 player in such a game cannot plan to play differently in a situation she cannot
-distinguish; hence we have to define her strategy \textit{uniformly} across
+distinguish; hence we have to define her strategy \emph{uniformly} across
 situations she cannot distinguish. 
 
 We consider two-player turn-based games played on a some graph, where the
@@ -1078,10 +1322,10 @@ that are true at it.
 
 We give a quick recap of transducers, as they are used heavily in the next two
 sections. A transducer is like a nondeterministic finite automaton with two
-tapes; an \textit{input} tape and an \textit{output} tape. The transducer reads
+tapes; an \emph{input} tape and an \emph{output} tape. The transducer reads
 an input finite wood on its input and writes a finite word on its output tape.
 Hence a transducer defines a binary relation. Relations recognised by a
-transducer are called \textit{regular} or \textit{rational} relations. 
+transducer are called \emph{regular} or \emph{rational} relations. 
 
 A transducer is a 6-tuple $T = (Q, \Sigma, \Gamma, I, F, \Delta)$, where $Q$ is
 a finite set of states, $\Sigma$ is the input alphabet, $\Gamma$ is the output
@@ -1244,18 +1488,19 @@ details of the process later in this chapter.
 \textbf{Step one}; we receive as input an epistemic model \tmc{M}, a
 propositional event model \tmc{E} and some formula $\phi \in \mc{L}(\Lambda)$,
 for some set of propositions $\Lambda$. We first construct an automata called
-\mestar, by simulating the repeated application of \tmc{E} onto \tmc{M}. This
-lets us easily traverse the set of possible states we can reach from our initial
-model.
+\mestar, by simulating the repeated application of \tmc{E} onto \tmc{M}. \mestar
+is a representation of all worlds that we can access from the application of any
+sequence of events in \tmc{E}. This lets us easily traverse the set of possible
+states we can reach from our initial model.
 
 Here, recall the definition of a planning problem from \secref{sec:Planning}. We
 require a planning system with a set $S$ of states, a set $A$ of actions and a
 partial transition function $\gamma : S \times A \hookrightarrow S$. \mestar
 provides us will all of these; our set of states $S$ is the state space $Q$, the
 set of actions $A$ is the alphabet $\Sigma$ and the transition function $\gamma$
-is exactly the transition function $\delta$ of \mestar. Furthermore, we can we
-the set of goal states to be the set of states that model the winning condition,
-and let the initial state be the initial state of \mestar.
+is exactly the transition function $\delta$ of \mestar. Furthermore, we can
+define set of goal states to be the set of states that model the winning
+condition, and let the initial state be the initial state of \mestar.
 
 \bigskip
 
@@ -1272,7 +1517,7 @@ To this end, we perform the process detailed in Section
 \ref{sec:PowersetAdapted}. In this, we build a transducer $\mc{T}_i$ which
 relates pairs of events that are indistinguishable to one another. We then step
 through \mestar again, building another automata where the states are
-\textit{sets of states} in \mestar. This is done by following the transitions in
+\emph{sets of states} in \mestar. This is done by following the transitions in
 \mestar and, whenever we make a transition through the occurence of an event,
 computing the set of events that are indistinguishable to agent $i$ and applying
 this to all of the states in the set of states that we could be in. This means
@@ -1339,9 +1584,9 @@ system.
 \label{subsec:mestar}
 
 Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
-represent the states that can be reached given an epistemic model \tmc{M} and an
+represent the worlds that can be reached given an epistemic model \tmc{M} and an
 event model \tmc{E}. \mestar holds the information about the set of possible
-states that can be reached using \tmc{M} and \tmc{E}, and how we can move
+worlds that can be reached using \tmc{M} and \tmc{E}, and how we can move
 between them.
 
 \bigskip
@@ -1356,24 +1601,33 @@ $\mc{ME}^1$ would be $\mc{M} \times \mc{E}$, and $\mc{ME}^2$ represents $\mc{M}
 \end{equation*}
 
 One might wonder how we can reason about this; it's a seemingly infinite
-structure. The key thing to realise is that our states in \mestar are indexed by
-the set of propositions that hold true at the state. For instance,
-\figref{fig:KripkeGossip} would be represented by the state $q_{\{N_{aa},
-  N_{ab}, N_{ba}, N_{ba}, N_{bc}, N_{cc}\}}$. Recall that the set of propositions that
-our epistemic model ranges over has to be finite; consequently, our set of
-states is finite\footnote{Indeed, we know the exact size of our set of states in
-\mestar, which is $2^{|\Lambda|}$.}. The transitions in \mestar are exactly
-those from states in \tmc{M} from \tmc{E}. It becomes very clear to see how this
-works once we inspect the definition of \mestar. 
+structure. The key thing to realise is that our worlds in \mestar can be indexed by
+the set of propositions that hold true at the world. This makes use of the
+bijection we discussed in Section \ref{sec:Formalisation}.
+
+For instance, \figref{fig:KripkeGossip} would be represented by the world
+$q_{\{N_{aa}, N_{ab}, N_{ba}, N_{bb}, N_{bc}, N_{cc}\}}$. Recall that the set of
+propositions that our epistemic model ranges over has to be finite;
+consequently, our set of world is finite\footnote{Indeed, we know the exact
+  size of our set of worlds in \mestar, which is $2^{|\Lambda|}$.}. The
+implication of this is that two completely different call paths from the same
+initial world could end at the same world in \mestar, if the sets of
+propositions that hold true are the same.
+
+The transitions in \mestar are exactly
+those from worlds in \tmc{M} from \tmc{E}. It becomes very clear to see how this
+works once we inspect the definition of \mestar.
 
 \bigskip 
 
-Let $\mc{M} = (W, R, V)$ be an epistemic model and let $\mc{E} = (E, \mc{R_E}, \pre,
-\post)$ be an event model. 
+Let $\mc{M} = (W, R, V)$ be an epistemic model, $\mc{E} = (E, \mc{R_E}, \pre,
+\post)$ be an event model and $\phi \in \mc{L}_P(\Lambda)$ be a formula in
+propositional logic. $\phi$ is our goal formula; we want to reach a state in which
+this formula is satisfied. 
 
 Then define the automaton $\mc{ME}^\ast= (\Sigma, Q, \delta, q_i, F)$, where
-$\Sigma = W \cup E, F = \left\{ q_v \mid v \subseteq \Lambda \right\}$ and $Q =
-F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
+$\Sigma = W \cup E, F = \left\{ q_v \mid v \models \phi \right\}$ and $Q =
+q_0 \uplus \left\{ q_v \mid v \subseteq \Lambda \right\}$. We define $\delta$, the transition function, as follows:
 
 \begin{centermath}
     \begin{array}{ll}
@@ -1388,13 +1642,22 @@ F \uplus {q_i}$. We define $\delta$, the transition function, as follows:
     \end{array}
 \end{centermath}
 
+\mestar is designed to accept words of the form $we_1e_2 \ldots e_n$, and such a
+word is accepted if and only if
+
+\[\delta (\ldots \delta(\delta(w, e_1), e_2), \ldots, e_n) \in F
+\]
+
+\noindent that is, all of the calls are permitted by \tpre, and the occurence of
+all of the calls takes us to a world in which the winning formula is satisfied. 
+
 We now explain the definition. We can see that our alphabet is the set of
 worlds in \tmc{M} and the events in \tmc{E}. See that $\delta(q, \sigma)$ is
 undefined when $q \not = q_i$ and $\sigma \in W$; we may only make a transition
-when $\sigma \in W$ if $q$ is the initial state. Recall that the worlds in
+when $\sigma \in W$ if $q$ is the initial world. Recall that the worlds in
 \mestar are indexed just by the propositions that hold true at them; we can see
 this in the definition of Q above. Then when we make a transition $\delta(q_i,
-w)$ we move to the state $q_{V(w)}$, where $V$ is the valuation function from
+w)$ we move to the world $q_{V(w)}$, where $V$ is the valuation function from
 \tmc{M}. This means that we move to the world indexed by the propositions true
 at $w$.
 
@@ -1431,25 +1694,25 @@ at $w$.
 After this, we can make no more transitions $\delta(q, \sigma)$ where $\sigma
 \in W$. The only other transitions we can make are when $q \in F$ and $\sigma
 \in E$. In these cases, $q$ is indexed by some set of propositions $v \subseteq
-\Lambda$. Then given this, we transition to a state $q_{v'}$ where $v'$ is the
+\Lambda$. Then given this, we transition to a world $q_{v'}$ where $v'$ is the
 set of all propositions $p$ where the postcondition $\post(e, p)$ is modelled by
 the set of propositions $v$. 
 
 This is quite an odd definition, and we give an example to try and aid
 understanding. Consider the gossip graph in \figref{fig:GossipWrap1}. In
-\mestar, this would be modelled by the state $q_v$ where $v = \left\{ N_{aa},
+\mestar, this would be modelled by the world $q_v$ where $v = \left\{ N_{aa},
   N_{ab}, N_{ba}, N_{bb}, N_{bc}, N_{cc}, S_{aa}, S_{bb}, S_{cc} \right\}$. When
 call $ab$ occurs at \figref{fig:GossipWrap1}, \figref{fig:GossipWrap2} is the
 result. We see that this matches up with the definition of $\delta$ for \mestar;
 take for example $S_{ba}$. $\post(ab, S_{ba}) = S_{ba} \lor S_{aa}$ is clearly
-modelled by $v$, hence this becomes true at our new state. Contrarily, consider
+modelled by $v$, hence this becomes true at our new world. Contrarily, consider
 $S_{cb}$. $\post(ab, S_{cb}) = S_{cb}$, as $c$ is not involved in the call $ab$.
 Clearly $v \not \models S_{cb}$, and as such $S_{cb}$ is not included in the set
-of propositions that are true at the new state.
+of propositions that are true at the new world.
 
 We also see that if the precondition of the event is not satisfied then the
-state moved to is undefined; we cannot make a transition with an event that may
-not happen at a state. 
+world moved to is undefined; we cannot make a transition with an event that may
+not happen at a world. 
 
 \bigskip 
 
@@ -1554,7 +1817,7 @@ set of potential final states of the transducer's output tape; we only have to
 keep track of the other possible states of the transducer. The set of states in
 the transducer is exactly the same as the set of states in our \mestar automata,
 so these transducer states correspond directly to the states that we
-\textit{could} be in in our \mestar automata.
+\emph{could} be in in our \mestar automata.
 
 This is easy to see from the definition of transitions in $\wh{\mc{ME^\ast}}$.
 $S'$ becomes the set of all states $q'$ that can be reached by making a
@@ -1875,7 +2138,7 @@ graph \mestar from \secref{subsec:mestar};
 After any kind of powerset, intersection or complement operation, it will still
 follow the same shape; we have layers, and as they get deeper more events get
 applied to them. One big benefit of this topology is that the resultant graph is
-\textit{acyclic}; there is no way we can return to an earlier state.
+\emph{acyclic}; there is no way we can return to an earlier state.
 
 This is one of the reasons that a breadth-first traversal of the resultant graph
 is most suitable for this context. 
@@ -1942,7 +2205,7 @@ models and event models in Haskell. \texttt{states} and \texttt{events}
 respectively represent the states and events of the Kripke and Event models, and
 \texttt{eprel} and \texttt{evrel} respectively represent the
 indistinguishability relations between them. Note that for ease of
-implementation we use \textit{partitions} (\cite{EREL}) of sets rather than sets
+implementation we use \emph{partitions} (\cite{EREL}) of sets rather than sets
 of pairs. This is done because we regularly want to just access the set of
 states we cannot distinguish an item between, and the use of partitions makes
 this a much simpler task. 
@@ -2090,7 +2353,7 @@ identically mimic the tuple definitions in \secref{subsec:Transducers}.
 \end{figure}
 
 Our FSM's transition returns a \texttt{Maybe st} to encode that it is
-\textit{nondeterministic}; meaning that it is not guaranteed to return a state
+\emph{nondeterministic}; meaning that it is not guaranteed to return a state
 on a transition. This comes in useful in practise when we have as input to
 $\delta$ some pair $(w, e)$ where $e$ is not permitted at $w$. In this case,
 $\delta(w, e) = \texttt{Nothing}$. An example of this is a call $ij$ in the
@@ -2183,7 +2446,7 @@ all tests and as such functions correctly.
 \bigskip
 
 However, more interesting is our plan for functional testing. This is the part
-of testing in which we check that the system \textit{correctly functions}, and
+of testing in which we check that the system \emph{correctly functions}, and
 will tell us if what we have implemented is correct or not.
 
 Although our system is capable of planning for any epistemic model and
@@ -2265,7 +2528,7 @@ set of ``identity'' propositions; we can see them as being vacuously true, as
 all of the agents are bound to know their own phone number and secret.
 
 We only look for cases where the agents start out not knowing the secret 
-of any agent, only phone numbers - we call these \textit{phonebook} graphs.
+of any agent, only phone numbers - we call these \emph{phonebook} graphs.
 There are a few reasons for this;
 
 \begin{itemize}
@@ -2388,7 +2651,7 @@ experts'' to the propositional variable $E$.
 
 We can clearly see that our tool is much more time and space efficient than the
 existing tool. However this is a quite straightforward victory; the other tool
-enumerates \textit{all} of the possible paths through a gossip graph (for a
+enumerates \emph{all} of the possible paths through a gossip graph (for a
 graph of size 4, there thousands of these), and then checks the success of each
 one. Compare this to our tool, which simply find the first, shortest, successful
 path it can take to reach some successful state.
@@ -2453,7 +2716,7 @@ The issue seems to arise from the final part of the definition of transitions in
 
 \noindent where, given a world where a set of propositions $v$ is true and an
 event $e$, we go through each proposition $p$ in the set of propositions for the
-current model and check if the set of propositions $v$ \textit{model} the postcondition
+current model and check if the set of propositions $v$ \emph{model} the postcondition
 of the given proposition $p$ and the event $e$. This occurs every time we wish
 to make a transition between two sets in our automata; clearly, this piece of
 code is being called a lot. However, this does not seem to be a particularly bad
@@ -2492,7 +2755,7 @@ considering the successful states. In the other tool it is known that the
 sequence of calls is ``final'', in the sense of a model checker - we want to
 know if this is successful or it isn't. But in ours we only stop either when we
 can make no more calls, or we are in a successful state. As such, we need to
-know if we are in a successful state \textit{every time we enter one}, and the
+know if we are in a successful state \emph{every time we enter one}, and the
 only way we can do this is by performing each string of indistinguishable calls
 on the initial state and evaluating the target formula at the resultant states;
 it is clear that this will be less efficient.
@@ -2526,7 +2789,7 @@ the propositions true at a state. At a state in the gossip protocol, if some set
 $v$ of propositions are true and we make some call $e$, then the set of
 propositions at the state we move to, $v'$, is guaranteed to be a superset of
 $v$. Consider what this means; there is no phone call that can be made that will
-make anyone know any \textit{less}. Hence we could change Equation
+make anyone know any \emph{less}. Hence we could change Equation
 \ref{eq:delta1} to
 
 \begin{equation} \label{eq:delta2}
@@ -2541,7 +2804,7 @@ be true.
 
 However I fear this would be an irresponsible change to make to our code.
 Remember that we do not want our system to solely plan for the Gossip problem;
-rather we want it to be capable of doing so for \textit{any} epistemic model and
+rather we want it to be capable of doing so for \emph{any} epistemic model and
 propositional event model. We have an example of a model where this occurs in
 \figref{fig:cointoss}; although this is quite a toy example, it does indeed show
 that such cases are possible. In the interests of portability then, it would be
