@@ -459,5 +459,50 @@ communicate highly technical material.
 **** Reflection, summary, future work 
 *** Structure
 **** Address three challenges. 
-* To ask about 
-  - Is it too early to introduce propositional pre- / post-conditions? 
+* Revisions
+** Overall
+*** TODO Spell check 
+*** TODO Change formatting to remove \bigskip
+*** DONE Update \texttt to \mintinline
+    CLOSED: [2019-05-06 Mon 16:51]
+** Ch 3 - Algorithm
+*** TODO Consider changing the examples in §3. 
+    Using K_A (Sbc) and then K_a (~Sba) is a bit annoying, could change it to be
+    just the same the whole way through? 
+*** TODO Need to make changes to §5 searching. 
+** Ch 4 - Implementation
+*** TODO Fix formatting, figures overrunning
+*** TODO Address code - compacting and removing stuff 
+*** Refer back to benefits of Haskell each time
+**** Model
+***** Possibility for DatatypeContexts - however deprecated feature.
+***** DONE Parametricity in St and Prp - ensures that they use the same events.
+      CLOSED: [2019-05-06 Mon 09:50]
+***** Form language means that they use th esame language of propositions.
+**** ME
+***** DONE How it represents all possible paths through the automata it can take
+      CLOSED: [2019-05-06 Mon 14:46]
+***** Problems with it (i.e, lack of powerset-ness)
+***** TODO Address runtime analysis stuff?
+**** DONE FSM
+     CLOSED: [2019-05-06 Mon 16:51]
+***** DONE Why not a map?
+      CLOSED: [2019-05-06 Mon 16:51]
+      * Never enumerate all of the transitions
+      * Maps want strictness; they want every element stored to eventually be used. We don't have that
+**** TODO Powerset
+***** DONE Address PState 
+***** TODO Maybe fix stuff about recursion? 
+** Ch 5 - Evaluation
+*** TODO Address non-agreeing results for certain graphs
+    Only for *certain* graphs. Mention why this may be / why this isn't a problem
+*** DONE Discuss protocols like ANY; the way in which we deal w/ them
+    CLOSED: [2019-05-07 Tue 11:07]
+*** TODO Add detail to the profiling - that we take averages 
+*** TODO Find case where DFS on Malvin code is bad
+*** DONE Restructure conclusion; put each criticism into a section? 
+    CLOSED: [2019-05-07 Tue 11:07]
+** Ch 6 - Conclusion
+*** TODO Add analysis of done stuff
+*** DONE Address Modal preconditions?
+    CLOSED: [2019-05-07 Tue 11:24]

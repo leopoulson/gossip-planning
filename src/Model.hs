@@ -68,6 +68,15 @@ data EpistM st p = Mo {
     allProps :: S.Set p
     }
 
+data EpistM2 ev p = Mo2 {
+    states2 :: [State ev],                  -- Set of possible worlds
+    agents2 :: [Agent],               -- Set of agents in model
+    val2 :: Valuation (State ev) p,             -- Valuation function; \pi : World -> Set of props.
+    eprel2 :: AgentRel (State ev),            -- Epistemic relation between worlds
+    actual2 :: [State ev],                  -- Set of pointed worlds.
+    allProps2 :: S.Set p
+    }
+
 type PointedEpM st p = (EpistM st p, st)  -- This is a pointed model. 
 
 -- So we want to be able to describe events; for us, we only have calls.

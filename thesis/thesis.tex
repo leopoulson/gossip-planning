@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{article}
+\documentclass[10pt, a4paper]{report}
 
 \input{preamble.tex}
 
@@ -19,7 +19,7 @@
 \tableofcontents
 \newpage
 
-\section{Introduction}
+\chapter{Introduction}
 \label{sec:Introduction}
 
 Often we come across situations, processes or phenomena in the real world that
@@ -185,7 +185,7 @@ $\phi$ we are given the sequence of calls $c_1, c_2, \ldots, c_n$ whose
 occurence on \tmc{M} will reach a state in which $\phi$ is modelled. For
 example, consider the below graph .... \textbf{Finish this}. 
 
-\subsection{Existing Software}
+\section{Existing Software}
 
 As research work is done into a topic, it is only natural that software is
 developed to support it. The three related pieces of software are
@@ -207,7 +207,7 @@ Despite this, there does not exist any software to solve the epistemic planning
 problem as envisioned in the literature; indeed, the only software to solve any
 epistemic planning problem is restricted to just gossip models.
 
-\subsection{Contributions}
+\section{Contributions}
 
 At a high level, our aim in this project is to put forward a process to solve
 the planning problem for epistemic models and propositional event models. This
@@ -259,7 +259,7 @@ the problem\footnote{This similarity is discussed again later, and is one of the
   reasons Haskell was chosen for the task.} this is easier than it would be in
 some languages, however this still has its difficulties.
 
-\subsection{Aims}
+\section{Aims}
 
 Concretely, our aims are as follows:
 
@@ -281,7 +281,7 @@ Concretely, our aims are as follows:
 % We hope that the work done in this thesis can help to unify work done on both
 % dynamic gossip and epistemic planning, and
 
-\subsection{Road Map}
+\section{Road Map}
 
 In Section 2, we introduce, formalise and explain the concepts and tools needed
 to understand the work in the rest of the thesis. This constitutes the first of
@@ -306,12 +306,12 @@ In Section 6 we conclude the thesis.
 
 \newpage
 
-\section{Background}
+\chapter{Background}
 
-\subsection{Dynamic Epistemic Logic}
+\section{Dynamic Epistemic Logic}
 \label{sec:DEL}
 
-\subsubsection{Epistemic Logic}
+\subsection{Epistemic Logic}
 
 Epistemic Logic is the logical language that we use to reason about knowledge.
 It is a modal logic; this is a class of logics that supplement the language of
@@ -488,7 +488,7 @@ To show some examples, let's evaluate some formulae on this model.
   q)$, since $(\mc{M}, w_1) \not \models p$. 
 \end{itemize}
 
-\subsubsection{Event Models}
+\subsection{Event Models}
 \label{sec:Event Models}
 
 % Public announcement logic was the first development in epistemic logic to
@@ -729,7 +729,7 @@ that in which the coin landed face-down.
 \end{figure}
     
 
-\subsection{The Gossip Problem}
+\section{The Gossip Problem}
 
 Gossip is a procedure for spreading secrets around a group of agents, where the
 agents are commonly displayed as nodes in a graph and the ability of one agent
@@ -742,7 +742,7 @@ agent being an \emph{expert}. It was quickly proved (\cite{TelephoneDisease},
 \cite{GandT}) that this number, for a network where the number of agents $n$ is
 greater than 4, is $2n - 4$.
  
-\subsubsection{Dynamic Gossip}
+\subsection{Dynamic Gossip}
 
 Dynamic Gossip is a variant of the classical gossip problem, in which we start
 off with an incomplete graph, representing the fact that the agents have only
@@ -750,7 +750,7 @@ the phone numbers of some of the other agents. In this case, when two agents
 talk on the phone, they also exchange all of the phone numbers that they know, as
 well as the secrets that they know.
 
-\subsubsection{Protocols}
+\subsection{Protocols}
 \label{sec:Protocols}
 
 The gossip problem, as we have mentioned so far, can rely on some central
@@ -786,7 +786,7 @@ It should also be noted that there are certain classes of graphs for which
 (\cite{DynamicGossip}). However, this thesis does not investigate this topic,
 and as such this will no longer be mentioned. 
 
-\subsubsection{Formalisation}
+\subsection{Formalisation}
 \label{sec:Formalisation}
 
 We now go on to formalise some of the ideas mentioned so far in this section.
@@ -1051,7 +1051,7 @@ gives us the useful property of being able to encode these gossip graphs with
 sets of propositions in the implementation, which makes gossip graphs much easier to
 deal with and reason about.
 
-\subsection{Planning}
+\section{Planning}
 \label{sec:Planning}
 
 Automated planning is the process of computing which set of events must occur to
@@ -1083,7 +1083,7 @@ Note that we call a planning problem \emph{multi-agent} if the number of
 agents in the system is greater than 1, and \emph{single-agent} if the number
 of agents is equal to 1. 
 
-\subsubsection{Epistemic Planning}
+\subsection{Epistemic Planning}
 
 The dynamic epistemic logic community has recently been investigating a special case
 of planning, namely \emph{epistemic} planning (\cite{BolanderEP},
@@ -1138,7 +1138,7 @@ as the lens through which we study epistemic planning;
   whilst still being a simple enough problem to understand intuitively.  
 \end{itemize}
 
-\subsection{Existing Tools}
+\section{Existing Tools}
 \label{sec:ExistingTools}
 
 We now give an overview of existing software in the realm of model checking or
@@ -1153,7 +1153,7 @@ propositions $\Lambda$, compute a sequence of events $e_1, e_2, \ldots, e_n$
 where $\forall e_i$ in the sequence $e_i \in \mc{E}$ whose occurence takes the
 model \tmc{M} to a state in which the formula $\phi$ is satisfied. 
 
-\subsubsection{DEMO-S5}
+\subsection{DEMO-S5}
 
 DEMO-S5 (\cite{DEMO-S5}) is a model checker for epistemic models, limited to
 $S5$ models. It is also limited in that it only supports events that are either
@@ -1185,7 +1185,7 @@ aiding the understanding of epistemic and event models. Indeed, the
 formalisation of epistemic and event models demonstrated here was used in the
 code associated with this thesis.
 
-\subsubsection{Gossip}
+\subsection{Gossip}
 
 \cite{GithubGossip} is another model checker, however for strictly the gossip
 problem. This program has a significant advantage over the other two pieces of
@@ -1216,7 +1216,7 @@ these call sequences, and never reaches the point at which it checks the
 successful call sequences. This is clearly a big limitation and in our system we
 aim to avoid this. 
 
-\subsubsection{SMCDEL}
+\subsection{SMCDEL}
 
 SMCDEL is the most sophisticated of the three pieces of software. A technical
 report is given in \cite{SMCDEL}, whilst a lot of the underlying theory is in
@@ -1232,10 +1232,10 @@ to a reasonably unpleasant interface we choose not to use this software for
 benchmarking and instead use the simpler \cite{GithubGossip}. 
 
 
-\subsection{Uniform Strategies}
+\section{Uniform Strategies}
 \label{sec:UniformStrategies}
 
-\subsubsection{A Quick Signpost}
+\subsection{A Quick Signpost}
 
 Recall that in the introduction we outlined that one of our contributions was a
 tool to perform epistemic planning on epistemic models and propositional event
@@ -1256,14 +1256,14 @@ Recall that in order to verify the truth or falsity of a formula of the form
 $K_i \phi$, we need to visit all the worlds that agent $i$ cannot distinguish
 from their current world and see whether or not $\phi$ holds there. Doing this
 quickly and easily is of great importance to our system. However, we see that in
-Section \ref{subsec:mestar}, this is not extremely simple to do; whilst it is
-straightforward to enumerate the set of states that can be reached through
+Section \ref{sec:mestar}, this is not extremely simple to do; whilst it is
+straightforward to enumerate the set of worlds that can be reached through
 application of an event model to a Kripke model, it is not so straightforward to
-consider the states that an agent may consider possible from some state. We
+consider the worlds that an agent may consider possible from some world. We
 would need to consider the call sequence we made and compute the call sequences
 that are indistinguishable to the current one. This is a slow, costly process.
 What we want is to be able to evaluate epistemic formulae \emph{positionally};
-that is, by only looking at the state in question.
+that is, by only looking at the world in question.
 
 In \cite{UniformStrategies} - the reference for uniform strategies - a process
 is detailed that helps us towards this goal of positional evaluation of a
@@ -1276,7 +1276,7 @@ $\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
   a word accepted by \tmc{A} will also be accepted by $\widehat{\mc{A}}$. The
   difference between the two is that the states in $\widehat{\mc{A}}$ contain
   much more information than those in \tmc{A}.}, but whose states
-contain in them all of the states indistinguishable to agent $i$. This lets us
+contain in them all of the worlds indistinguishable to agent $i$. This lets us
 positionally verify formulae of the shape $K_i \phi$.
 
 \bigskip
@@ -1294,7 +1294,7 @@ version. In order to illustrate that our algorithm is a special case of this
 process, we introduce the powerset construction in its natural game theory
 setting. 
 
-\subsubsection{Game Arenas}
+\subsection{Game Arenas}
 
 A game with \emph{imperfect information} is a game in which the players have
 some uncertainty concerning hte current configuration of the game (for example
@@ -1305,19 +1305,24 @@ situations she cannot distinguish.
 
 We consider two-player turn-based games played on a some graph, where the
 vertices are labelled with propositions. These propositions hold some useful
-information about the state; it could be what people know about it, or some fact
+information about the world; it could be what people know about it, or some fact
 about the environment the player is in and so on. This set of propositions will
 be referred to as $AP$. 
 
 Then a game arena is a structure $\mc{G} = (V, E, v_I, l)$ where $V = V_1 \uplus
-V_2$ \footnote{We use $\uplus$ here to indicate that this is a partition} is a
-set of positions split between those of Player 1 ($V_1$) and those of Player 2
-($V_2$). $E \subseteq (V_1 \times V_2) \cup (V_2 \times V_1)$ is the set of
-edges, $v_I \in V$ is the initial position and $l : V \rightarrow \mc{P}(AP)$ is
-a valuation function, which maps each position to the finite set of propositions
-that are true at it.
+V_2$ \footnote{We use $\uplus$ here to indicate that the two sets are
+  \emph{disjoint}} is a set of positions split between those of Player 1 ($V_1$)
+and those of Player 2 ($V_2$). $E \subseteq (V_1 \times V_2) \cup (V_2 \times
+V_1)$ is the set of edges, $v_I \in V$ is the initial position and $l : V
+\rightarrow \mc{P}(AP)$ is a valuation function, which maps each position to the
+finite set of propositions that are true at it.
 
-\subsubsection{Transducers}
+It may be easy to see the relationship between game arenas and finite state
+automata. We can see $V$ as a set of states in an automata. $E$ encodes the
+transitions between states, and as such we can see it as representing the
+transition function $\delta$.
+
+\subsection{Transducers}
 \label{subsec:Transducers}
 
 We give a quick recap of transducers, as they are used heavily in the next two
@@ -1361,10 +1366,10 @@ Finally, we say that the relation recognised by some transducer $T$ is
   [T] ::= \left\{ (w, w') \mid w \in \Sigma^\ast, w' \in \Gamma^\ast, \exists q_F \in F, \exists q_i \in I, q_i \rsarrow_{w \mid w'} q_F \right\}
 \end{align*}
 
-\subsubsection{The Powerset Arena}
-\label{sec:PowersetArenaena}
+\subsection{The Powerset Arena}
+\label{sec:PowersetArena}
 
-In games with imperfect information, the information set of a player after a
+In games with imperfect information, the \emph{information set} of a player after a
 certain play is the set of positions she may possibly be in, consistent with
 what she has observed\footnote{For instance in a game of poker with one deck of cards, a
 player may have no idea what the other players have in their hands except that
@@ -1449,7 +1454,7 @@ Finally, we say that $\widehat{v}_I$ is the only successor of
 $\widehat{v}_{-1}$, and that the valuation of a position in the powerset arena
 is the valuation of the underlying position in the original arena. 
 
-\subsubsection{Lifting Transducers}
+\subsection{Lifting Transducers}
 
 We can keep on repeating this process, creating a power-powerset arena
 $\widehat{\widehat{G}}$. However we first need to lift our transducer $T$ where
@@ -1471,9 +1476,9 @@ form $K_i K_j \phi$.
 
 \newpage
 
-\section{Algorithm}
+\chapter{Algorithm}
 
-\subsection{Introduction}
+\section{Introduction}
 
 In this section, we formalise the algorithm that we use to solve the
 propostional epistemic planning problem. We see this as a meaningful
@@ -1580,8 +1585,8 @@ to some successful state, as required.
 With this all in mind, we now move into the implementation details of the
 system. 
 
-\subsection{\mestar}
-\label{subsec:mestar}
+\section{\mestar}
+\label{sec:mestar}
 
 Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
 represent the worlds that can be reached given an epistemic model \tmc{M} and an
@@ -1717,38 +1722,75 @@ not happen at a world.
 \bigskip 
 
 
-\subsection{Powerset Adapted}
+\section{Powerset Adapted}
 \label{sec:PowersetAdapted}
 
-The powerset construction given in \ref{sec:PowersetArena} is a very broad
-definition, designed for use in game arenas. We need a simpler version of this
-for our context, as finite automata are simpler than game arenas and as such we
-do not need as much information. We first show how the special transducer in
-this section is built. We will then define our version of the powerset
-construction, and then explain where the differences arise. This process puts
-the powerset construction in \ref{sec:PowersetArena} into context.
+In \ref{sec:PowersetArena} we give a definition of the process used construct a
+powerset game arena, which constructs a super-arena in which the states of the
+arena contain in them the set of states \emph{related} to the current one, given
+the initial game arena and a transducer relating pairs of events. Recall the way
+we compute the truth value of a formula $K_i \phi$ on some model; we find the
+set of all worlds indistinguishable to $i$ from $i$'s current world and compute
+the truth value of $\phi$ there.
 
-\subsubsection{Event Transducers}
+However, \mestar is unable to perform this task. We have no way of computing the
+set of indistinguishable worlds; as mentioned before, in order to compute the set
+of states that $i$ considers possible we would have to go back and compute the
+set of call sequences that $i$ cannot distinguish between and find the state
+resulting from the application of all of these. 
+
+It's clear to see how the powerset construction would be useful in our context;
+it would give us the set of all states indistinguishable to $i$ built-in to the
+states. Hence we can quickly evaluate a formula of the form $K_i \phi$ on a
+state, as we have the set of indistinguishable states already built in to the
+state - this is what is referred to in this thesis as \emph{positional}
+evaluation. This is clearly superior to the method detailed above. 
+
+The construction of this automata would let us perform epistemic planning when
+our successful formula is of the form $K_i \phi$. Currently, with \mestar, we
+may only plan where our successful formula is in $\mc{L}_P(\Lambda)$; when
+planning we visit each state and evaluate the successful formula on it. We are
+unable to evaluate knowledge-based formulae on states in \mestar; hence we are
+unable to plan for knowledge-based formulae. The construction of a powerset
+automata of \mestar - referred to as $\wh{\mc{ME^\ast}}$ - gives us this
+desirable property. 
+
+In order to perform this task we need to construct a transducer that relates
+pairs of events indistinguishable from $i$. This can be built very easily from
+the event model supplied, as in here these pairs are already stored. This is one
+of the requisites for the powerset construction as outlined in Section
+\ref{sec:PowersetArena} and refined for our use-case in Section \ref{sec:PowersetAdapted}.
+In this section we give a method with which these transducers can be built, how
+we compose them to make them more useful for our powerset construction, and
+finally the adaptation of the powerset construction for finite state automata. 
+
+\subsection{Event Transducers}
 
 In conjunction with \mestar, we also need to produce a set of transducers
 $\mc{T} = \{\mc{T}_i \mid i \in A\}$, for the model in question. $\mc{T}_i$
-relates pairs of events that agent $i$ cannot distinguish between. This becomes
-very useful later in this section, as it lets us easily compute states that an
-agent considers possible given a prior state and some event. Hence we want
-$\left[ \mc{T}_i \right]$ to be equal to the set of pairs of calls
+relates pairs of events that agent $i$ cannot distinguish between. This is
+critical to us performing the powerset construction on our \mestar automata.
+Hence we want $\left[ \mc{T}_i \right]$ to be equal to the set of pairs of calls
 indistinguishable to agent $i$\footnote{As an example, consider the gossip graph
   with three agents. Then $\left[ \mc{T}_a \right] = \left\{ (ab, ab), (ac, ac),
     (ba, ba), (ca, ca), (bc, bc), (bc, cb), (cb, bc), (cb, cb) \right\} $.}.
-
+Formally, this means that, given an event model $\mc{E} = (E, P, \pre, \post)$,
+$[\mc{T}_i] = P_i$. 
 
 In order to do this we need just one state in our transducer, which we simply
-call $q$. Then we define $\mc{T}_i = (\Sigma, Q', \Delta_i, q, F')$. $Q' = F' =
-\{q\}$ and $\Delta_i = \left\{ (q, w, w', q \mid (w, w') \in R_i) \right\} \cup
-\left\{ (q, e, e', q \mid (e, e') \in Q_i) \right\}$. It is quite simple to see
-that this definition will satisfy the above requirement. 
+call $q$. The choice of using a one-state transducer is slightly non-standard,
+however we hope it becomes clear once we see how it is used in Section
+\ref{sec:TransducerComposition}. In short, we choose this because we just care
+about relating hte states that are indistinguishable; the state of the model has
+no impact on this \footnote{We may want to not allow a certain event because its
+  precondition is not satisfied; however this is not handled in this
+  transducer.}. Then given an event model $\mc{E} = (E, P, \pre, \post)$, we
+define $\mc{T}_i = (\Sigma, Q, \Delta_i, q, F)$. $Q = F = \{q\}$ and $\Delta_i =
+\left\{ (q, e, e', q \mid (e, e') \in P_i) \right\}$. It is quite simple to see
+that this definition will satisfy the above requirement.
 
-\subsubsection{Transducer Composition}
-\label{subsubsec:TransducerComposition}
+\subsection{Transducer Composition}
+\label{sec:TransducerComposition}
 
 Essential to this stage of the algorithm is the construction of a transducer to
 relate a state with the states considered possible after some event happens by
@@ -1763,7 +1805,11 @@ The second component is the identity transducer over the automata \mestar. This
 can be computed in another very straightforward manner. Given $\mc{ME}^\ast =
 (\Sigma, Q, \delta, q_0, F)$, we can construct the identity transducer
 $\mc{T}_{\text{id}} = (\Sigma, Q, \Delta, q_0, F)$ where $(q, e, e', q') \in
-\Delta$ iff $(q, e, q') \in \delta$ and $e = e'$. 
+\Delta$ iff $\delta(q, e) = q'$ and $e = e'$. This is useful as it lets us
+compute the effect of an event occuring and whether the event is permitted at
+the world in question. The single-state transducer computes which events
+\emph{could} happen, whilst the identity transducer computes the effects of
+these events. 
 
 The next step is to compose the two. We use a slightly different method than
 those put forward in the literature (\cite{ComposingFSTs}), given that one of
@@ -1777,25 +1823,30 @@ composition $\mc{T} = (\Sigma, Q, \Delta, q_0, F)$ where
   \Delta(s, e) = \left\{ (e', s') \mid (e', q) \in \Delta_1(q, e), (e', s') \in \Delta_2(s, e') \right\} 
 \end{align*}
 
-Hence, if we give as input to $\Delta$ an input pair $(q, e)$, where $q$ is a
-state and $e$ an event, it returns a set of pairs $\left\{ (e', q') \right\}$,
-where $e'$ is some event indistinguishable from $e$ and $q'$ is the state we
-reach through the occurence of $e'$ at state $q$. This transducer is the one
-used in the definition of the transition relation in Section
-\ref{subsubsec:Powerset}. This makes the transitions in the Powerset automata
-much more simple to implement. 
+Note that \tmc{T} is nearly identical to $\mc{T}_2$; the states, alphabet,
+initial and final states are the same. Recall that this is because we use
+\tmc{T} to relate a world - call pair to a set of worlds that agent $i$
+considers it possible to be in from the prior worlds. 
 
-\subsubsection{Powerset}
+Hence, if we give as input to $\Delta$ an input pair $(q, e)$, where $q$ is a
+state and $e$ an event, it returns a set of pairs of the form $(e', q')$, where
+$e'$ is some event indistinguishable from $e$ and $q'$ is the state we reach
+through the occurence of $e'$ at state $q$. This transducer is the one used in
+the definition of the transition relation in Section \ref{subsubsec:Powerset}.
+This makes the transitions in the Powerset automata much more simple to
+implement.
+
+\subsection{Powerset}
 \label{subsubsec:Powerset}
 
 Given an automata $\mc{ME^\ast} = (\Sigma, Q, \delta, q_i, F)$ and a transducer
-$\mc{T}_i = (\Sigma, Q, \Delta, q_0, F_{\mc{T}})$, we construct a
-powerset automata $\wh{\mc{ME^\ast}} = (\wh{\Sigma}, \wh{Q}, \wh{\delta}, \wh{q}_i,
+$\mc{T}_i = (\Sigma, Q, \Delta, q_0, F_{\mc{T}})$, we construct a powerset
+automata $\wh{\mc{ME^\ast}} = (\wh{\Sigma}, \wh{Q}, \wh{\delta}, \wh{q}_i,
 \wh{F})$. In this automata, our states $\wh{q} \in \wh{Q}$ are of the form $(v,
-S)$, where $S \subseteq Q$. This is because, in our case, when we need to
-evaluate a formula of the form $K_i\phi$, we just need to know the set of states
-indistinguishable to agent $i$ at this moment. This is exactly what the set $S$
-is.
+S)$, where $S \subseteq Q$. This is because when we need to evaluate a formula
+of the form $K_i\phi$, we need to know the set of states indistinguishable
+to agent $i$ at this moment. The set $S$ serves this purpose; it contains all of
+the states that are indistinguishable from our current state to agent $i$.
 
 \begin{itemize}
 \item $\wh{Q} = Q \times \mc{P}(Q)$
@@ -1808,7 +1859,7 @@ is.
   \end{itemize}
 \item $\wh{q}_0$ is the state $(q_0, S)$ where $S$ is the set of all worlds
   indistinguishable from $q_0$ in \mestar.
-\item $\wh{F} = \left\{ (v, S) \mid v \in F \right\}$
+\item $\wh{F} = \left\{ (v, S) \mid v \in F \right\}$.
 \end{itemize}
 
 We see that this version is much simpler than the definition given in
@@ -1819,21 +1870,27 @@ the transducer is exactly the same as the set of states in our \mestar automata,
 so these transducer states correspond directly to the states that we
 \emph{could} be in in our \mestar automata.
 
-This is easy to see from the definition of transitions in $\wh{\mc{ME^\ast}}$.
+Note that we can update $\wh{F}$ to accept worlds in which $K_i \phi$ is made
+true very easily. Assuming that in the automaton the layer below, all the states
+in $F$ are those which make $\phi$ true, the definition becomes $\wh{F} =
+\left\{ (v, S) \mid \forall w \in S, w \in F \right\}$\footnote{Note that given
+  that we are working in an \textsf{S5} model, we know that $v \in S$. This is
+  due to the \emph{reflexivity} of the accessibility relations in an \textsf{S5}
+model.}.
+
+From the definition of transitions in $\wh{\mc{ME^\ast}}$, we can see that 
 $S'$ becomes the set of all states $q'$ that can be reached by making a
 transducer transition with the input event $\sigma$ from some state $q \in S$.
 If we recall the definition of our transducer from
-\secref{subsubsec:TransducerComposition}, a transition $\Delta(q, \sigma)$ gives
+\secref{sec:TransducerComposition}, a transition $\Delta(q, \sigma)$ gives
 us a set of pairs $\sigma', q'$ where $\sigma'$ is some event indistinguishable
 to agent $i$, and $q'$ is the state we reach from making that transition from
 state $q$. 
 
 \bigskip \bigskip \bigskip
 
-We now give an example execution of this process. Consider the following gossip
-graph;
 
-\begin{figure}[h]
+\begin{wrapfigure}{r}{0.3\textwidth}
   \centering
   \begin{tikzpicture}
     [every node/.style={draw, circle}]
@@ -1847,22 +1904,28 @@ graph;
     \draw[dashed, ->, shorten >= 1pt] (c) -- (d);
 
   \end{tikzpicture}
-  \caption{An example gossip graph}
+  % \caption{An example gossip graph}
+  \caption{}
   \label{fig:egGossip}
-\end{figure}
+\end{wrapfigure}
 
-Let us take this gossip graph to be our example. We want to get to a state where
-the formula $K_a (Sbc)$ is true; that is, we want to get to a state where agent
-$a$ knows that agent $b$ knows the secret of agent $c$. One call sequence that
-will guarantee this is $bc; ab$; $b$ calls $c$ to discover $c$'s secret, and
-then $a$ calls $b$. At this point $a$ realises that $b$ knows the secret of $c$,
-and hence the formula $K_a (Sbc)$ is satisfied.
+We now give an example execution of this process. Consider the gossip graph in
+Figure \ref{fig:egGossip}. We want to get to a state where the formula $K_a
+(Sbc)$ is true; that is, we want to get to a state where agent $a$ knows that
+agent $b$ knows the secret of agent $c$. One call sequence that will guarantee
+this is $bc; ab$; $b$ calls $c$ to discover $c$'s secret, and then $a$ calls
+$b$. At this point $a$ realises that $b$ knows the secret of $c$, and hence the
+formula $K_a (Sbc)$ is satisfied. 
 
-This is of course a very high-level description, and is (unfortunately) not hwo
+This is of course a very high-level description, and is unfortunately not how
 the program will reason about it. Let us step through one application of the
 event model \tmc{E} on this graph. In this case, our event model \tmc{E} is the
-set of all possible calls; however only three are permitted. This is displayed
-in Figure \ref{fig:egGossipE1}
+set of all possible calls, similar to Figure \ref{fig:GossipEvMo}; however only
+three are permitted. The effects of updating Figure \ref{fig:egGossip} are seen
+in Figure \ref{fig:egGossipE1}. We can see this as being the automata
+$\mc{ME^1}$. We hope that the reader can see how the structure \mestar would
+arise by repeatedly applying the event model \tmc{E} to the events in
+$\mc{ME^1}$. 
 
 \begin{figure}[h]
   \centering
@@ -1937,26 +2000,33 @@ in Figure \ref{fig:egGossipE1}
     \label{fig:egGossipE1}
 \end{figure}
 
-The above diagram shows the three possible states that we could be in afer
-making one call from the initial state displayed in \ref{fig:egGossip}. The red
-line indicates that agent $a$ cannot distinguish between these two states, as
-they were both reached by the execution of a call that agent $a$ was not a
-member of. Note that in the algorithm this connection does not exist; it's here
-simply for labelling. We can see the three states on the lower row as a Kripke
-model, where the three are worlds labelled by their valuation, and the two
-connected by the red line are indistinguishable to $a$.
+\bigskip 
 
-Now say that we wanted to evaluate the formula $\neg S_{ba}$ on the bottom-left
+Figure \ref{fig:egGossipE1} shows the three possible states that we could be in
+afer making one call from the initial state displayed in Figure
+\ref{fig:egGossip}. The red line indicates that agent $a$ cannot distinguish
+between these two states, as they were both reached by the execution of a call
+that agent $a$ was not a member of. Note that in the algorithm this connection
+does not exist; it's here simply for labelling. We can see the three states on
+the lower row as a Kripke model, where the three are worlds labelled by their
+valuation, and the two connected by the red line are indistinguishable to $a$.
+
+Now say that we wanted to evaluate the formula $\neg S_{ba}$ on the bottom-right
 world in Figure \ref{fig:egGossipE1}. This is very straightforward; we just need
 to check if $b$ does indeed know $a$'s secret; here it doesn't, and so the world
 satisfies $\neg S_{ba}$. But what if we want to evaluate the formula $K_a \neg
 S_{ba}$? We need to visit each of the states indistinguishable from our state
-and see if $\neg S_{ba}$ holds there. This is currently impossible; we have no
-idea whether agent $a$ cannot distinguish between this world and any others, and
-certainly no way of reaching those worlds if they are. This is where the
-powerset construction comes into play; we pull the indistinguishable states into
-the states themselves. Hence, Figure \ref{fig:egGossipE1} becomes Figure
-\ref{fig:egGossipE1pset}.
+and see if $\neg S_{ba}$ holds there. Recall that, although a red line the red
+line connecting the two bottom states indicates that agent $a$ cannot
+distinguish between these two worlds, this connection does \emph{not} exist in
+the automata; it is there just for our intuitions. \mestar has \emph{no notion}
+of two states being indistinguishable from one another. 
+
+Hence, this is currently impossible; \mestar have no idea whether agent $a$
+cannot distinguish between this world and any others, and certainly no way of
+reaching those worlds if they are. This is where the powerset construction comes
+into play; we pull the indistinguishable states into the states themselves.
+Hence, Figure \ref{fig:egGossipE1} becomes Figure \ref{fig:egGossipE1pset}.
 
 \bigskip
 
@@ -2080,10 +2150,15 @@ be treated as a higher-class item than those it was indistinguishable from,
 however this was not the case. I suppose this lives up to the nature of the
 indistinguishability relation; these states are truly all equal. 
 
-\subsection{Combining Automata}
+\section{Combining Automata}
 
 When we encounter a formula of the form $\phi \land \psi$, where $\phi, \psi \in
-\mc{L}_P(\Lambda)$, we may simply construct an automata to solve this formula.
+\mc{L}_P(\Lambda)$, we can simply apply the method described in Section
+\ref{sec:mestar} to produce an automata whose successful states are those in
+which $\phi \land \psi$ are made true. The production of an automaton whose
+successful states are those in which a formula $\chi$ is made true is a process
+that we call \emph{constructing an automata to solve $\chi$}.
+
 However this is less straightforward when we encounter a formula of the formula
 $K_a \phi \land K_b \psi$ \footnote{This occurs very frequently; in this gossip
   problem, we often want to reach a state where every agent knows that everyone
@@ -2116,13 +2191,23 @@ the intersection; hence we just exploit de Morgan's law and use the identity $A
 this may be more costly than some alternative implementation, but for now this
 is of little importance. 
 
-\subsection{Searching}
+\section{Searching}
 
 Then given our solving automata, we want to traverse it to find paths that takes
-us from the initial state to some successful state. Recall the structure of the
-graph \mestar from \secref{subsec:mestar};
+us from the initial state to some successful state. It is in here that the
+process of planning is really performed; everything up to this point has been
+merely preparation for this. 
 
-\begin{center}
+Recall our earlier definition of \mestar. We can see \mestar as being the
+repeated application of some event model \tmc{E} onto some epistemic model
+\tmc{M}. Hence, we can see \mestar as being structures similarly to Figure
+\ref{fig:mestarStructure}; each time we perform a call we travel further down
+the 
+
+Recall the structure of the graph \mestar from \secref{sec:mestar};
+
+\begin{figure}[h]
+  \centering
   \begin{tikzpicture}[every node part/.style={align=center}]
     \node(0) [draw, rounded rectangle] at (0, 4) {Nodes in $\mc{ME}^0$};
     \node(1) [draw, rounded rectangle] at (0, 2) {Nodes in $\mc{ME}^1$};
@@ -2133,7 +2218,9 @@ graph \mestar from \secref{subsec:mestar};
     \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
     \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
   \end{tikzpicture}
-\end{center}
+  \caption{}
+  \label{fig:mestarStructure}
+\end{figure}
 
 After any kind of powerset, intersection or complement operation, it will still
 follow the same shape; we have layers, and as they get deeper more events get
@@ -2145,7 +2232,7 @@ is most suitable for this context.
 
 \newpage 
 
-\section{Implementation}
+\chapter{Implementation}
 
 We now come to covering the implementation of the algorithm developed in the
 previous chapter. We will first give an overview of the structure of the
@@ -2177,7 +2264,7 @@ ability to make sure that an epistemic model and an event model span the same
 set of atomic propositions and events. Typeclasses help us make code that is
 very reusable but also safe; if we wanted to use a new language of atomic
 propositions for an existing model, we would only need to give an instance of
-the \texttt{Prop} typeclass for our new language and hey presto.
+the \mih{Prop} typeclass for our new language and hey presto.
 
 The classification of functions as first-class objects also comes in very
 helpful. In the implementation we make the transition function of an FSM a
@@ -2194,16 +2281,16 @@ not) a module into another. We give a brief overview of each module in the
 system, and highlight notable uses of any of the above language features in this
 process. We also highlight any notable design choices made. 
 
-\subsection{\texttt{Model.hs}}
+\section{\mih{Model.hs}}
 
 This section is arguably the foundation of the system. Here we implement the
 structures defined in \secref{subsec:DEL}; we have the language of our formulae,
 Kripke models, Event models and updates thereof.  
 
 In Figure \ref{fig:HaskellModels}, we can see the implementation of both Kripke
-models and event models in Haskell. \texttt{states} and \texttt{events}
+models and event models in Haskell. \mih{states} and \mih{events}
 respectively represent the states and events of the Kripke and Event models, and
-\texttt{eprel} and \texttt{evrel} respectively represent the
+\mih{eprel} and \mih{evrel} respectively represent the
 indistinguishability relations between them. Note that for ease of
 implementation we use \emph{partitions} (\cite{EREL}) of sets rather than sets
 of pairs. This is done because we regularly want to just access the set of
@@ -2214,13 +2301,13 @@ this a much simpler task.
   \centering
   \begin{subfigure}[b]{0.5\textwidth}
     \begin{minted}{haskell}
-      data EpistM st prp = Mo {
-        states :: [st],                  
+      data EpistM ev prp = Mo {
+        states :: [State ev],                  
         agents :: [Agent],              
-        val :: [(st, [Form prp])],         
-        eprel :: [(Agent, [[st]])],
-        actual :: [st],              
-        allProps :: [prp] 
+        val :: [(State ev, [Form prp])],         
+        eprel :: [(Agent, [[State ev]])],
+        actual :: [State ev],              
+        allProps :: Set prp
       }
     \end{minted}
     \caption{The Kripke model datatype}
@@ -2241,7 +2328,39 @@ this a much simpler task.
   \label{fig:HaskellModels}
 \end{figure}
 
-The user then defines their own \tpre and \tpost-condition functions. One
+In Figure \ref{fig:HaskellModels} we see the first leverage of Haskell's type
+system. Through making our models parametric in the propositions of the language
+used (formally referred to as $\Lambda$) and the events used. These parameters
+mean that when we use them in a function they necessarily use the same events
+and propositions. Consider the function signature for \mintinline{haskell}{update}.
+% \mintinline{haskell}{update:: Prop p => EpistM ev p -> EventModel ev p -> EpistM
+% ev p}.
+
+\begin{figure}[h]
+  \centering
+  \begin{minted}{haskell}
+    update :: Prop p => EpistM ev p -> EventModel ev p -> EpistM ev p
+\end{minted}
+  \caption{}
+  \label{fig:UpdateType}
+\end{figure}
+
+If we try and use the \mintinline{haskell}{update} function with models using
+different types of events or propositions we get a compiler error. This type
+safety, and ease of use of it, is one of the main attractions of Haskell for
+this project, giving us a type-safety unavailable in a language like C.
+
+One may also notice in Figure \ref{fig:UpdateType} the use of the typeclass
+\mih{Prop p}. This typeclass guarantees us a function
+\mintinline{haskell}{evalState :: p -> EpistM st p -> st -> Bool}, which given a
+model, propositions and a state within the model, returns a boolean value
+expressing whether or not the proposition in question holds at the state. This may
+seem nonsensical - given that we have no information about what the state is
+from the type, we can not do anything too interesting - however it becomes
+useful in the case of propositions like $N_{ii}$; an agent will always know
+their own phone number. 
+
+The user then defines their own \tpre- and \tpost-condition functions. One
 deviation from the mathematical notation is the addition of the set of agents;
 this is purely a pragmatic thing, as it makes certain operations more
 straightforward later on.
@@ -2250,7 +2369,7 @@ straightforward later on.
   % \centering
   \begin{subfigure}[b]{0.5\textwidth}
   \begin{minted}{haskell}
-    update :: (Eq ev, Prop p) => EpistM (State ev) p -> EventModel ev p -> EpistM (State ev) p
+    update :: (Eq ev, Prop p) => EpistM ev p -> EventModel ev p -> EpistM ev p
     update epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
       where
         states' = [stateUpdate s ev | s <- states epm, ev <- events evm, satisfies (epm, s) (pre evm ev)]
@@ -2275,46 +2394,19 @@ the merits of Haskell; our implementation stays very close to the specification,
 allowing for simple visual verification that the code that we've written matches
 the specification. 
 
-\subsection{\texttt{ME.hs}}
-\label{sec:MEHaskell}
-
-We now come onto the module that handles construction of the automata \mestar.
-This is a slightly more interesting case.
-
-In this module we make use of one of the many language extensions Haskell offers
-us, namely \texttt{MultiParamTypeClasses}.
-
-\begin{figure}
-  \begin{minted}{haskell}
-    class (Ord st, Prop p) => EvalState st p where
-    evalState :: Form p -> st -> Bool
-  \end{minted}
-\end{figure}
-
-This lets us ensure in our functions that the propositions we're using can be
-evaluated at the states we want them to be evaluated at. This prevents us from
-trying to evaluate formula of a certain language on a world it is incompatible
-with.
-
-\textbf{TODO Add some to this}
-
-\subsection{\texttt{FSM.hs} and \texttt{FST.hs}}
+\section{\mih{FSM.hs} and \mih{FST.hs}}
 
 These two modules hold our finite state machines. Given how much of the
 algorithm relies on state machines, it was very important in development to have
 a reliable structure for state machines. Furthermore, we needed to do some
 non-standard operations on the machines we implemented (namely, the composition
-mentioned in \secref{subsubsec:TransducerComposition}). To do this easily we need
+mentioned in \secref{sec:TransducerComposition}). To do this easily we need
 low-level access to the states and a good understanding of the library. 
 
 The two libraries that seemed most suitable were \cite{HaskellFST} and
-\cite{HaskellMachines}. However, in both libraries, there seemed to be far too
-much to take in; it felt like the time spent trying to understand how to use the
-library (particularly in the latter) would far outweigh any potential benefit
-gained from using them. Furthermore it was particularly unclear how we would go
-about implementing our single-state composition as mentioned above.
-
-\bigskip
+\cite{HaskellMachines}. However, both libraries carried complexity unnecessary
+for our use-case; furthermore it was particularly unclear how we would go
+about implementing our single-state composition as mentioned above. 
 
 Fortunately, implementation of these finite-state machines is incredibly
 straightforward. We can see in \figref{fig:FSMFST} that the datatypes nearly
@@ -2352,23 +2444,107 @@ identically mimic the tuple definitions in \secref{subsec:Transducers}.
   \label{fig:FSMFST}
 \end{figure}
 
-Our FSM's transition returns a \texttt{Maybe st} to encode that it is
+Our FSM's transition returns a \mih{Maybe st} to encode that it is
 \emph{nondeterministic}; meaning that it is not guaranteed to return a state
 on a transition. This comes in useful in practise when we have as input to
 $\delta$ some pair $(w, e)$ where $e$ is not permitted at $w$. In this case,
-$\delta(w, e) = \texttt{Nothing}$. An example of this is a call $ij$ in the
+$\delta(w, e) = \text{\mih{Nothing}}$. An example of this is a call $ij$ in the
 gossip problem where $i$ does not know $j$'s phone number.
 
 Similarly, the FST transition returns a list of $(e, q)$ pairs. This again
 encapsulates the nondeterminism of the FST. This is useful in the case of
-\secref{subsubsec:TransducerComposition}, where we want to return from
+\secref{sec:TransducerComposition}, where we want to return from
 $\Delta(q, e)$ the set of all pairs $(e', q')$ where $e'$ is some event
 indistinguishable from $e$ and $q'$ is the state reached by making the
-transition $\delta(q, e')$. 
+transition $\delta(q, e')$.
 
-\subsection{\texttt{Powerset.hs}}
+A decision we made in the design of the machines was the encoding of transitions
+as \emph{functions}, rather than as a map. We chose to do this for a number of
+reasons. Firstly, we never wish to enumerate the set of transitions in the
+graph, a task which is made easier through the use of maps. Further, use of a
+map requires us to ``be strict in our keys, but lazy in the values''
+(\textbf{cite hackage page}). Although better than being strict in keys and
+values, this is still quite unpleasant; consider \mestar. We want to be able to
+mimic from every state to every other, even the impossible states\footnote{We
+  can imagine an ``impossible'' state as a state that we would never reach in
+  the model. For example, in the gossip problem, an impossible state would be
+  one in which everyone knows everyone else's secret, but no one knows anyone
+  else's phone number.}. When using a Map, this would mean we would require an
+entry for all of these impossible state. This means that a lot of time would be
+spent on entering keys into the map for states that \emph{will never be used}.
+However, when we use a function, these inputs are covered for free. This is a
+much easier way to handle transitions. A similar argument holds for the
+\mintinline{haskell}{accepting} function. 
 
-\begin{wrapfigure}{r}{0.5\textwidth}
+The use of functions here is a method that can only be easily utilised in
+languages where functions are treated as first-class objects (Haskell is one of
+these). This treatment of functions also makes operations like intersection and
+complement of FSMs a simplicity; in the latter case, we simply need to compose
+the \mintinline{haskell}{not} function before the accepting function. 
+
+\section{\mih{ME.hs}}
+\label{sec:MEHaskell}
+
+\begin{wrapfigure}{r}{0.3\textwidth}
+  \begin{minted}{haskell}
+    class (Ord st, Prop p) => EvalState st p where
+      evalState :: Form p -> st -> Bool
+\end{minted}
+  \caption{}
+  \label{fig:EvalState}
+\end{wrapfigure}
+
+We now come onto the module that handles construction of the automata \mestar.
+This is a slightly more interesting case.
+
+In this module we make use of one of the many language extensions Haskell offers
+us, namely \mih{MultiParamTypeClasses}. This gets around the limitation that
+GHC enforces of being unable to use a typeclass with more than one type
+parameter, allowing us to write typeclasses like this in Figure
+\ref{fig:EvalState}.
+
+This lets us ensure in our functions that the propositions we're using can be
+evaluated at the states we want them to be evaluated at. This prevents us from
+trying to evaluate formula of a certain language on a world it is incompatible
+with. This is another display of the way we can use Haskell's type system to our
+advantage. 
+
+\begin{figure}[h]
+\begin{minted}{haskell}
+meTrans :: (Prop p, Eq ev) => EpistM ev p -> EventModel ev p -> ((QState p, ev)
+-> Maybe (QState p))
+meTrans (Mo _ _ _ _ _ props) evm    (Q ps, ev)
+    | not $ ps `models` pre evm ev  = Nothing
+    | otherwise                     = Just . Q $ filter (\p -> ps `models` post evm (ev, p)) props
+\end{minted}
+  \caption{}
+  \label{fig:metrans}
+\end{figure}
+
+In Figure \ref{fig:metrans}, we can see the implementation of the transition
+function of \mestar; we give an epistemic model and an event model and we are
+returned a function of type \mintinline{haskell}{(QState p, ev) -> Maybe (QState
+  p)}. The \mintinline{haskell}{Nothing}s encode a call that is not permitted to
+occur, and as such is undefined. When an event is permitted, we travel to the
+corresponding state as per the definition of the transitions in \mestar in
+Section \ref{sec:mestar}. The definition of \mestar lends itself perfectly to
+the use of transitions as functions rather than maps; we behave the same no
+matter what the inputs are; there are no special cases we need to look out for.
+In this way, \mestar represents each possible transition between states. 
+
+Remind yourself that our problem with \mestar, and the motivation for Section
+\ref{sec:PowersetArena}, is that \mestar has no means to handle
+indistinguishable states. This is still true here; our implementation has no
+notion of what an indistinguishable state is. In the case that our successful
+formula is in $\mc{L}_P$, we may simply use \mestar to produce a structure which
+we can use to solve the planning problem; however if our successful formula is
+epistemic, then we need to apply the powerset construction to \mestar. 
+
+\textbf{TODO Add some to this}
+
+\section{\mih{Powerset.hs}}
+
+\begin{wrapfigure}{l}{0.3\textwidth}
   \begin{center}
     \begin{minted}{haskell}
       data PState st = PList [PState st] 
@@ -2377,19 +2553,51 @@ transition $\delta(q, e')$.
                      | PVar st 
     \end{minted}
   \end{center}
-  \caption{The \texttt{PState} datatype.}
+  \caption{The \mih{PState} datatype.}
+  \label{fig:PState}
 \end{wrapfigure}
 
 This module contains all of the functions pertaining to the powerset
 construction, as specified in \secref{sec:PowersetAdapted}.
 
-As before, we keep definitions very close to the mathematical specification. We
-introduce a new datatype, \texttt{PState}, which holds our states in the
-powerset. \texttt{PVar} is the ``atomic'' constructor, and it is here that the
-formulae are actually evaluated. \texttt{PCon} represents an actual state and
-the set of states indistinguishable from this state; such states arise when we
-want to evaluate a modal formula. Finally the \texttt{PList} constructor is used for
-conjunctions; we pass through all of the states in the list simultaneously.
+The general process is as follows. Say that we want to plan with an epistemic
+model \tmc{M}, an event model \tmc{E}, and a successful formula $K_a \phi$,
+where $\phi \in \mc{L}_P(\Lambda)$. We first convert produce an \mestar automata
+with \tmc{M} and \tmc{E}, and set the successful formula to be $\phi$. We now
+want to perform the powerset construction and bring all of the possible states
+we could be in into our states, so that $K_a \phi$ can be evaluated
+positionally. We convert the states in \mestar to states of type
+\mintinline{haskell}{PState} (these are discussed below), and then perform the
+powerset construction detailed in Section \ref{sec:PowersetAdapted} on this
+automata. Finally, we have an automata with which we can evaluate the winning
+condition positionally; we can easily compute a successful path now. 
+
+In Figure \ref{fig:PState}, we see our first deviation from the algorithm in
+Section \ref{sec:PowersetAdapted}. Recall that we said that states in an
+automata $\wh{A}$ are of the form $(v, S)$, where $v$ is a state of $A$ and $S$
+is a subset of the states of $A$. The \mintinline{haskell}{PCon} constructor
+solves this; holding in it the state $v$ in the first argument and the set $S$
+in the second. \mintinline{haskell}{PVar} serves to hold the \emph{underlying
+  states} - this can be seen as it contains a value of type
+\mintinline{haskell}{st}. These are used in the step discussed above, where we
+convert out states in \mestar to states of type \mintinline{haskell}{PState}.
+Finally, \mintinline{haskell}{PList} serves to help us perform intersection and
+union operations on automata.
+
+\mintinline{haskell}{PVar} is the place where the formulae are actually
+evaluated. For instance, when we have a formula $K_a \phi$, our automata states
+are of the form \mih{PCon (PVar st) [PVar st]}. The evaluation of the knowledge
+is simple; we just go to each \mih{PVar} in the list and see if $\phi$ holds
+there; this will be done by checking $\phi$ against the formulae that are true
+at the states in \mih{PVar}. This process is the same if our successful formula
+is of the form $K_a K_b \phi$; we take our states\footnote{Here our states are
+  of the form \mih{PCon (PCon (PVar st) [PVar st]) [PCon (PVar st) [PVar
+    st]]}.}, take the set of indistinguishable states, and evaluate $K_b \phi$
+there. For any modal formula $K_i \phi$ we perform the same process, no matter
+what $\phi$ is.
+
+% The recursiveness in \mih{PState} lets us 
+
 
 The reason we do this is so that we can create our automata recursively.
 Consider the function in \figref{fig:createSolvingAutomata}\footnote{For clarity
@@ -2403,7 +2611,7 @@ Let us first consider the bottom case. We receive some formula, e.g. $S_{ab}
 those which satisfy the formula $S_{ab} \land S_{bc}$, through the procedure in
 \secref{sec:MEHaskell}. 
 
-If it receives a formula $K_a \phi$, then we call the \texttt{buildPSA}
+If it receives a formula $K_a \phi$, then we call the \mih{buildPSA}
 function, which performs the powerset creation process as detailed earlier. Note
 that it does so with the automata that solves the formula $\phi$, invariant of
 the form of $\phi$ - it could be an atomic proposition or another modality, or a
@@ -2427,23 +2635,21 @@ conjunction of modalities.
 
       cSA phi ep ev = makeP $ buildMEStar phi ep ev
     \end{minted}
-  \caption{The \texttt{createSolvingAutomata} function.}
+  \caption{The \mih{createSolvingAutomata} function.}
   \label{fig:createSolvingAutomata}
 \end{figure}
 
 \newpage
 
-\section{Evaluation}
+\chapter{Evaluation}
 
-\subsection{Plan for Testing}
+\section{Plan for Testing}
 
-Throughout development we used the Haskell library \texttt{HUnit}. This provides
+Throughout development we used the Haskell library \mih{HUnit}. This provides
 a wealth of combinators that we can use to tersely write unit tests for our
 functions. This was used in a standard manner; before implementing a function we
 would write tests for it, and then implement the function, ensuring it passes
 all tests and as such functions correctly.
-
-\bigskip
 
 However, more interesting is our plan for functional testing. This is the part
 of testing in which we check that the system \emph{correctly functions}, and
@@ -2455,15 +2661,16 @@ for several reasons:
 
 \begin{itemize}
 \item Gossip models cover every part of the system (epistemic models, \mestar,
-  the powerset construction) and as such give us maximal test coverage;
+  the powerset construction) and as such let us test all the functionality of
+  the code;
 \item Testing with a certain class of models tells us that all of the code
   works; the algorithm does not depend on what the particular model is. Hence if
   we know it is correct for a certian class of models, it will also be correct
   for any other class of models;
-\item We have an existing model checker speciailised for the Gossip problem that we can use
+\item We have an existing model checker specialised for the Gossip problem that we can use
   (\cite{GithubGossip});
-\item It is the class of models best understood by myself; hence if an error
-  arises it should be quite easy to understand. 
+\item It is the class of models which I have the most experience with; hence if
+  an error arises it should be quite easy to understand.
 \end{itemize}
 
 This in mind, we chose to use \cite{GithubGossip} to verify our results. It was
@@ -2472,23 +2679,22 @@ of accessibility; we can provide it with just a list of lists encoding who knows
 who's phone number, and it will produce an epistemic model for us. This is very
 easily produced from the epistemic models in our software. This is a sharp
 contrast to \cite{SMCDEL}, which uses a text file based input - output interface
-which would have added significant complication to the testing process. We could
-have very easily used \cite{DEMO-S5}, given the similarity betweeen the Kripke
-models in our code and in \cite{DEMO-S5}, however \cite{GithubGossip} was
-eventually chosen due to the conversion between the two representations of a
-Gossip graph being so straightforward. The last thing we wanted to do was create
-some kind of bug within the testing software!
+which would have added significant complication to the testing process.
+\cite{DEMO-S5} was unsuitable for testing due to it only being able to model
+\emph{public announcements}. Events in the Gossip problem are not public, rather
+being between just two agents; hence \cite{DEMO-S5} is unable to model calls in
+the Gossip problem, and as such can not be used to verify our results.
 
-\subsection{Testing Frameworks}
+\section{Testing Frameworks}
 \label{sec:TestingFrameworks}
 
 The next decision to be made was how to actually go through with the testing
-process. Haskell offers the seminal property-based library \texttt{QuickCheck},
-which, when given a function $\texttt{a} \rightarrow \texttt{Bool}$ and a way to
-generate arbitrary values of type \texttt{a}, will test the function on these
-arbitrary values and ensure that the function returns $True$. All that we need
+process. Haskell offers the seminal property-based library \mih{QuickCheck},
+which, when given a function $\mih{a} \rightarrow \mih{Bool}$ and a way to
+generate arbitrary values of type \mih{a}, will test the function on these
+arbitrary values and ensure that the function returns \mih{True}. All that we need
 to provide in order to generate these arbitrary values is an instance of the
-\texttt{Arbitrary} typeclass. We can see an example of this in \figref{fig:Arbitrary}.
+\mih{Arbitrary} typeclass. We can see an example of this in \figref{fig:Arbitrary}.
 
 \begin{figure}[h]
   \centering
@@ -2496,7 +2702,7 @@ to provide in order to generate these arbitrary values is an instance of the
       instance Arbitrary (EpistM StateC GosProp) where
         arbitrary = standardEpistModel agents <$> (sublistOf $ allNumbers agents)
   \end{minted}
-  \caption{An \texttt{Arbitrary} instance for an epistemic model.}
+  \caption{An \mih{Arbitrary} instance for an epistemic model.}
   \label{fig:Arbitrary}
 \end{figure}
 
@@ -2507,23 +2713,31 @@ exists. Whatever the outcome, we then send this result and the original model to
 a function that converts our model to a model in the style of
 \cite{GithubGossip} and uses the model checker there to verify our answer.
 
-\bigskip
-
-\texttt{QuickCheck} was working well, however I quickly wanted to be able to
-check for every possible gossip graph. QuickCheck will sometimes repeat
+\mih{QuickCheck} was working well, however I quickly wanted to be able to check
+for every possible gossip graph. \mih{QuickCheck} will sometimes repeat
 instances \footnote{To verify this, simply open up your nearest Haskell REPL,
-  import \texttt{QuickCheck}, and run the line of code \texttt{verboseCheck
+  import \mih{QuickCheck}, and run the line of code \mih{verboseCheck
     (($\lambda$ s -> s == s) :: Bool -> Bool)}}; hence to get every single
 possible gossip graph I simply created a list with every single graph in and
 performed the same process of using the model checker from \cite{GithubGossip}
-on each graph.
+on each graph. Naturally, this technique is impractical for numbers of agents
+greater than 4; there are thousands of possible gossip graphs for 5 agents, and
+to enumerate them would be a long, slow and mostly boring task. However, there
+is little difference between testing with 4 agents and testing with
+5\footnote{In contrast, consider the difference between testing with 3 agents
+  and 4. When we have 3 agents, a call that does not involve an agent $a$ can
+  only be from either $b$ to $c$ or $c$ to $b$; however, these are essentially
+  the same call. With 4 agents, a call not involving agent $a$ can be from $b$
+  to $c$, or $b$ to $d$, or $c$ to $d$, and so on. The latter case generates
+  interesting indistinguishable states; the former does not.}; hence it suffices
+to exhaustively test each 4-agent gossip graph and use \mih{QuickCheck} to test
+gossip graphs of 5 or more agents. This combination of the two testing methods
+ended up being the most practical for our situation.
 
-\bigskip
-
-The creation of gossip graphs is very straightforward; we just produce some
-random set of propositions $N = \left\{ N_{ij} \mid i, j \in A, i \not = j
-\right\}$. Once we have this set $N$ we union it with the set $\{N_{ij} \mid i,
-j \in A, i = j\}\ cup \{N_{ij} \mid i, j \in A, i = j\}$. This latter set is the
+The generation of gossip graphs is very straightforward; we just produce some
+random set of propositions $T \subseteq \left\{ N_{ij} \mid i, j \in A, i \not = j
+\right\}$. Once we have this set $T$ we union it with the set $ID = \{N_{ij} \mid i,
+j \in A, i = j\} \cup \{S_{ij} \mid i, j \in A, i = j\}$. This latter set is the
 set of ``identity'' propositions; we can see them as being vacuously true, as
 all of the agents are bound to know their own phone number and secret.
 
@@ -2538,11 +2752,17 @@ There are a few reasons for this;
   of any other.
 \item These cases are the most faithful to the applications of the gossip
   problem in reality.
+\item We want to generate well-formed test cases, in order strictly test
+  \emph{realistic} inputs. The only requirement that we put on a test case for
+  it to be well-formed it that an agent cannot know the secret of another agent
+  without knowing their phone number as well. If we remove the chance for an
+  agent to know another's secret in the initial test cases, we satisfy this
+  requirement. 
 \item On a pragmatic note, it is more straightforward to convert phonebook
   graphs to the representation in \cite{GithubGossip} than non-phonebook graphs.
 \end{itemize}
 
-\subsection{Profiling}
+\section{Profiling}
 
 One of the project aims was to perform a space and time analysis of our
 implemented system. We have a number of reasons to do this;
@@ -2591,11 +2811,12 @@ compare them against the corresponding results in \cite{GithubGossip}. We use
 
 Note that the way that our tool and \cite{GithubGossip} plan are quite
 different. In our tool we return just one successful sequence of events; in
-\cite{GithubGossip} all possible sequences are returned. It is unclear how to
-use the latter tool to return just one; hence in the interests of fairness we
-just use the function that returns all the possible paths.
+\cite{GithubGossip} all possible sequences are returned. In the interests of
+fairly testing the two systems, we make an adjustment to \cite{GithubGossip}, to
+make it return the first valid call sequence it comes across. We perform
+comparisons with both versions.
 
-\subsubsection{Profiling Framework}
+\subsection{Profiling Framework}
 
 In our profiling we will generate random graphs as in
 \secref{sec:TestingFrameworks}, use them in both tools and then take averages.
@@ -2608,7 +2829,7 @@ This is because certain graphs will take much less time than others
 We then perform the planning process on the generated gossip graph. As mentioned
 earlier we run for some amount of graphs and then take the average.
 
-\subsubsection{Profiling Results}
+\subsection{Profiling Results}
 
 When profiling, we generated gossip graphs of size 4 (by which we mean graphs
 with 4 agents in). This is not an arbitrary number; 4 is the smallest
@@ -2678,7 +2899,9 @@ comparison between the two.
 We see that the other tool now outperforms ours, in both space and time
 efficiency. 
 
-\subsubsection{Conclusions from Profiling}
+\section{Results Analysis}
+
+\subsection{\mih{Models}}
 
 \begin{wrapfigure}{r}{0.5\textwidth}
   \begin{center}
@@ -2691,15 +2914,13 @@ efficiency.
       models ps (And forms) = all (models ps) forms
     \end{minted}
   \end{center}
-  \caption{The \texttt{models} function}
+  \caption{The \mih{models} function}
   \label{fig:modelsfunction}
 \end{wrapfigure}
 
-
-
 Through looking at the cost centres given to us by GHC, we can see where our
 program spends the bulk of the time computing. In our tool, the culprit is
-\texttt{models}, which can be seen in \figref{fig:modelsfunction}. Unfortunately
+\mih{models}, which can be seen in \figref{fig:modelsfunction}. Unfortunately
 there's no more we can do to speed up this function \footnote{Short of using a
   HashSet, which gives us quicker lookup times.}, suggesting that the problem
 lies in the amount of times we call it. The function is one of the essential
@@ -2723,7 +2944,7 @@ code is being called a lot. However, this does not seem to be a particularly bad
 thing in itself; rather the opposite, it seems essential that this piece of code
 would be called a lot.
 
-\bigskip
+\subsection{Search Strategies}
 
 To understand the differences in efficiency, we mainly need to consider the
 algorithmic differences. The other tool first enumerates the possible set of
@@ -2737,7 +2958,7 @@ shortest.
 The point at which this difference is really shown is in the generation of
 indistinguishable states. In our tool we progressively keep track of the states
 indistinguishable from our current one, and update each of these states with
-each transition, leading to a lot of time spent in the \texttt{models} function.
+each transition, leading to a lot of time spent in the \mih{models} function.
 In contrast, the other tool takes the string of calls to be checked against and
 generates all of the other strings of calls indistinguishable to it, and then
 checks if these model the target formula. The latter technique is much more
@@ -2760,12 +2981,12 @@ only way we can do this is by performing each string of indistinguishable calls
 on the initial state and evaluating the target formula at the resultant states;
 it is clear that this will be less efficient.
 
-\bigskip
+\subsection{\mih{BFSM}}
 
-Another method we spend a lot of time on is the BFSM method \texttt{enqueue}. In
+Another method we spend a lot of time on is the BFSM method \mih{enqueue}. In
 this we take the existing queue and append onto it the set of states that are
 next to be visited. This function uses a lot of memory and time as it has two
-memory-costly functions inside it; namely \texttt{filter} and \texttt{(++)}.
+memory-costly functions inside it; namely \mih{filter} and \mih{(++)}.
 This was an interesting function to investigate and try and optimise. We only
 need to perform two actions on our queue:
 
@@ -2775,14 +2996,14 @@ need to perform two actions on our queue:
 \end{enumerate}
 
 In Haskell, list concatenation has runtime $O(n)$, where $n$ is the length of
-the list being appended to\footnote{I.e., in the command \texttt{xs ++ ys}, $n$
-  is the length of \texttt{xs}.}. This is far from ideal - however the
-\texttt{Data.Seq} package offers us constant-time access to the first and last
+the list being appended to\footnote{I.e., in the command \mih{xs ++ ys}, $n$
+  is the length of \mih{xs}.}. This is far from ideal - however the
+\mih{Data.Seq} package offers us constant-time access to the first and last
 element of a sequence. This seems like it would be perfect for our situation,
 however \textbf{for some reason currently beyond me} the time nearly doubles and
 the space used balloons.
 
-\bigskip
+\subsection{Monotonicity}
 
 Another thing we could have used to reduce computation is the monotonicity of
 the propositions true at a state. At a state in the gossip protocol, if some set
@@ -2810,11 +3031,25 @@ propositional event model. We have an example of a model where this occurs in
 that such cases are possible. In the interests of portability then, it would be
 unwise to make such a change. 
 
-\subsection{Negatives of Design}
+\subsection{\textsf{ANY} and related protocols}
+
+Early on in this thesis we mentioned that \cite{GithubGossip} is unable to plan
+for gossip graphs with protocols that allow for infinite call sequences (an
+example of this is \textsf{ANY}). One benefit that our tool demonstrates over
+\cite{GithubGossip} is the ability to plan using such protocols. This is because
+before the process of searching through the gossip graph we crop the automata to
+remove any calls that do not have an effect. This prevents the problem that can
+arise when using \textsf{ANY}, where two agents can just repeatedly call each
+other over and over again. 
+
+This manifests itself as a great advantage over the existing tool. \textsf{ANY}
+is a very practical protocol for use in the gossip problem as it requires no
+reasoning on behalf of the agents; they do not need to consider whether or not
+they can make a call. \textbf{Check this this is quite bad}.
 
 \newpage
 
-\section{Conclusion}
+\chapter{Conclusion}
 
 We now take some time to reflect on the work done in this project. Our
 overarching aim in the project was to design an implement a system with which we
@@ -2823,26 +3058,34 @@ which the challenges of the project were accomplished; we first reviewed the
 literature, then designed the algorithm, and then implemented it. Chapters 2, 3
 and 4 are respectively dedicated to each subtask.
 
-\bigskip
-
 In Chapter 2, we explained the concepts necessary to understand the algorithm
 put forward. When starting work on this project the understanding of the
 processes put forward in the literature was the first major difficulty, and as
 such care has been taken in the writing process to make these definitions as clear
 as possible. 
 
-\bigskip
-
 In Chapter 3, we put forward the algorithm designed to perform the task of
-planning. 
+planning. We hope that this communicates the magnitude of the wrok done here, as
+well as serves as a sufficient explanation for the process implemented. Whilst
+the existence of this algorithm was postulated in \cite{AutomataTechniques}, it
+did not exist in a simple, digestable form; the work in Chapter 3 is the first
+explanation of the process in this manner. We hope that if someone were to
+continue work in this area, this document would aid there understanding. 
 
-\subsection{Future Work}
+Chapter 4 contains writing on implementation of the process. This details the
+design decisions made in the process, and argues a case for the use of Haskell
+in development of such a tool. 
+
+In Chapter 5 we gave an analysis - both quantitative and qualitative - of the
+work done in the thesis. 
+
+\section{Future Work}
 
 It is clear to see that our system is very slow; when run on a gossip graph with
 greater than 6 agents the takes so long that it's not worth waiting for the
 results. Whilst there is scope for implementation-based
 optimisations\footnote{By which we mean optimisations like changing a
-  \texttt{Set} to a \texttt{HashSet} and so on.}, this is mainly due to the
+  \mih{Set} to a \mih{HashSet} and so on.}, this is mainly due to the
 algorithm; in \cite{AutomataTechniques} it is shown that the propositional
 epistemic planning problem is in \textsf{$k + 1$-EXPTIME}, where $k$ is the
 depth of the deepest-nested knowledge operator. 
@@ -2857,6 +3100,25 @@ branches, a la dynamic programming.
 
 It also seems possible that there's scope for a symbolic approach, like in
 \cite{MalvinThesis}.
+
+\bigskip
+
+Epistemic preconditions are investigated in \cite{EpProforDyGo}. These allow for
+protocols like ``$a$ may call $b$ if $a$ knows $b$'s phone number and $a$
+considers it possible that $b$ knows something that $a$ does not know.''. These
+protocols are clearly much more expressive than protocols like \textsf{LNS}. In
+our implementation, we encode preconditions in the \tpre function in the event
+models. However, recall that in this thesis we investigate the
+\emph{propositional} fragment of the epistemic planning problem, in which our
+\tpre conditions may only be propositional; hence such epistemic protocols are
+not possible. Despite this, there is a sensation that it would be possible to
+use these protocols. We could evaluate the protocols on the states in question
+, as long as they are of the \mih{PState} form. However, there might need to be
+significant restructuring of the algorithm to accommodate for this; currently
+protocols are restricted to just being propositional and as such are evaluated
+at the atomic, \mih{PVar} states. Furthermore, it is proven in
+\cite{UndecidabilityEP} that non-propositional preconditions can yield
+undecidability; hence we prepare ourselves for this to not be possible. 
 
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
