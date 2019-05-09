@@ -16,6 +16,7 @@ import System.IO.Unsafe
 -- import Unsafe.Coerce
 
 import Profile
+import Prisoners
 
 import Test.QuickCheck
 
@@ -26,18 +27,21 @@ import Data.Maybe (fromJust)
 import Data.Either (rights)
 
 main :: IO ()
-main = runTests 4 200
+-- main = runTests 4 4096
+main = print . extractCalls . doBFS $ prisonPSA
 -- main = print $ unsafePerformIO $ performN 20
--- main = performNMine 300 >>= print
+-- main = performNMalv 4000 >>= print
+-- main = print . extractCalls . doBFS $ saThesis
 
 thesisModel :: EpistM StateC GosProp
-thesisModel = standardEpistModel [a, b, c, d] $ [N a b, N a c, N a d] 
+-- thesisModel = standardEpistModel [a, b, c, d] $ [N a b, N a c, N d a] 
+thesisModel = standardEpistModel [a, b, c, d] $ [N b a, N c a, N c b, N c d, N d c]
 
 thesisEvModel :: EventModel Call GosProp
 thesisEvModel = standardEventModel [a, b, c, d] anyCall postUpdate
 
 saThesis :: FSM CallChar (PState (QState GosProp))
-saThesis = createSolvingAutomata ((allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
+saThesis = createSolvingAutomata ((K a $ allExpertsAg [a, b, c, d])) thesisModel thesisEvModel knowFilter
 
 threeCalls :: Maybe [Either StateC Call]
 threeCalls = extractCalls $ doBFS saThree
@@ -45,11 +49,11 @@ threeCalls = extractCalls $ doBFS saThree
 threeModel :: EpistM StateC GosProp
 threeModel = Mo
     [State (0, [])]
-    [a, b, c]
-    [(State (0, []), [P (N a b), P (N b c)])]
+    [a, b, c, d]
+    [(State (0, []), [P (N b a), P (N a c), P (N a d), P (N c d)])]
     [(a, [[State (0, [])]]), (b, [[State (0, [])]]), (c, [[State (0, [])]])]
     [State (0, [])]
-    (produceAllProps [a, b, c])
+    (produceAllProps [a, b, c, d])
 
 threeEvModel :: EventModel Call GosProp
 threeEvModel = standardEventModel [a, b, c] anyCall postUpdate

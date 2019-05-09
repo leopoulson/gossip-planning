@@ -34,7 +34,7 @@ doBFS' :: (Ord a, Show a) => FSM ch a -> Maybe [(a, Maybe ch)]
 doBFS' fsm = bfs' fsm (Seq.fromList $ map bNode $ initial fsm) empty
 
 bfs :: (Ord a, Show a, Show ch) => FSM ch a -> [BNode a ch] -> Set a -> Maybe [(a, Maybe ch)]
-bfs fsm queue seen = trace ("New call") $
+bfs fsm queue seen = -- trace ("New call") $
   -- trace ("Seen length: " ++ (show $ size seen)) $
   case queue of
     []     -> trace ("Empty queue") $ Nothing    -- If the queue is empty, we stop and that is that
@@ -53,10 +53,11 @@ updateQueue :: (Ord a, Show ch) => FSM ch a -> BNode a ch -> [BNode a ch] -> Set
 updateQueue fsm st queue seen = enqueue queue seen bNeighbours
   where
     neighbours = getNeighboursEv fsm $ node st
-    bNeighbours = map (\(st', ch) -> trace ("Neighbour " ++ show ch) $ BNode st' (Just (st, ch))) neighbours
+    -- bNeighbours = map (\(st', ch) -> trace ("Neighbour " ++ show ch) $ BNode st' (Just (st, ch))) neighbours
+    bNeighbours = map (\(st', ch) -> BNode st' (Just (st, ch))) neighbours
 
 enqueue :: Ord a => [BNode a ch] -> Set a -> [BNode a ch] -> [BNode a ch]
-enqueue queue seen items = unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> notMember (node item) seen) items
+enqueue queue seen items = queue ++ filter (\item -> notMember (node item) seen) items --unlist (foldl' (flip (enqueueOne seen)) (mklist queue) items) -- queue ++ filter (\item -> notMember (node item) seen) items
 
 bfs'' :: Ord a => FSM ch a -> Seq.Seq (BNode a ch) -> Set a -> Maybe [(a, Maybe ch)]
 bfs'' fsm queue seen = case Seq.viewl queue of
@@ -123,6 +124,8 @@ rebuildPath = trace ("Rebuilding\n") $ go []
   where
     go acc (BNode x Nothing)         = (x, Nothing):acc
     go acc (BNode x (Just (bn, ch))) = go ((x, Just ch):acc) bn
+
+
 
 
 

@@ -31,10 +31,10 @@ type Valuation st prp = [(st, [Form prp])]
 
 data Form prp = Top | P prp | Not (Form prp) | And [(Form prp)] | Or [(Form prp)] | K Agent (Form prp) deriving (Eq, Ord, Show, Generic)
 
-instance Hashable prp => Hashable (Form prp)
+-- instance Hashable prp => Hashable (Form prp)
 
 -- This typeclass guarantees us that the thing that the propositions we're handling can be evaluated
-class (Show p, Ord p, Hashable p) => Prop p where
+class (Show p, Ord p) => Prop p where
   evalProp :: Eq st => p -> EpistM st p -> st -> Bool
   allProps' :: [Agent] -> S.Set p
 
@@ -245,7 +245,7 @@ updateSingle epm (evm, ev) = Mo states' (agents epm) val' rels' (actual epm) (al
     val' = [(s, ps s) | s <- states']
     ps s = S.toList $ S.map P $ S.filter (\p -> satisfies (epm, trimLast s) (post evm (lastEv s, p))) props
      -- [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
-    props = allProps' (agents epm)
+    props = allProps epm
 
 lastEv :: State ev -> ev
 lastEv (State (_, es)) = last es

@@ -10,13 +10,17 @@ import Data.Set as Set
 
 data Pr = Qi Int | LightOn deriving (Eq, Ord, Show)
 
+prisoners = 9
+
 instance Prop Pr where
   evalProp pr m w = (P pr) `elem` tval m w
-  allProps' _ = Set.fromList $ allPropsN 3
+  allProps' _ = Set.fromList $ allPropsN prisoners
 
 data EvI = Empty | On Int | Off Int deriving (Eq, Ord, Show)
 
 allPropsN n = [LightOn] ++ [Qi n | n <- [0 .. (n - 1)]]
+
+
 
 
 type StateI = State EvI
@@ -24,7 +28,7 @@ type StateI = State EvI
 q1, q2, fin :: Form Pr
 q1 = P (Qi 1)
 q2 = P (Qi 2)
-fin = K a (And [q1, q2])
+fin = K a (And [P (Qi n) | n <- [1 .. prisoners - 1]])
 
 initM :: EpistM StateI Pr
 initM = Mo 
@@ -33,12 +37,12 @@ initM = Mo
     [(State (0, []), [])]
     [(a, [[State (0, [])]])]
     [State (0, [])]
-    (Set.fromList [LightOn, Qi 1, Qi 2])
+    (allProps' [a] :: Set Pr)
 
 evmo :: EventModel EvI Pr
 evmo = EvMo 
-    ([Empty] ++ [On n | n <- [0, 1, 2]] ++ [Off n | n <- [0, 1, 2]])
-    [(a, [[On 0], [Off 0], ([Empty] ++ [On n | n <- [1, 2]] ++ [Off n | n <- [1, 2]])])]
+    ([Empty] ++ [On n | n <- [0 .. prisoners - 1]] ++ [Off n | n <- [0 .. prisoners - 1]])
+    [(a, [[On 0], [Off 0], ([Empty] ++ [On n | n <- [1 .. prisoners - 1]] ++ [Off n | n <- [1 .. prisoners - 1]])])]
     prec
     postc
 

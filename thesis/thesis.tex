@@ -35,10 +35,6 @@ This use of mathematical models for real-world systems gives rise to the
 some formula $\phi$ and finding if the model \tmc{M} satisfies the formula
 $\phi$. \textbf{Perhaps we could add a little to this. }
 
-\bigskip
-
-% \textbf{Define models here. }
-
 Planning is the task of computing a set of actions to take some state within a
 model to a successful state. In such a model we have a set of \emph{actors},
 who will perform these actions that we search for.
@@ -66,8 +62,6 @@ that we work on in this project, due to its decidability property. This result
 means that interest in the area has been maintained since its birth
 (\cite{AutomataTechniques}), leading to the work that this project uses.
 
-\bigskip
-
 The gossip problem is a problem regarding peer-to-peer information sharing. A
 set of agents start out with some \emph{secret information}, and their goal is
 to transfer this information across the network, such that every other agent
@@ -82,8 +76,6 @@ that each agent began with the phone number of every other agent. We can hence
 visualise the set of agents as nodes and the fact of agent $a$ knowing the phone
 number of $b$ as a directed edge, and so such a formulation would be a complete
 graph as in \figref{fig:classicgossipex}.
-
-\bigskip
 
 \begin{figure}[h]
   \centering
@@ -172,6 +164,25 @@ gossip behave. We list the decisions taken in this thesis here;
   agents share all of their knowledge when communicating. 
 \end{itemize}
 
+\begin{wrapfigure}{r}{0.2\textwidth}
+  \centering
+  \begin{tikzpicture}
+    [every node part/.style={align=center}]
+    \node (a) {$a$};
+    \node (b) [right = of a] {$b$};
+    \node (c) [below = of a] {$c$};
+    \node (d) [right = of c] {$d$};
+
+    \draw [->, dashed] (b) -- (a);
+    \draw [->, dashed] (c) -- (a);
+    \draw [->, dashed] (c) -- (b);
+    \draw [->, dashed] (c) -- (d);
+    \draw [->, dashed] (d) -- (c);
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:abacda}
+\end{wrapfigure}
+
 Recall that earlier we said that the epistemic planning problem is decidable for
 epistemic models where the preconditions and consequences of events are
 \emph{propositional}. Gossip models, like those in \figref{fig:dynamicgossipex},
@@ -183,7 +194,15 @@ process with which this can be performed, and an example implementation of this.
 Then given an input pair \tmc{M}, which is a gossip graph, and some formula
 $\phi$ we are given the sequence of calls $c_1, c_2, \ldots, c_n$ whose
 occurence on \tmc{M} will reach a state in which $\phi$ is modelled. For
-example, consider the below graph .... \textbf{Finish this}. 
+example, consider the graph in Figure \ref{fig:abacda}, with the winning formula
+$K_a \forall_{i \in Ag} E_i$\footnote{In this thesis we abbreviate the statement
+``agent $i$ is an expert'' to be the proposition $E_i$. We also abbreviate the
+statement ``all agents are experts'' to the proposition $E$, although
+$\forall_{i \in Ag}E_i$ is semantically equivalent.}. Our state transition
+system required by the planningThen the returned string
+of calls will be $ba, ca, ad, ab, ac$. Later in this thesis we go through the
+process with which this call sequence is produced, and explain the decisions
+taken.  \textbf{Go over this .. weird wording}
 
 \section{Existing Software}
 
@@ -211,75 +230,38 @@ epistemic planning problem is restricted to just gossip models.
 
 At a high level, our aim in this project is to put forward a process to solve
 the planning problem for epistemic models and propositional event models. This
-is motivated by the dynamic gossip problem; despite the literature on the topic
-there is little work done on the topic of planning for it. Dynamic Gossip can be
-modelled perfectly by epistemic models and propositional event models, and hence
-is a very fitting case study for the tool we will develop. Although our
-algorithm is designed to work for any models, it is hoped that the work done in
-this thesis can shed light on how a specialised process could be designed for
-the dynamic gossip problem.
+is motivated by the Dynamic Gossip problem; despite all of the work done in the
+area of Gossip little has been done on the topic of \emph{planning} for the
+Gossip problem. Dynamic Gossip can be modelled perfectly by epistemic models and
+propositional event models, and hence is a perfect case study for the tool we
+will develop. 
 
-Our process uses the algorithm outlined in \cite{AutomataTechniques}. This paper
-provides an outline of an algorithm which could be used, however much work
-remains to be done in order to make this outline into an implementable
-algorithm. 
-
-As a testament to the functionality of the algorithm, we give an implementation
-of the process in Haskell. There is currently no existing algorithm or software
-that performs planning for epistemic models. 
-
-This process will entail use of automata, a method discussed in the literature
-however yet to be formalised to the point at which it can be implemented, nor
-implemented. The literature surrounding the task spans from epistemic logic to
-game theory, and as such is far outside the reach of the standard degree
-content. In this thesis we hope to present all of the related literature in a
-simple manner, so that the reader may understand all of the concepts used. 
-
-\bigskip
-
-This project puts forward several challenges. The first challenge is compiling
-the assorted literature on the topic. As we come to see later, the literature
-stretches very far and wide; the collection, comprehension and recollection of
-this literature is a substantial piece of work in itself.
-
-\bigskip
-
-The second is the act of designing the algorithm that we will use to solve the
-planning problem. Whilst the algorithm is roughly laid out in
-\cite{AutomataTechniques} and \cite{UniformStrategies}, this is but a sketch.
-There still remains a lot of work to be done on it in order to make it an easy
-to understand and implement process. The development of this forms our second
-challenge.
-
-\bigskip
-
-The third is the implementation in Haskell of the designed process. Due to
-Haskell's syntactic similarity to the mathematical notation we use to formalise
-the problem\footnote{This similarity is discussed again later, and is one of the
-  reasons Haskell was chosen for the task.} this is easier than it would be in
-some languages, however this still has its difficulties.
-
-\section{Aims}
-
-Concretely, our aims are as follows:
+We have four major contributions in this thesis, as follows:
 
 \begin{itemize}
-  \item Research and survey the literature on the topic of planning and the
-    gossip problem, with an aim to combining them.
-  \item Review the extant software on model checking and planning for epistemic
-    models, with an aim to drawing comparions between the existing tools and the
-    one developed. 
-  \item Design an algorithm to solve the planning problem for epistemic models
-    and propositional event models.
-  \item Provide an implementation of the developed algorithm in Haskell.
-  \item Design and implement a testing system, to check the correctness of the
-    program and also aid with profiling.
-  \item Perform a study of performance in terms of time and space, and explain
-    any strengths or shortcomings in comparison to existing tools. 
+\item The first contribution is the background chapter. The literature on the
+  topic spans from epistemic logic to game theory, and is far outside the reach
+  of the standard computer science curriculum, As such, its compilation,
+  comprehension and recollection is itself a substantial task. We present the
+  content in a simple, straightforward manner, such that an undergraduate reader
+  may understand all of the concepts involved.
+\item Our second contribution is the derivation of the algorithm we use to solve
+  the epistemic planning problem. Although it is roughly laid out in
+  \cite{AutomataTechniques}, this is but a sketch; and indeed it leaves out lots
+  of the harder work. There still remains a lot of work to be done in order to
+  make this process easy to understand and implement. 
+\item As a testament to the functionality of the algorithm designed, we provide
+  an implementation of it in Haskell. This manifests the third contribution of
+  this thesis. There is currently no existing algorithm that performs the task
+  of planning for general epistemic models. 
+\item Finally, we give an empirical evaluation of the software developed and the
+  process designed. In this evaluation we inspect the correctness of the system,
+  and perform a study into the program's efficiency in terms of time and space.
+  As part of this, we implement a framework with which we automatically perform
+  these tests. We also build a framework to aid with profiling the code.
+  Finally, we explain any strengths or shortcomings in comparison to existing
+  tools. 
 \end{itemize}
-
-% We hope that the work done in this thesis can help to unify work done on both
-% dynamic gossip and epistemic planning, and
 
 \section{Road Map}
 
@@ -1480,15 +1462,37 @@ form $K_i K_j \phi$.
 
 \section{Introduction}
 
+
+\begin{wrapfigure}{r}{0.2\textwidth}
+  \centering
+  \begin{tikzpicture}
+    [every node part/.style={align=center}]
+    \node (a) {$a$};
+    \node (b) [right = of a] {$b$};
+    \node (c) [below = of a] {$c$};
+    \node (d) [right = of c] {$d$};
+
+    \draw [->, dashed] (b) -- (a);
+    \draw [->, dashed] (c) -- (a);
+    \draw [->, dashed] (c) -- (b);
+    \draw [->, dashed] (c) -- (d);
+    \draw [->, dashed] (d) -- (c);
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:introgossip}
+\end{wrapfigure}
+
 In this section, we formalise the algorithm that we use to solve the
 propostional epistemic planning problem. We see this as a meaningful
 contribution of the thesis; there is no existing, clear implementation of this
 in the literature.
 
 We first give a rough explanation of the process, before getting into the
-details of the process later in this chapter.
-
-\bigskip
+details of the process later in this chapter. As part of this, we revisit the
+example given in Section \ref{sec:Introduction}, to shed some light on how the
+program produces the given call sequence. The gossip graph used is given in
+Figure \ref{fig:introgossip}, and the successful formula in this case is $\phi =
+\forall_{i \in Ag} E_i$. 
 
 \textbf{Step one}; we receive as input an epistemic model \tmc{M}, a
 propositional event model \tmc{E} and some formula $\phi \in \mc{L}(\Lambda)$,
@@ -1497,6 +1501,12 @@ for some set of propositions $\Lambda$. We first construct an automata called
 is a representation of all worlds that we can access from the application of any
 sequence of events in \tmc{E}. This lets us easily traverse the set of possible
 states we can reach from our initial model.
+
+In the case of planning for the Dynamic Gossip problem, recall that we can
+generate an event model \tmc{E} automatically given an initial gossip graph -
+like the one in Figure \ref{fig:introgossip}. The gossip graph forms the model
+\tmc{M}; hence given just the initial gossip graph we can produce the automata
+\mestar.
 
 Here, recall the definition of a planning problem from \secref{sec:Planning}. We
 require a planning system with a set $S$ of states, a set $A$ of actions and a
@@ -1507,36 +1517,203 @@ is exactly the transition function $\delta$ of \mestar. Furthermore, we can
 define set of goal states to be the set of states that model the winning
 condition, and let the initial state be the initial state of \mestar.
 
-\bigskip
+\mestar when \tmc{M} is Figure \ref{fig:introgossip} and \tmc{E} is the
+corresponding event model is modelled in Figure \ref{fig:introgossipE1}.
 
-\textbf{Step two}; we now need to consider the success formula $\phi$. If it
-does not consider a knowledge modality $K_i$ then we proceed to the next stage.
-However, if it does, the process changes. Recall that the way we find out the
-truth value of a formula $K_i \phi$ is to go to all of the states
-indistinguishable from the current state to agent $i$ and check if $\phi$ holds
-at all of these. In \mestar we have no way of knowing which states are
-indistinguishable from the states we're currently looking at; hence it's very
-difficult to check the truth-value of these modal formulae.
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \node(0) [draw, rounded rectangle] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[dashed, ->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[dashed, ->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+
+    \node(cb) [draw, rounded rectangle, below = of 0] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[dashed, ->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[<->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+          \draw[dashed, ->] (b) -- (d);
+        \end{tikzpicture}
+      };
+
+    \node(ba) [draw, rounded rectangle, left = of cb] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[<->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[dashed, ->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+
+      \node(dots) [right = of cb] {
+        \ldots
+      };
+
+      \draw[->] (0) -- (ba) node [midway, left = 2pt] {$ba$};
+      \draw[->] (0) -- (cb) node [midway, left = 2pt] {$cb$};
+      \draw[->] (0) -- (dots);
+    \end{tikzpicture}
+    \caption{The gossip graph in Figure \ref{fig:introgossip}, updated with \tmc{E} once.}
+    \label{fig:introgossipE1}
+\end{figure}
+
+
+\textbf{Step two}; we now consider the success formula $\phi$. If it does not
+contain a knowledge modality - that is, $\phi \in \mc{L}_P(\Lambda)$ - then we
+proceed to step three. However if it does (like in our example), our process
+changes Recall that to find the truth value of a formula $K_i \phi$ evaluated at
+some state we need to visit all of the states indistinguishable from the current
+state to agent $i$ and check if $\phi$ holds at \emph{all} these states. In
+\mestar we have no way of knowing which states are indistinguishable from the
+state in question; hence it is very difficult to check the truth-value of such
+formulae.
 
 To this end, we perform the process detailed in Section
-\ref{sec:PowersetAdapted}. In this, we build a transducer $\mc{T}_i$ which
-relates pairs of events that are indistinguishable to one another. We then step
-through \mestar again, building another automata where the states are
-\emph{sets of states} in \mestar. This is done by following the transitions in
-\mestar and, whenever we make a transition through the occurence of an event,
-computing the set of events that are indistinguishable to agent $i$ and applying
-this to all of the states in the set of states that we could be in. This means
-that at each state in this powerset automata, we have the set of states that $i$
-considers possible, and hence we can quickly check formulae of form $K_i \phi$. 
+\ref{sec:PowersetAdapted}. In this process we build a transducer $\mc{T}_i$
+which relates pairs of events that are indistinguishable to one another. We then
+step through \mestar again, building another automata $\wh{\mc{ME^\ast}}$ where
+the states are instead \emph{sets of states} in \mestar. This is done by
+following the transitions in \mestar and, whenever we make a transition through
+the occurence of an event, computing the set of events that are
+indistinguishable to agent $i$ and applying this to all of the states in the set
+of states that we could be in. This means that at each state in this powerset
+automata, we have the set of states that $i$ considers possible, and hence we
+can quickly check formulae of form $K_i \phi$. This permits \emph{positional
+  evaluation} of epistemic formulae.
+
+We can see the process of performing this procedure on the automata in Figure
+\ref{fig:introgossipE1} in Figure \ref{fig:introgossipPSet}. We can see that the
+calls $cb, cd$ and $dc$ all take us to the same state. This is because agent $a$
+cannot distinguish between these three calls; hence the state the occurence of
+any of these calls takes us to is the same. The state itself contains two state
+in \mestar. The former is resulting state from applying $cb$ to the initial
+state; the latter is the resulting state from applying $cd$ or $dc$ to the
+initial state. Calls $ba$ and $ca$ take us to unique states. This is because
+agent $i$ can distinguish between calls that they are a part of, and as such is
+completely sure of which state they are in after the call occurs. 
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \node(0) [draw, rounded rectangle] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[dashed, ->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[dashed, ->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+
+    \node(cb) [draw, rounded rectangle, below = of 0] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+          \node (a') [right = of b] {$a$};
+          \node (b') [right = of a'] {$b$};
+          \node (c') [below = of a'] {$c$};
+          \node (d') [right = of c'] {$d$};
+
+          \draw[dashed, ->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[<->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+          \draw[dashed, ->] (b) -- (d);
+
+          \draw[dashed, ->] (a') -- (b');
+          \draw[dashed, ->] (c') -- (a');
+          \draw[dashed, ->] (c') -- (b');
+          \draw[dashed, ->] (d') -- (b');
+          \draw[<->] (c') -- (d');
+        \end{tikzpicture}
+      };
+
+    \node(ba) [draw, rounded rectangle, left = of cb] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[<->] (a) -- (b);
+          \draw[dashed, ->] (a) -- (c);
+          \draw[dashed, ->] (c) -- (b);
+          \draw[dashed, <->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+
+
+    \node(ca) [draw, rounded rectangle, right = of cb] {
+        \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[dashed, <->] (a) -- (b);
+          \draw[<->] (a) -- (c);
+          \draw[dashed, ->] (c) -- (b);
+          \draw[dashed, ->] (a) -- (d);
+          \draw[dashed, <->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+      
+      \draw[->] (0) -- (ba) node [midway, left = 2pt] {$ba$};
+      \draw[->] (0) -- (cb) node [midway, left = 2pt] {$cb, cd, dc$};
+      \draw[->] (0) -- (ca) node [midway, left = 2pt] {$ca$};
+    \end{tikzpicture}
+    % \caption{Figure \ref{fig:introgossipE1}, wit}
+    \caption{}
+    \label{fig:introgossipPSet}
+\end{figure}
 
 We can repeat this process ad infinitum; for a formula of the form $K_b K_a
 \phi$, we need to find the set of states that agents $b$ considers possible, and
-then check $K_a \phi$ in these states\footnote{Note that in a situation where we have a
+then check $K_a \phi$ in these states\footnote{\label{note:KKFootnote}Note that in a situation where we have a
   formula $K_a K_a \phi$ we do not need to build another powerset automata as in
   an \textsf{S5} model, $KK \ldots KK = K$ (\cite{ModalLogic}). However, for a
   formula $K_a K_b \phi$ we do; this is because we can see $K_i$ and $K_j$ as
   being different modalities for different agents $i$ and $j$.}.
-
 
 In cases where we have some conjunction or negation of formulae with a knowledge
 modality in, we can just respectively perform intersection and complement on the
@@ -1544,22 +1721,9 @@ automata generated to solve the constituent formulae. This is a very pleasing
 method and is a great display of why finite-state machines are so well-suited to
 this task. 
 
-% We repeat the process in Section \ref{sec:PowersetAdapted} each time we
-% encounter a $K$ modality \footnote{Note that in a situation where we have a
-%   formula $K_a K_a \phi$ we do not need to build another powerset automata as in
-%   an \textsf{S5} model, $KK \ldots KK = K$ (\cite{ModalLogic}). However, for a
-%   formula $K_a K_b \phi$ we do; this is because we can see $K_i$ and $K_j$ as
-%   being different modalities for different agents $i$ and $j$.}; in cases where
-% we have a conjunction or negation where one of the formulas
-% included is a knowledge-based formula, then we perform intersection and
-% complement of the resulting automata. This is a very pleasing result and is a
-% great display of why finite-state automata are so well suited to this area.
-
-\bigskip
-
 In \textbf{step 3} we find paths through the finite-state machine we have built.
 In our implementation we simply search for a single path, using breadth-first
-search; however given that we have a conventional finite-state machine we can
+search; however given that we have a conventional finite-state machine one could
 use a wide array of other techniques to enumerate the set of all successful
 paths through the automata.
 
@@ -1569,21 +1733,12 @@ path to a successful state exists. This satisfies the return requirement of a
 planning problem; we return a set of actions that take us from the initial state
 to some successful state, as required. 
 
-% Finally, once we have finished building automata we perform breadth-first search
-% on the resulting machine. At this point, we have an automata in which formulae
-% of the same shape \footnote{By shape, we mean that the propositions in the
-%   formula may be anything in $\mc{L}_P(\Lambda)$, as long as the knowledge
-%   modalities, conjunctions and negations remain in place} as $\phi$ can be
-% evaluated positionally. Then we set the states which satisfy $\phi$ to
-% be the successful states. We can now perform breadth-first search on the
-% resulting automata to find the shortest path to a successful state. We either
-% return the path taken - that is, a string of events $e_1, e_2, e_3, \ldots,
-% e_n$ - or a negative response to say that no path to a successful state exists. 
+In our example, we take the automata in Figure \ref{fig:introgossipPSet} and
+search through it to find a state where the successful formula $\forall_{i \in
+  Ag} E_i$ is satisfied. This is an easy task now, as we can evaluate such
+formulae positionally in $\wh{\mc{ME^\ast}}$.
 
-\bigskip \bigskip \bigskip
-
-With this all in mind, we now move into the implementation details of the
-system. 
+With this all in mind, we now move into the details of the system.
 
 \section{\mestar}
 \label{sec:mestar}
@@ -1592,9 +1747,7 @@ Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
 represent the worlds that can be reached given an epistemic model \tmc{M} and an
 event model \tmc{E}. \mestar holds the information about the set of possible
 worlds that can be reached using \tmc{M} and \tmc{E}, and how we can move
-between them.
-
-\bigskip
+between them. \textbf{Maybe this can go}
 
 \mestar represents the application of some event model \tmc{E} onto an epistemic
 model \tmc{M} infinitely. Consider that $\mc{ME}^0$ represents $\mc{M}$,
@@ -2646,7 +2799,7 @@ conjunction of modalities.
 \section{Plan for Testing}
 
 Throughout development we used the Haskell library \mih{HUnit}. This provides
-a wealth of combinators that we can use to tersely write unit tests for our
+a wealth of combinators that we can use to concisely write unit tests for our
 functions. This was used in a standard manner; before implementing a function we
 would write tests for it, and then implement the function, ensuring it passes
 all tests and as such functions correctly.
@@ -2684,6 +2837,20 @@ which would have added significant complication to the testing process.
 \emph{public announcements}. Events in the Gossip problem are not public, rather
 being between just two agents; hence \cite{DEMO-S5} is unable to model calls in
 the Gossip problem, and as such can not be used to verify our results.
+
+Then the question arises of how we use the selected tool. We generate a sequence
+of calls with our tool (as a solution to the planning problem). We then convert
+the initial gossip graph, the successful formula and the successful call
+sequence to their representation in \cite{GithubGossip}, and check that the call
+sequence applied to the initial graph take us to a state in which the successful
+formula is made true. In the case that our tool tells us there is no successful
+call sequence given the initial model, we use the other tool to check that
+there's no successful path to take us to a successful state. We define the
+former case as a \emph{positive} result from our tool, and the latter a
+\emph{negative} result from our tool. We say that the two tools \emph{agree} if
+the call sequence returned from our tool takes the gossip graph in question to a
+successful state; or, in the case of a negative result from our tool, that there
+are no successful paths returned from the other tool.
 
 \section{Testing Frameworks}
 \label{sec:TestingFrameworks}
@@ -2762,6 +2929,73 @@ There are a few reasons for this;
   graphs to the representation in \cite{GithubGossip} than non-phonebook graphs.
 \end{itemize}
 
+\section{Correctness Results}
+
+The results from functional testing were on the whole positive. Our tool and
+\cite{GithubGossip} agreed on all test cases where the gossip graph was of a
+size less than 4. However, as mentioned earlier, these test cases are the
+``uninteresting'' ones; indistinguishable states are not generated, and as such
+the whole breadth of the system is not being tested. As such, we will only look
+at cases where the number of agents in the gossip graph is greater than or equal
+to 4. 
+
+Having fixed the size of gossip graphs to be 4, we now vary the successful
+formula in question. We abbreviate the statement ``all agents are experts'' to
+the proposition $E$. We investigate two things; the \emph{conjunction} of
+formulae and the \emph{order} of formulae\footnote{Where first-order is $K_a
+  \phi$, second-order is $K_b K_A \phi$, \ldots}. 
+
+% 2-order - 3788 pos 3788 correct, 308 negative 290 correct
+% 3-order - 3676 pos 3676 correct, 420 negative 296 correct
+
+% 2-conj - 3794 pos 3794 correct, 302 neg 290 correct
+% 4-conj - 3593 pos 3593 correct, 503 neg 290 correct
+
+For $E$ and $K_a E$\footnote{Note that it does not matter which agents knowledge
+  we reason about; as we test for \emph{each} graph, all cases are covered. The
+  same goes for second- and higher-order knowledge; the only requirement is that we do not
+  have $K_i K_i \phi$. Refer to footnote \ref{note:KKFootnote} on page 
+  \pageref{note:KKFootnote} to be reminded why.}, the two tools agree on all
+gossip graphs.
+
+Once we address second-order and higher successful formulae, we start to get
+disagreeing results. We tested each possible initial gossip graph, of which
+there are 4096. For the successful formula $K_d K_c E$, we have 3788 positive
+results and 308 negative results. The other tool agreed on all 3788 positive
+results, however it only agreed on 290 of the negative results, leaving 18
+gossip graphs which the other tool could find a successful path for, but ours
+could not. This increases as the number of knowledge modalities increases; for
+the successful formula $K_b K_d K_c E$, the two tools agree on all 3676 positive
+results but disagree on 124 negative results\footnote{A happy result is that
+  when using the successful formula $K_a K_a \phi$, the two tools agree on all
+  results. This is a testament to what we have talked about in footnote
+  \ref{note:KKFootnote} on page \pageref{note:KKFootnote}; $K_a K_a \phi$ is
+  exactly the same as $K_a \phi$. The observed result is a testament as it shows
+that $K_a K_a \phi$ is not in the same class as $K_a K_b \phi$.}.
+
+Similar results were encountered when conjoining modalities. With the formula
+$K_a E \land K_b E$, our tool gave us 12 negative results out of 4096 that were
+not agreed with by the other tool. With the formula $\bigwedge_{i \in Ag} K_i E$
+our tool gave us 213 negative results of 4096 that were not agreed with by the
+other tool.
+
+There are several reasons for why this may be the case. The first one is that
+the equivalence relation used in \cite{GithubGossip} has some nuances that
+changed it from being identical to the one used in this tool. These nuances can
+best be seen in Page 166 of \cite{SMCDEL}. This first caused problems when
+planning for formulae of the form $K_i \phi$ where $\phi \in
+\mc{L}_p(\Lambda)$\footnote{This fix can be seen in the \mih{knowFilter}
+  function in the code.}. Whilst the problems were fixed and all tests agree for
+these cases, it is possible that our fix is faulty for conjunctions and
+higher-order knowledge. Further work into the intricacies of knowledge could
+remedy this.
+
+Another possible reason is the 
+
+
+% This arises because at this point we reason about states
+% of the form \mih{PList} and \mih{PState}; 
+
 \section{Profiling}
 
 One of the project aims was to perform a space and time analysis of our
@@ -2831,6 +3065,8 @@ earlier we run for some amount of graphs and then take the average.
 
 \subsection{Profiling Results}
 
+\subsubsection{Gossip}
+
 When profiling, we generated gossip graphs of size 4 (by which we mean graphs
 with 4 agents in). This is not an arbitrary number; 4 is the smallest
 ``interesting'' gossip graph, meaning the smallest graph where a call occuring,
@@ -2898,6 +3134,94 @@ comparison between the two.
 
 We see that the other tool now outperforms ours, in both space and time
 efficiency. 
+
+\subsubsection{$n$ Prisoners and a Lightbulb}
+
+As a testament to our tool working for other classes of epistemci models as well
+as gossip models, we implemented the ``$n$-prisoners and a lightbulb'' problem.
+This is a problem very similar to the gossip problem; we care about what the
+prisoners \emph{know}, how their knowledge \emph{changes} due to
+\emph{observations}, and how their \emph{actions} effect the state of the world. 
+
+The riddle is as follows. $n$ prisoners are all together in the prison
+cafeteria. They are told they will all be put into isolation cells, and they
+will be brought out from the cells for interrogation one by one in a room
+containing a light with an on/off switch. The only way prisoners can communicate
+with each other is by toggling the light switch. There is no fixed order of
+interrogations, nor fixed interval between interrogations. When interrogated, a
+prisoner may either do nothing, toggle the light switch, or announce that all
+prisoners have been interrogated. If the prisoner is correct in announcing that
+all prisoners have been interrogated, they are all set free; but the
+announcement is incorrect they are all executed. Whilst in the dining room, can
+the prisoners agree on a protocol that will set them free? 
+
+The answer is of course yes. We take the simplest protocol listed in
+\cite{Prisoners}. In this, the $n$ prisoners appoint one prisoner to be the
+counter\footnote{This is the crux of the solution; the typical problem solver
+  does not think about having different prisoners behave differently.}. All of
+the non-counting prisoners then follow the following protocol; the first time
+they enter the room when the light is off, they turn it on; on all other
+occasions, they do nothing. The counter follows a different protocol. The first
+$n - 2$ times the light is on when he enters the interrogation room, he turns it
+off. The next time he enters the room, he (correctly) announces that everybody
+has been interrogated.
+
+This is not the most efficient protocol; however it is the simplest and the best
+suited to our setting, as it can be perfectly modelled as an epistemic model and
+a propositional event model. We leave out the details of the modelling; they are
+perfectly covered in \cite{Prisoners} and our implementation is nearly identical
+to this. Notable in our implementation is that we only care about the knowledge
+of the agent who is the counter; hence we \emph{do not} model the knowledge
+states of the other $n - 1$ prisoners. 
+
+The reason that we chose to use the $n$ prisoners problem is that it's very easy
+to scale the problem's complexity up or down; we simply add more prisoners.
+Despite the fact that we only care about the knowledge state of one agent,
+increasing the number of prisoners yields an increase in events; and most
+importantly increases the number of events \emph{indistinguishable} to the agent
+in question. This yields a large increase in the amount of states we have in our
+automata. This can be seen in the graphs below ... 
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.3\textwidth}
+  \begin{tikzpicture}
+    \centering
+    \begin{axis}[
+      title = {Planning runtime as number of agents increases},
+      xlabel = {Number of Prisoners},
+      ylabel = {Time / $s$},
+      ]
+
+      \addplot[
+      color = blue
+      ]
+      coordinates {(2, 0) (3, 0) (4, 0.01) (5, 0.04) (6, 0.21) (7, 1.77) (8, 58.71)};
+
+    \end{axis}
+  \end{tikzpicture}
+  \end{subfigure}%
+ ~ 
+  \begin{subfigure}[b]{0.3\textwidth}
+    \begin{tikzpicture}
+      \centering
+    \begin{axis}[
+      title = {Planning space consumption as number of agents increases},
+      xlabel = {Number of Prisoners},
+      ylabel = {Space / $s$},
+      ]
+
+      \addplot[
+      color = red
+      ]
+      coordinates {(2, 0.11) (3, 0.459) (4, 2.78) (5, 18.478) (6, 160.479) (7, 2365) (8, 79812)};
+
+    \end{axis}
+  \end{tikzpicture}
+  \end{subfigure}
+  \label{fig:graphs}
+  \caption{Complexity analysis graphs.}
+\end{figure}
 
 \section{Results Analysis}
 

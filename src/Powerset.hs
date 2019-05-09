@@ -311,3 +311,9 @@ idFilter _ (st, c) (c', st') = c == c' && st == st'
 
 tFilter :: (Eq st, Eq ch) => Agent -> TransFilter st ch
 tFilter _ (st, c) (c', st') = True
+
+
+
+
+
+

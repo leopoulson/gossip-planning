@@ -24,7 +24,7 @@ prec :: Precondition Call GosProp
 prec = lns
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula ags = K a (allExpertsAg ags)
+successfulFormula ags = K c $ K b $ K a (allExpertsAg ags)
     --allKnowAllExperts ags --K b $ K a (allExpertsAg ags) --abKnowAllExperts
 
 allKnowAllExperts ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
@@ -51,10 +51,10 @@ performNMalv n = replicateM n $ performMalvin <$> genGossip
 perform :: GossipModel -> Maybe [CallChar]
 perform model = extractCalls . doBFS . removeLoopsFSM . getPSA $ model
 
-performMalvin :: GossipModel -> Maybe [(Int, Int)]
+-- performMalvin :: GossipModel -> Maybe [(Int, Int)]
 -- performMalvin :: GossipModel -> (Int, Int)
-performMalvin model = Malvin.firstSucc Malvin.lns (ex, []) malvinSuccessfulFormula
--- performMalvin model = statistics' Malvin.lns (ex, []) malvinSuccessfulFormula
+-- performMalvin model = Malvin.firstSucc Malvin.lns (ex, []) malvinSuccessfulFormula
+performMalvin model = statistics' Malvin.lns (ex, []) malvinSuccessfulFormula
   where
     ex = Malvin.Gossip.exampleFromList $ graphToGattinger model
 

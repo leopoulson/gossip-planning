@@ -463,17 +463,39 @@ communicate highly technical material.
 ** Overall
 *** TODO Spell check 
 *** TODO Change formatting to remove \bigskip
+*** TODO Check capitals in things like "Dynamic Gossip"
 *** DONE Update \texttt to \mintinline
     CLOSED: [2019-05-06 Mon 16:51]
+** Ch 1 - Introduction
+*** DONE Add example
+    CLOSED: [2019-05-08 Wed 09:38]
+*** DONE Contributions
+    CLOSED: [2019-05-07 Tue 20:19]
+**** Background chapter
+     Material is not on the standard CS degree, nor accessible to a current
+     undegraduate. Literature stretches very far and wide; collection,
+     comprehension and recollection of this is a substantial piece of work in
+     itself. 
+**** Algorithm
+     Specialisation of a very general theory of uniform strategies
+*** TODO Consider whether we move specifics about variants of GP to a later point
+** Ch 2 - Background
+*** TODO Move Uniform Strategies stuff to the appendix ? 
 ** Ch 3 - Algorithm
 *** TODO Consider changing the examples in §3. 
     Using K_A (Sbc) and then K_a (~Sba) is a bit annoying, could change it to be
     just the same the whole way through? 
 *** TODO Need to make changes to §5 searching. 
+*** TODO Maybe change first paragraph in MEStar ? 
+*** TODO Address the way we draw diagrams of PSAs. 
+    Namely, the fact that we just draw the state S. 
+*** DONE Add examples to introduction. 
+    CLOSED: [2019-05-08 Wed 11:37]
 ** Ch 4 - Implementation
+*** TODO Add link to source code at start of implementation. 
 *** TODO Fix formatting, figures overrunning
 *** TODO Address code - compacting and removing stuff 
-*** Refer back to benefits of Haskell each time
+*** TODO Refer back to benefits of Haskell each time
 **** Model
 ***** Possibility for DatatypeContexts - however deprecated feature.
 ***** DONE Parametricity in St and Prp - ensures that they use the same events.
@@ -494,15 +516,65 @@ communicate highly technical material.
 ***** DONE Address PState 
 ***** TODO Maybe fix stuff about recursion? 
 ** Ch 5 - Evaluation
-*** TODO Address non-agreeing results for certain graphs
-    Only for *certain* graphs. Mention why this may be / why this isn't a problem
-*** DONE Discuss protocols like ANY; the way in which we deal w/ them
-    CLOSED: [2019-05-07 Tue 11:07]
+*** TODO Correctness results [2/3]
+**** DONE Address how we did the testing, and results for basic
+     CLOSED: [2019-05-07 Tue 15:13]
+**** DONE Then come onto the bad results. Conjunction / 2nd order
+     CLOSED: [2019-05-07 Tue 15:13]
+**** TODO Explain why?
+*** TODO Change last part of results
+    Final line is very un-complimentary. Change this to  be a bit more positive? 
+*** TODO Add more timings
+**** TODO Add for 2, 3 agents
+     Results
+     3 agents
+
+     NO 2.10s 927Mb / 4000
+     SO 2.87s 1.224Gb / 4000
+     2O 2.95s 1.512Gb / 4000
+     3O 3.64s 1.970Gb / 4000
+
+     Stop of increase -> less calls possible resulting in more searches?? 
+
+     Malvin slow
+
+     NO 1.62s 2,240Mb
+     SO 3.37 3,725Mb
+     2O 3.95 5,643Mb
+     3O 5.43 7,822Mb
+
+     Malvin quick
+
+     NO 0.28s 
+     SO 0.51s 480Mb / 4000
+     2O 0.78s 700Mb / 4000
+     3O 0.84s 997Mb / 4000
+
+*** TODO Other epistemic models
+**** Prisoners
+     As a testament to our tool working for other classes of epistemic models as
+     well as just the Gossip problem, we implemented the "$n$-prisoners and a
+     lightbulb" problem. 
+
+     | Prisoners | Time/s | Space/Mb |
+     |-----------+--------+----------|
+     |         2 |      0 |     0.11 |
+     |         3 |    1us |    0.459 |
+     |         4 |   0.01 |     2.78 |
+     |         5 |   0.04 |   18.478 |
+     |         6 |   0.21 |  160.479 |
+     |         7 |   1.77 |    2,365 |
+     |         8 |  58.71 |   79,182 |
+     |           |        |          |
+     
 *** TODO Add detail to the profiling - that we take averages 
 *** TODO Find case where DFS on Malvin code is bad
+*** DONE Discuss protocols like ANY; the way in which we deal w/ them
+    CLOSED: [2019-05-07 Tue 11:07]
 *** DONE Restructure conclusion; put each criticism into a section? 
     CLOSED: [2019-05-07 Tue 11:07]
 ** Ch 6 - Conclusion
-*** TODO Add analysis of done stuff
+*** DONE Add analysis of done stuff
+    CLOSED: [2019-05-07 Tue 15:18]
 *** DONE Address Modal preconditions?
     CLOSED: [2019-05-07 Tue 11:24]
