@@ -2425,16 +2425,16 @@ lazy functional programming language, which gives us several benefits for this
 particular task that other languages lack. 
 
 The first one is the syntax; its functional style lends itself very well to
-mathematical definitions. Its list comprehension and pattern matching let us
+mathematical definitions. Haskell's list comprehension and pattern matching let us
 write code that very closely mimics the original notation, thus erasing a lot of
 the difficulty of converting a mathematical definition to code once we have
 implemented it. 
 
 Another benefit is its laziness. In our implementation we often use automata
 with a ridiculously large state space; however (thankfully) Haskell's laziness
-means that we never have to enumerate these states. We only need to access them
-when we need them. This saves a lot of processing time, as well as greatly
-reduces the space the program takes up.
+means that we never have to enumerate these states. We only access them when we
+need them. This saves a lot of processing time, as well as greatly reduces the
+space the program takes up.
 
 Its strong type system and typeclasses support us and give us safety guarantees,
 preventing us from writing erroneous code that in another language may only be
@@ -2540,9 +2540,9 @@ One may also notice in Figure \ref{fig:UpdateType} the use of the typeclass
 model, propositions and a state within the model, returns a boolean value
 expressing whether or not the proposition in question holds at the state. This may
 seem nonsensical - given that we have no information about what the state is
-from the type, we can not do anything too interesting - however it becomes
+from the type, we can not do anything too interesting. It becomes
 useful in the case of propositions like $N_{ii}$; an agent will always know
-their own phone number. 
+their own phone number.
 
 The user then defines their own \tpre- and \tpost-condition functions. One
 deviation from the mathematical notation is the addition of the set of agents;
@@ -2575,7 +2575,7 @@ Whilst the agents, set of propositions and actual world remain the same, we
 update the states, epistemic relations and valuation function in a way very
 similar to the definition in \secref{subsec:EventModels}. This is a display of
 the merits of Haskell; our implementation stays very close to the specification,
-allowing for simple visual verification that the code that we've written matches
+allowing for simple visual verification that the code that we have written matches
 the specification. 
 
 \section{\mih{FSM.hs} and \mih{FST.hs}}
@@ -2653,7 +2653,7 @@ mimic from every state to every other, even the impossible states\footnote{We
   can imagine an ``impossible'' state as a state that we would never reach in
   the model. For example, in the gossip problem, an impossible state would be
   one in which everyone knows everyone else's secret, but no one knows anyone
-  else's phone number.}. When using a Map, this would mean we would require an
+  else's phone number.}. When using a map, this would mean we would require an
 entry for all of these impossible state. This means that a lot of time would be
 spent on entering keys into the map for states that \emph{will never be used}.
 However, when we use a function, these inputs are covered for free. This is a

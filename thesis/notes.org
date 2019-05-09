@@ -460,7 +460,7 @@ communicate highly technical material.
 *** Structure
 **** Address three challenges. 
 * Revisions
-** Overall [1/8]
+** Overall [1/9]
 *** TODO Spell check 
 *** TODO Change formatting to remove \bigskip
 *** TODO Check capitals in things like "Dynamic Gossip"
@@ -469,6 +469,7 @@ communicate highly technical material.
 *** TODO Increase bullet pt spacing
 *** TODO Check use of automatA and automatON
 *** TODO Change citation style
+*** TODO Contractions!!
 *** DONE Update \texttt to \mintinline
     CLOSED: [2019-05-06 Mon 16:51]
 ** Ch 1 - Introduction [2/3]
