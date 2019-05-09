@@ -241,26 +241,23 @@ We have four major contributions in this thesis, as follows:
 \begin{itemize}
 \item The first contribution is the background chapter. The literature on the
   topic spans from epistemic logic to game theory, and is far outside the reach
-  of the standard computer science curriculum, As such, its compilation,
-  comprehension and recollection is itself a substantial task. We present the
-  content in a simple, straightforward manner, such that an undergraduate reader
-  may understand all of the concepts involved.
-\item Our second contribution is the derivation of the algorithm we use to solve
-  the epistemic planning problem. Although it is roughly laid out in
-  \cite{AutomataTechniques}, this is but a sketch; and indeed it leaves out lots
-  of the harder work. There still remains a lot of work to be done in order to
-  make this process easy to understand and implement. 
+  of the standard computer science curriculum, We present the content in a
+  simple, straightforward manner, such that an undergraduate reader may
+  understand all of the concepts involved.
+\item Our second contribution is the derivation of an algorithm to solve the
+  epistemic planning problem, as a specialisation of the sketch given in
+  \cite{AutomataTechniques}. Through a scrutinization of this theory, which
+  involves the very general theory of two-person games, we extract a
+  conceptually clean procedure that can be understood in terms of simple
+  automata theory.
 \item As a testament to the functionality of the algorithm designed, we provide
-  an implementation of it in Haskell. This manifests the third contribution of
-  this thesis. There is currently no existing algorithm that performs the task
-  of planning for general epistemic models. 
+  an implementation of it in Haskell. This is the first implementation of a
+  planning algorithm for general epistemic models. 
 \item Finally, we give an empirical evaluation of the software developed and the
   process designed. In this evaluation we inspect the correctness of the system,
   and perform a study into the program's efficiency in terms of time and space.
   As part of this, we implement a framework with which we automatically perform
   these tests. We also build a framework to aid with profiling the code.
-  Finally, we explain any strengths or shortcomings in comparison to existing
-  tools. 
 \end{itemize}
 
 \section{Road Map}
@@ -1217,8 +1214,6 @@ benchmarking and instead use the simpler \cite{GithubGossip}.
 \section{Uniform Strategies}
 \label{sec:UniformStrategies}
 
-\subsection{A Quick Signpost}
-
 Recall that in the introduction we outlined that one of our contributions was a
 tool to perform epistemic planning on epistemic models and propositional event
 models. So far in this chapter we have introduced the language we use to reason
@@ -1252,7 +1247,7 @@ is detailed that helps us towards this goal of positional evaluation of a
 formula of form $K_i \phi$. This process takes as input an automaton \tmc{A},
 whose successful states are those in which the formula $\phi$ is true, and a
 transducer $\mc{T}_i$\footnote{We give a recap of transducers in Section
-  \ref{subsec:Transducers}.}, which relates pairs of events that are
+  \ref{sec:Transducers}.}, which relates pairs of events that are
 indistinguishable to agent $i$. As output, we are returned an automata
 $\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
   a word accepted by \tmc{A} will also be accepted by $\widehat{\mc{A}}$. The
@@ -1260,8 +1255,6 @@ $\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
   much more information than those in \tmc{A}.}, but whose states
 contain in them all of the worlds indistinguishable to agent $i$. This lets us
 positionally verify formulae of the shape $K_i \phi$.
-
-\bigskip
 
 We first introduce this process - named the \emph{powerset construction} - in
 the context of game arenas. These are automata-like structures, arising from
@@ -1275,6 +1268,15 @@ epistemic planning relies heavily on this process, however uses a simplified
 version. In order to illustrate that our algorithm is a special case of this
 process, we introduce the powerset construction in its natural game theory
 setting. 
+
+Important to note is that this section is \emph{not} essential to understanding
+the rest of this thesis. The text above details the motivation for this
+technique; however the reader will be able to continue onto the next chapter
+without reading the rest of this section and still understand the process very
+easily. The reader may indeed get more out of this section returning to it after
+reading the algorithm detailed in the next chapter. The \emph{only} part that
+the reader should read is Section \ref{sec:Transducers}, which introduces our
+notation used to reason about finite state transducers.
 
 \subsection{Game Arenas}
 
@@ -1305,7 +1307,7 @@ transitions between states, and as such we can see it as representing the
 transition function $\delta$.
 
 \subsection{Transducers}
-\label{subsec:Transducers}
+\label{sec:Transducers}
 
 We give a quick recap of transducers, as they are used heavily in the next two
 sections. A transducer is like a nondeterministic finite automaton with two
@@ -1437,6 +1439,7 @@ $\widehat{v}_{-1}$, and that the valuation of a position in the powerset arena
 is the valuation of the underlying position in the original arena. 
 
 \subsection{Lifting Transducers}
+\label{sec:LiftingTransducers}
 
 We can keep on repeating this process, creating a power-powerset arena
 $\widehat{\widehat{G}}$. However we first need to lift our transducer $T$ where
@@ -1461,7 +1464,6 @@ form $K_i K_j \phi$.
 \chapter{Algorithm}
 
 \section{Introduction}
-
 
 \begin{wrapfigure}{r}{0.2\textwidth}
   \centering
@@ -1744,48 +1746,40 @@ With this all in mind, we now move into the details of the system.
 \label{sec:mestar}
 
 Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
-represent the worlds that can be reached given an epistemic model \tmc{M} and an
-event model \tmc{E}. \mestar holds the information about the set of possible
-worlds that can be reached using \tmc{M} and \tmc{E}, and how we can move
-between them. \textbf{Maybe this can go}
-
-\mestar represents the application of some event model \tmc{E} onto an epistemic
-model \tmc{M} infinitely. Consider that $\mc{ME}^0$ represents $\mc{M}$,
-$\mc{ME}^1$ would be $\mc{M} \times \mc{E}$, and $\mc{ME}^2$ represents $\mc{M}
-\times \mc{E} \times \mc{E}$, and so on and so forth. Then we define \mestar as
+represent all the worlds that can be reached and how we can move between them
+given an epistemic model \tmc{M} and an event model \tmc{E}. Its name refers to
+how it represents the application of \tmc{E} onto \tmc{M} infinitely. Consider
+that $\mc{ME}^0$ represents $\mc{M}$, $\mc{ME}^1$ would be $\mc{M} \times
+\mc{E}$, and $\mc{ME}^2$ represents $\mc{M} \times \mc{E} \times \mc{E}$, and so
+on and so forth. Then we define \mestar as
 
 \begin{equation*}
   \mc{ME}^\ast = \bigcup_{n \geq 0} \mc{ME}^n
 \end{equation*}
 
 One might wonder how we can reason about this; it's a seemingly infinite
-structure. The key thing to realise is that our worlds in \mestar can be indexed by
-the set of propositions that hold true at the world. This makes use of the
-bijection we discussed in Section \ref{sec:Formalisation}.
-
-For instance, \figref{fig:KripkeGossip} would be represented by the world
-$q_{\{N_{aa}, N_{ab}, N_{ba}, N_{bb}, N_{bc}, N_{cc}\}}$. Recall that the set of
+structure. The key thing to realise is that our worlds in \mestar can be indexed
+by the set of propositions that hold true at the world. This makes use of the
+bijection we discussed in Section \ref{sec:Formalisation}. For instance,
+\figref{fig:KripkeGossip} would be represented by the world $q_{\{N_{aa},
+  N_{ab}, N_{ba}, N_{bb}, N_{bc}, N_{cc}\}}$. Recall that the set of
 propositions that our epistemic model ranges over has to be finite;
-consequently, our set of world is finite\footnote{Indeed, we know the exact
-  size of our set of worlds in \mestar, which is $2^{|\Lambda|}$.}. The
-implication of this is that two completely different call paths from the same
-initial world could end at the same world in \mestar, if the sets of
-propositions that hold true are the same.
-
-The transitions in \mestar are exactly
-those from worlds in \tmc{M} from \tmc{E}. It becomes very clear to see how this
-works once we inspect the definition of \mestar.
-
-\bigskip 
+consequently, our set of world is finite\footnote{Indeed, we know the exact size
+  of our set of worlds in \mestar, which is $2^{|\Lambda|}$.}. The implication
+of this is that two completely different call paths from the same initial world
+could end at the same world in \mestar, if the sets of propositions that hold
+true are the same.
+\textbf{Maybe this can go? } The transitions in \mestar are exactly those from worlds in
+\tmc{M} from \tmc{E}. It becomes very clear to see how this works once we
+inspect the definition of \mestar.
 
 Let $\mc{M} = (W, R, V)$ be an epistemic model, $\mc{E} = (E, \mc{R_E}, \pre,
 \post)$ be an event model and $\phi \in \mc{L}_P(\Lambda)$ be a formula in
-propositional logic. $\phi$ is our goal formula; we want to reach a state in which
-this formula is satisfied. 
-
-Then define the automaton $\mc{ME}^\ast= (\Sigma, Q, \delta, q_i, F)$, where
-$\Sigma = W \cup E, F = \left\{ q_v \mid v \models \phi \right\}$ and $Q =
-q_0 \uplus \left\{ q_v \mid v \subseteq \Lambda \right\}$. We define $\delta$, the transition function, as follows:
+propositional logic. $\phi$ is our goal formula; we want to reach a state in
+which this formula is satisfied. Then define the automaton $\mc{ME}^\ast=
+(\Sigma, Q, \delta, q_i, F)$, where $\Sigma = W \cup E, F = \left\{ q_v \mid v
+  \models \phi \right\}$ and $Q = q_0 \uplus \left\{ q_v \mid v \subseteq
+  \Lambda \right\}$. We define $\delta$, the transition function, as follows:
 
 \begin{centermath}
     \begin{array}{ll}
@@ -1985,12 +1979,12 @@ Hence, if we give as input to $\Delta$ an input pair $(q, e)$, where $q$ is a
 state and $e$ an event, it returns a set of pairs of the form $(e', q')$, where
 $e'$ is some event indistinguishable from $e$ and $q'$ is the state we reach
 through the occurence of $e'$ at state $q$. This transducer is the one used in
-the definition of the transition relation in Section \ref{subsubsec:Powerset}.
+the definition of the transition relation in Section \ref{sec:Powerset}.
 This makes the transitions in the Powerset automata much more simple to
 implement.
 
 \subsection{Powerset}
-\label{subsubsec:Powerset}
+\label{sec:Powerset}
 
 Given an automata $\mc{ME^\ast} = (\Sigma, Q, \delta, q_i, F)$ and a transducer
 $\mc{T}_i = (\Sigma, Q, \Delta, q_0, F_{\mc{T}})$, we construct a powerset
@@ -2076,14 +2070,14 @@ event model \tmc{E} on this graph. In this case, our event model \tmc{E} is the
 set of all possible calls, similar to Figure \ref{fig:GossipEvMo}; however only
 three are permitted. The effects of updating Figure \ref{fig:egGossip} are seen
 in Figure \ref{fig:egGossipE1}. We can see this as being the automata
-$\mc{ME^1}$. We hope that the reader can see how the structure \mestar would
+$\mc{ME}^1$. We hope that the reader can see how the structure \mestar would
 arise by repeatedly applying the event model \tmc{E} to the events in
-$\mc{ME^1}$. 
+$\mc{ME}^1$. 
 
 \begin{figure}[h]
   \centering
   \begin{tikzpicture}
-    \node(0) [draw, circle] {
+    \node(0) [draw, rounded rectangle] {
         \begin{tikzpicture}
           [every node/.style={draw, circle}]
           \node (a) [] {$a$};
@@ -2099,7 +2093,7 @@ $\mc{ME^1}$.
       };
 
 
-      \node(bc) [draw, circle, below = of 0] {
+      \node(bc) [draw, rounded rectangle, below = of 0] {
         \begin{tikzpicture}
           [every node/.style={draw, circle}]
           \node (a) [] {$a$};
@@ -2114,7 +2108,7 @@ $\mc{ME^1}$.
         \end{tikzpicture}
       };
 
-      \node(ab) [draw, circle, left = of bc] {
+      \node(ab) [draw, rounded rectangle, left = of bc] {
         \begin{tikzpicture}
           [every node/.style={draw, circle}]
           \node (a) [] {$a$};
@@ -2130,7 +2124,7 @@ $\mc{ME^1}$.
         \end{tikzpicture}
       };
       
-      \node(cd) [draw, circle, right = of bc] {
+      \node(cd) [draw, rounded rectangle, right = of bc] {
         \begin{tikzpicture}
           [every node/.style={draw, circle}]
           \node (a) [] {$a$};
@@ -2168,20 +2162,19 @@ Now say that we wanted to evaluate the formula $\neg S_{ba}$ on the bottom-right
 world in Figure \ref{fig:egGossipE1}. This is very straightforward; we just need
 to check if $b$ does indeed know $a$'s secret; here it doesn't, and so the world
 satisfies $\neg S_{ba}$. But what if we want to evaluate the formula $K_a \neg
-S_{ba}$? We need to visit each of the states indistinguishable from our state
-and see if $\neg S_{ba}$ holds there. Recall that, although a red line the red
-line connecting the two bottom states indicates that agent $a$ cannot
-distinguish between these two worlds, this connection does \emph{not} exist in
+S_{ba}$? We need to visit each of the states indistinguishable from the state in
+question and see if $\neg S_{ba}$ holds there. Recall that, although
+the red line connecting the two bottom states indicates that agent $a$ cannot
+distinguish between these two worlds, this connection \emph{does not exist} in
 the automata; it is there just for our intuitions. \mestar has \emph{no notion}
-of two states being indistinguishable from one another. 
+of two states being indistinguishable from one another.
 
-Hence, this is currently impossible; \mestar have no idea whether agent $a$
+Hence, this is currently impossible; \mestar has no idea whether agent $a$
 cannot distinguish between this world and any others, and certainly no way of
-reaching those worlds if they are. This is where the powerset construction comes
-into play; we pull the indistinguishable states into the states themselves.
-Hence, Figure \ref{fig:egGossipE1} becomes Figure \ref{fig:egGossipE1pset}.
-
-\bigskip
+reaching such worlds. This is where the powerset construction comes into play;
+we pull the indistinguishable states into the states themselves, yielding the
+possibility for \emph{positional evaluation} of $K_a \neg S_{ba}$. Hence, Figure
+\ref{fig:egGossipE1} becomes Figure \ref{fig:egGossipE1pset}.
 
 \begin{figure}[h]
   \centering
@@ -2201,42 +2194,11 @@ Hence, Figure \ref{fig:egGossipE1} becomes Figure \ref{fig:egGossipE1pset}.
         \end{tikzpicture}
       };
 
+      \node(btwn1) [below = of 0] {};
 
-      \node(btwn) [below = of 0] {};
+      \node(btwn) [below = of btwn1] {};
 
-      \node(bc) [draw, rounded rectangle, below = of btwn] {
-        \begin{tikzpicture}
-          [every node/.style={draw, circle}]
-          \node (a) [] {$a$};
-          \node (b) [right = of a] {$b$};
-          \node (c) [below = of a] {$c$};
-          \node (d) [right = of c] {$d$};
-
-          \node (ln1) [right = of b] {};
-          \node (ln2) [right = of d] {};
-
-          \node (aa) [right = of ln1] {$a$};
-          \node (ab) [right = of aa] {$b$};
-          \node (ac) [below = of aa] {$c$};
-          \node (ad) [right = of ac] {$d$};
-
-
-
-          \draw[dashed, ->, shorten >= 1pt] (a) -- (b);
-          \draw[dashed, ->, shorten >= 1pt] (b) -- (d);
-          \draw[<->, shorten >= 1pt] (b) -- (c);
-          \draw[dashed, ->, shorten >= 1pt] (c) -- (d);
-
-          
-          \draw[<->, shorten >= 1pt] (aa) -- (ab);
-          \draw[dashed, ->, shorten >= 1pt] (aa) -- (ac);
-          \draw[dashed, ->, shorten >= 1pt] (ab) -- (ac);
-          \draw[dashed, ->, shorten >= 1pt] (ac) -- (ad);
-
-        \end{tikzpicture}
-      };
-
-      \node(ab) [draw, rounded rectangle, left = of btwn] {
+      \node(ab2) [draw, rounded rectangle, left = of btwn] {
         \begin{tikzpicture}
           [every node/.style={draw, circle}]
           \node (a) [] {$a$};
@@ -2278,10 +2240,55 @@ Hence, Figure \ref{fig:egGossipE1} becomes Figure \ref{fig:egGossipE1pset}.
         \end{tikzpicture}
       };
 
-      \draw[dashed, ->, shorten >= 2pt] (0) -- (ab) node [midway, left = 2pt] {$ab$};
-      \draw[dashed, ->, shorten >= 2pt] (0) -- (bc) node [midway, left = 2pt] {$bc$};
-      \draw[dashed, ->, shorten >= 2pt] (0) -- (cd) node [midway, left = 2pt] {$cd$};
-      \draw[-, red] (bc) -- (cd) node [midway, below = 2pt] {$~_a$};
+      \node(bc) [draw, rounded rectangle, below = of btwn] {
+       \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \node (aa) [right = of b] {$a$};
+          \node (ab) [right = of aa] {$b$};
+          \node (ac) [below = of aa] {$c$};
+          \node (ad) [right = of ac] {$d$};
+
+
+          \draw[dashed, ->, shorten >= 1pt] (aa) -- (ab);
+          \draw[dashed, ->, shorten >= 1pt] (ab) -- (ac);
+          \draw[<->, shorten >= 1pt] (ac) -- (ad);
+
+          \draw[dashed, ->, shorten >= 1pt] (a) -- (b);
+          \draw[dashed, ->, shorten >= 1pt] (b) -- (d);
+          \draw[<->, shorten >= 1pt] (b) -- (c);
+          \draw[dashed, ->, shorten >= 1pt] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+
+
+      \node(ab3) [draw, rounded rectangle, below = of bc] {
+       \begin{tikzpicture}
+          [every node/.style={draw, circle}]
+          \node (a) [] {$a$};
+          \node (b) [right = of a] {$b$};
+          \node (c) [below = of a] {$c$};
+          \node (d) [right = of c] {$d$};
+
+          \draw[<->] (a) -- (b);
+          \draw[->] (a) -- (c);
+          \draw[dashed, ->] (a) -- (d);
+          \draw[dashed, ->] (b) -- (d);
+          \draw[<->] (b) -- (c);
+          \draw[dashed, ->] (c) -- (d);
+
+        \end{tikzpicture}
+      };
+      
+      \draw[dashed, ->] (0) -- (ab2) node [midway, left = 2pt] {$ab$};
+      \draw[dashed, ->] (0) -- (bc) node [midway, left = 2pt] {$bc$};
+      \draw[dashed, ->] (0) -- (cd) node [midway, left = 2pt] {$cd$};
+      \draw[dashed, ->] (bc) -- (ab3) node [midway, left = 2pt] {$ab$};
     \end{tikzpicture}
     \caption{The automata in Figure \ref{fig:egGossipE1}, now with the
       indistinguishable states in the states.}
@@ -2295,13 +2302,20 @@ state by simply inspecting the states indistinguishable from the one we're
 looking at to check a formula of such form. This is now an extremely
 straightforward task! 
 
-An interesting result that arose during implementation and testing of this
-algorithm was that the ``actual'' state - that is, the $v$ of the $(v, S)$ pairs
-that make up states in the powerset automata - have absolutely no bearing on the
-progression of the system. I had originally expected that the actual state would
-be treated as a higher-class item than those it was indistinguishable from,
-however this was not the case. I suppose this lives up to the nature of the
-indistinguishability relation; these states are truly all equal. 
+In Figure \ref{fig:egGossipE1pset} we display the \emph{true} state on the left.
+This is the state that contains the true information of the state reached by
+making the corresponding call. This is very important, as when an agent calls
+another they become aware of the knowledge state of the other. To revisit the
+example from the start of this section, consider again the formula $K_a (Sbc)$.
+Recall that we said a successful call sequence would be $bc, ab$. Observe that
+in the state reached from the initial state by the call $bc$ in Figure
+\ref{fig:egGossipE1pset} there are two states that cannot be distinguished
+between by $a$. However, upon the event of $a$ calling $b$, $a$ learns that $b$
+knows the phone number of $c$ - this is the \emph{underlying} state that we talk
+about. Hence the state at the bottom of Figure \ref{fig:egGossipE1pset} contains
+only one possible world; $a$ no longer considers the other possible, as the
+knowledge of $b$ is different. Happily, this leads us to a state in which $K_a
+Sbc$ is satisfied, just as we promised. 
 
 \section{Combining Automata}
 
@@ -2351,37 +2365,52 @@ us from the initial state to some successful state. It is in here that the
 process of planning is really performed; everything up to this point has been
 merely preparation for this. 
 
-Recall our earlier definition of \mestar. We can see \mestar as being the
-repeated application of some event model \tmc{E} onto some epistemic model
-\tmc{M}. Hence, we can see \mestar as being structures similarly to Figure
-\ref{fig:mestarStructure}; each time we perform a call we travel further down
-the 
+In this stage, we simply view the automata as a \emph{directed graph} and
+perform breadth-first search on the automata. Each of the edges are weighted
+equally\footnote{If we had some situation where certain communication channels
+  were more expensive or slower in a network, we could emulate this by making
+  some of the edges weighted.}. This way we find the \emph{shortest path} from
+the root note to one of the final nodes. This is one reason why breadth-first
+search was chosen over depth-first; another is that it breadth-first search is
+less prone to one of the pitfalls of \cite{GithubGossip}, which is that it can
+infinitely loop sometimes when using a gossip protocol like \textsf{ANY}.
+Protocols like \textsf{ANY} can allow for infinite call sequences. A depth-first
+search strategy will result in the searching of infinite call sequences; this
+means that the program will loop infinitely and never return. With a
+breadth-first search this is less likely to happen, although in the case of
+there being no successful state in the graph this is still possible. To remedy
+this we pre-process the automata to remove all transitions from a state to
+itself. This means that there is no scope to repeatedly investigate a state. 
 
-Recall the structure of the graph \mestar from \secref{sec:mestar};
+% Recall our earlier definition of \mestar. We can see \mestar as being the
+% repeated application of some event model \tmc{E} onto some epistemic model
+% \tmc{M}. Hence, we can see \mestar as being structures similarly to Figure
+% \ref{fig:mestarStructure}; each time we perform a call we travel further down
+% the 
 
-\begin{figure}[h]
-  \centering
-  \begin{tikzpicture}[every node part/.style={align=center}]
-    \node(0) [draw, rounded rectangle] at (0, 4) {Nodes in $\mc{ME}^0$};
-    \node(1) [draw, rounded rectangle] at (0, 2) {Nodes in $\mc{ME}^1$};
-    \node(2) [draw, rounded rectangle] at (0, 0) {Nodes in $\mc{ME}^2$};
-    \node(3) at (0, -2) {\ldots};
+% \begin{figure}[h]
+%   \centering
+%   \begin{tikzpicture}[every node part/.style={align=center}]
+%     \node(0) [draw, rounded rectangle] at (0, 4) {Nodes in $\mc{ME}^0$};
+%     \node(1) [draw, rounded rectangle] at (0, 2) {Nodes in $\mc{ME}^1$};
+%     \node(2) [draw, rounded rectangle] at (0, 0) {Nodes in $\mc{ME}^2$};
+%     \node(3) at (0, -2) {\ldots};
 
-    \draw[->, shorten >= 1pt] (0) -- (1) node [midway, left = 3pt] {Calls in \tmc{E}};
-    \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
-    \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
-  \end{tikzpicture}
-  \caption{}
-  \label{fig:mestarStructure}
-\end{figure}
+%     \draw[->, shorten >= 1pt] (0) -- (1) node [midway, left = 3pt] {Calls in \tmc{E}};
+%     \draw[->, shorten >= 1pt] (1) -- (2) node [midway, left = 3pt] {Calls in \tmc{E}};
+%     \draw[->, shorten >= 1pt] (2) -- (3) node [midway, left = 3pt] {Calls in \tmc{E}};
+%   \end{tikzpicture}
+%   \caption{}
+%   \label{fig:mestarStructure}
+% \end{figure}
 
-After any kind of powerset, intersection or complement operation, it will still
-follow the same shape; we have layers, and as they get deeper more events get
-applied to them. One big benefit of this topology is that the resultant graph is
-\emph{acyclic}; there is no way we can return to an earlier state.
+% After any kind of powerset, intersection or complement operation, it will still
+% follow the same shape; we have layers, and as they get deeper more events get
+% applied to them. One big benefit of this topology is that the resultant graph is
+% \emph{acyclic}; there is no way we can return to an earlier state.
 
-This is one of the reasons that a breadth-first traversal of the resultant graph
-is most suitable for this context. 
+% This is one of the reasons that a breadth-first traversal of the resultant graph
+% is most suitable for this context. 
 
 \newpage 
 
@@ -2390,8 +2419,6 @@ is most suitable for this context.
 We now come to covering the implementation of the algorithm developed in the
 previous chapter. We will first give an overview of the structure of the
 software and then a summary of all design decisions taken throughout. 
-
-\bigskip
 
 For the implementation of our algorithm, we chose to use Haskell. Haskell is a
 lazy functional programming language, which gives us several benefits for this
@@ -2427,12 +2454,16 @@ datatype $P$ to access the underlying $Q$ and then use the previous $\delta$
 function; this would be much more tricky in a language other than Haskell,
 however in Haskell it is a very pleasant thing to do.
 
-\bigskip
-
 Haskell offers a simple way to divide each file into a module and import (or
 not) a module into another. We give a brief overview of each module in the
 system, and highlight notable uses of any of the above language features in this
-process. We also highlight any notable design choices made. 
+process. We also highlight any notable design choices made.
+
+All of the code discussed in this section and associated with this thesis can be
+found at \url{https://github.com/leopoulson/gossip-planning}. In the code
+samples in this thesis we often remove or shorten certain functions in order to
+better display the aspects of the code we \emph{want} to show, and remove the
+irrelevant clutter. 
 
 \section{\mih{Model.hs}}
 
@@ -2563,7 +2594,7 @@ about implementing our single-state composition as mentioned above.
 
 Fortunately, implementation of these finite-state machines is incredibly
 straightforward. We can see in \figref{fig:FSMFST} that the datatypes nearly
-identically mimic the tuple definitions in \secref{subsec:Transducers}.
+identically mimic the tuple definitions in \secref{sec:Transducers}.
 
 
 \begin{figure}[h]
@@ -2753,7 +2784,7 @@ what $\phi$ is.
 
 
 The reason we do this is so that we can create our automata recursively.
-Consider the function in \figref{fig:createSolvingAutomata}\footnote{For clarity
+Consider the function in Figure \ref{fig:createSolvingAutomata}\footnote{For clarity
   and brevity, we omit some of the supporting function calls, and also omit some
   of the cases.}. This is the function we use to create the automata we traverse
 to find successful sequences of events; it pattern matches on the formula given
@@ -2791,6 +2822,20 @@ conjunction of modalities.
   \caption{The \mih{createSolvingAutomata} function.}
   \label{fig:createSolvingAutomata}
 \end{figure}
+
+When our successful formula is of the form $K_b K_a \phi$, we can very easily
+\emph{lift} our transducers, as detailed in Section
+\ref{sec:LiftingTransducers}. Recall that we compose the single-state transducer
+that relates pairs of events with the identity transducer of \mestar in order to
+perform the powerset construction on \mestar to yield $\wh{\mc{ME^\ast}}$. In
+order to produce $\wh{\wh{\mc{ME^\ast}}}$, we repeat the powerset construction,
+this time stepping through $\wh{\mc{ME^\ast}}$ to create an automata whose
+states are of the form $(v, S)$ where $v$ is a state in $\wh{\mc{ME^\ast}}$ and
+every $s \in S$ is a state in $\wh{\mc{ME^\ast}}$. We compose the transducer
+relating pairs of events with the identity transducer over $\wh{\mc{ME^\ast}}$
+to generate the automata used in the powerset construction. This process then
+telescopes in the natural way depending on the number of $K$ modalities in the
+successful formula.
 
 \newpage
 
@@ -2884,7 +2929,7 @@ a function that converts our model to a model in the style of
 for every possible gossip graph. \mih{QuickCheck} will sometimes repeat
 instances \footnote{To verify this, simply open up your nearest Haskell REPL,
   import \mih{QuickCheck}, and run the line of code \mih{verboseCheck
-    (($\lambda$ s -> s == s) :: Bool -> Bool)}}; hence to get every single
+    ((\s -> s == s) :: Bool -> Bool)}}; hence to get every single
 possible gossip graph I simply created a list with every single graph in and
 performed the same process of using the model checker from \cite{GithubGossip}
 on each graph. Naturally, this technique is impractical for numbers of agents
@@ -2988,10 +3033,8 @@ planning for formulae of the form $K_i \phi$ where $\phi \in
   function in the code.}. Whilst the problems were fixed and all tests agree for
 these cases, it is possible that our fix is faulty for conjunctions and
 higher-order knowledge. Further work into the intricacies of knowledge could
-remedy this.
-
-Another possible reason is the 
-
+remedy this. It could also be an issue with the lifting of transducers,
+discussed in Section \ref{sec:LiftingTransducers}.  
 
 % This arises because at this point we reason about states
 % of the form \mih{PList} and \mih{PState}; 
@@ -3088,18 +3131,20 @@ This might seem like an odd choice, but it is well-motivated;
   and spot the differences in how knowledge is handled.
 \end{itemize}
 
-\bigskip
-
 We tabulate the results here. We abbreviate the statement ``all agents are
-experts'' to the propositional variable $E$. 
+experts'' to the propositional variable $E$. $n$ is the number of agents in the
+initial gossip graph. All of figures in Table \ref{tab:Proflining1} and Table
+\ref{tab:Proflining2} are averages of many test cases. 
 
 \begin{table}[h]
   \centering
-  \begin{tabular}{|c||c|c|c|}
+  \begin{tabular}{|c||c|c|c|c|}
     \hline
-    & $E$ & $ K_a E$ & $K_b K_a E$  \\ \hline 
-    Our tool   & 0.00917s, 7.36Mb  & 0.0150s, 10.15Mb & 0.0239s, 14.12Mb \\ \hline 
-    Other tool & 0.1449s, 251Mb & 0.724s, 1.25Gb & 3.849s, 6.425Gb \\ 
+    & $E$ & $ K_a E$ & $K_b K_a E$ & $K_c K_b K_a E$ \\ \hline 
+    Our tool, $n$ = 3 & 0.53ms, 0.23Mb & 0.72ms, 0.3Mb & 0.74ms, 0.38Mb & 0.91ms, 0.49Mb \\ \hline
+    Other tool, $n$ = 3 & 0.41ms, 0.56Mb & 0.84ms, 0.93Mb & 0.99ms, 1.4Mb & 1.36ms, 1.96Mb \\ \hline \hline
+    Our tool, $n$ = 4   & 9.2ms, 7.36Mb & 15ms, 10.15Mb & 24ms, 14.12Mb & \\ \hline
+    Other tool, $n$ = 4 & 145ms, 251Mb & 724ms, 1250Mb & 3849ms, 6425Mb & \\ 
     \hline
   \end{tabular}
   \caption{Profiling Results between our tool and \cite{GithubGossip}}
@@ -3124,8 +3169,10 @@ comparison between the two.
   \begin{tabular}{|c||c|c|c|c|}
     \hline
     & $E$ & $ K_a E$ & $K_b K_a E$ & $K_c K_b K_a E$ \\ \hline 
-    Our tool   & 0.00917s, 7.36Mb  & 0.0150s, 10.15Mb & 0.0239s, 14.12Mb & 0.0965s, 65.094Mb \\ \hline 
-    Other tool & 0.0006s, 0.694Mb  & 0.0015s, 2.006Mb & 0.0042s, 4.6104Mb & 0.0074s, 11.077Mb \\
+    Our tool, $n$ = 4 & 9.2ms, 7.36Mb & 15ms, 10.15Mb & 24ms, 14.12Mb & 96.5ms, 65.1Mb \\ \hline
+    Other tool, $n$ = 4 & 0.6ms, 0.694Mb & 1.5ms, 2.006Mb & 4.2ms, 4.6104Mb & 7.4ms, 11.077Mb \\ \hline \hline
+    Our tool, $n$ = 5 & 7390ms, 8173Mb & 33100ms, 38489Mb & - & - \\ \hline
+    Other tool, $n$ = 5 & 1.86ms, 28.1Mb & 732ms, 1089Mb & 2085ms, 3643Mb & 6390ms, 11304Mb \\
     \hline
   \end{tabular}
   \caption{Profiling Results between our tool and \cite{GithubGossip}, with modification}
@@ -3133,9 +3180,28 @@ comparison between the two.
 \end{table}
 
 We see that the other tool now outperforms ours, in both space and time
-efficiency. 
+efficiency. We can see that, when we have 4 agents in the gossip graphs, the
+times are relatively similar; however once we increase the number of agents the
+runtime and space consumption balloons. This is due to the extra cost of needing
+to reason about \emph{8} more calls; this is nearly as many calls as we have
+in total with 4 agents. This large increase in time and space consumption occurs
+again in our analysis in Section \ref{sec:Prisoners}. Although the other tool
+suffers from slow down when increasing the number of agents in our gossip
+graphs, its increase is much less than in our tool. \textbf{Add in the why}.
+
+In light of these results, we must remember the benefits our tool provides over
+the other. The most obvious is the facility of our tool to plan for generic
+epistemic models and propositional event models. There are many optimisations
+that could be made to our system if we were specialising the system to only plan
+for gossip models; for example, the technique discussed in Section
+\ref{sec:Monotonicity}. These optimisations would perhaps bring our system's
+performance up to speed with \cite{GithubGossip}. 
+
+Another benefit our system exercises over \cite{GithubGossip} is its capability
+to plan for systems permitting infinite sequences of events. 
 
 \subsubsection{$n$ Prisoners and a Lightbulb}
+\label{sec:Prisoners}
 
 As a testament to our tool working for other classes of epistemci models as well
 as gossip models, we implemented the ``$n$-prisoners and a lightbulb'' problem.
@@ -3180,9 +3246,15 @@ Despite the fact that we only care about the knowledge state of one agent,
 increasing the number of prisoners yields an increase in events; and most
 importantly increases the number of events \emph{indistinguishable} to the agent
 in question. This yields a large increase in the amount of states we have in our
-automata. This can be seen in the graphs below ... 
+automata. The effects of this can be seen in Figure \ref{fig:graphs}; our
+time and space complexity increase exponentially as we increase the number of
+prisoners. 
 
-\begin{figure}
+Although through careful programming we could bring the size of the constants
+down in the graphs, it would take some rethinking of the algorithm to avoid the
+exponential increase that we suffer from here. \textbf{Maybe top this off better?}
+
+\begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.3\textwidth}
   \begin{tikzpicture}
@@ -3328,6 +3400,7 @@ however \textbf{for some reason currently beyond me} the time nearly doubles and
 the space used balloons.
 
 \subsection{Monotonicity}
+\label{sec:Monotonicity}
 
 Another thing we could have used to reduce computation is the monotonicity of
 the propositions true at a state. At a state in the gossip protocol, if some set

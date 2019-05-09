@@ -28,9 +28,8 @@ import Data.Either (rights)
 
 main :: IO ()
 -- main = runTests 4 4096
-main = print . extractCalls . doBFS $ prisonPSA
 -- main = print $ unsafePerformIO $ performN 20
--- main = performNMalv 4000 >>= print
+main = performNMalv 2 >>= print
 -- main = print . extractCalls . doBFS $ saThesis
 
 thesisModel :: EpistM StateC GosProp

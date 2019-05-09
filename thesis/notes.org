@@ -460,13 +460,18 @@ communicate highly technical material.
 *** Structure
 **** Address three challenges. 
 * Revisions
-** Overall
+** Overall [1/8]
 *** TODO Spell check 
 *** TODO Change formatting to remove \bigskip
 *** TODO Check capitals in things like "Dynamic Gossip"
+*** TODO Fix formatting everywhere - figures overrunning etc
+**** 
+*** TODO Increase bullet pt spacing
+*** TODO Check use of automatA and automatON
+*** TODO Change citation style
 *** DONE Update \texttt to \mintinline
     CLOSED: [2019-05-06 Mon 16:51]
-** Ch 1 - Introduction
+** Ch 1 - Introduction [2/3]
 *** DONE Add example
     CLOSED: [2019-05-08 Wed 09:38]
 *** DONE Contributions
@@ -479,23 +484,27 @@ communicate highly technical material.
 **** Algorithm
      Specialisation of a very general theory of uniform strategies
 *** TODO Consider whether we move specifics about variants of GP to a later point
-** Ch 2 - Background
-*** TODO Move Uniform Strategies stuff to the appendix ? 
-** Ch 3 - Algorithm
-*** TODO Consider changing the examples in §3. 
+** Ch 2 - Background [1/1]
+*** DONE Move Uniform Strategies stuff to the appendix ? 
+    CLOSED: [2019-05-09 Thu 10:00]
+** Ch 3 - Algorithm [4/4]
+*** DONE Consider changing the examples in §3. 
+    CLOSED: [2019-05-09 Thu 16:51]
     Using K_A (Sbc) and then K_a (~Sba) is a bit annoying, could change it to be
     just the same the whole way through? 
-*** TODO Need to make changes to §5 searching. 
-*** TODO Maybe change first paragraph in MEStar ? 
-*** TODO Address the way we draw diagrams of PSAs. 
-    Namely, the fact that we just draw the state S. 
+*** DONE Need to make changes to §5 searching. 
+    CLOSED: [2019-05-09 Thu 13:04]
+*** DONE Maybe change first paragraph in MEStar ? 
+    CLOSED: [2019-05-09 Thu 10:19]
 *** DONE Add examples to introduction. 
     CLOSED: [2019-05-08 Wed 11:37]
-** Ch 4 - Implementation
-*** TODO Add link to source code at start of implementation. 
-*** TODO Fix formatting, figures overrunning
-*** TODO Address code - compacting and removing stuff 
-*** TODO Refer back to benefits of Haskell each time
+** Ch 4 - Implementation [4/4]
+*** DONE Address code - compacting and removing stuff 
+    CLOSED: [2019-05-09 Thu 12:31]
+*** DONE Add link to source code at start of implementation. 
+    CLOSED: [2019-05-09 Thu 11:50]
+*** DONE Refer back to benefits of Haskell each time
+    CLOSED: [2019-05-09 Thu 10:10]
 **** Model
 ***** Possibility for DatatypeContexts - however deprecated feature.
 ***** DONE Parametricity in St and Prp - ensures that they use the same events.
@@ -515,42 +524,65 @@ communicate highly technical material.
 **** TODO Powerset
 ***** DONE Address PState 
 ***** TODO Maybe fix stuff about recursion? 
-** Ch 5 - Evaluation
-*** TODO Correctness results [2/3]
+*** DONE Mention the way we lift transducers
+    CLOSED: [2019-05-09 Thu 10:58]
+** Ch 5 - Evaluation [7/8]
+*** DONE Correctness results [3/3]
+    CLOSED: [2019-05-09 Thu 16:17]
 **** DONE Address how we did the testing, and results for basic
      CLOSED: [2019-05-07 Tue 15:13]
 **** DONE Then come onto the bad results. Conjunction / 2nd order
      CLOSED: [2019-05-07 Tue 15:13]
-**** TODO Explain why?
-*** TODO Change last part of results
+**** DONE Explain why?
+     CLOSED: [2019-05-09 Thu 16:17]
+*** DONE Add more timings
+    CLOSED: [2019-05-09 Thu 16:02]
+**** 3 agents
+
+    NO 2.10s 927Mb / 4000
+    SO 2.87s 1.224Gb / 4000
+    2O 2.95s 1.512Gb / 4000
+    3O 3.64s 1.970Gb / 4000
+
+    Stop of increase -> less calls possible resulting in more searches?? 
+
+    Malvin slow
+
+    NO 1.62s 2,240Mb
+    SO 3.37 3,725Mb
+    2O 3.95 5,643Mb
+    3O 5.43 7,822Mb
+
+    Malvin quick
+
+    NO 0.28s 
+    SO 0.51s 480Mb / 4000
+    2O 0.78s 700Mb / 4000
+    3O 0.84s 997Mb / 4000
+**** 5 agents... 
+     n = 20
+
+     Malvin slow 
+     E 3155s 5,280,045 Mb / 2
+     
+     Mine 
+     E 14.78s, 16346Mb / 2
+     SO 66.13s, 76978Mb / 2
+
+
+     Malvin fast
+     E 3.72s 5629Mb / 200
+     SO 14.63s 21,786Mb
+     2O 41.7s, 72825Mb
+     3O 127.86s, 226079Mb
+
+*** DONE Change last part of results
+    CLOSED: [2019-05-09 Thu 15:00]
     Final line is very un-complimentary. Change this to  be a bit more positive? 
-*** TODO Add more timings
-**** TODO Add for 2, 3 agents
-     Results
-     3 agents
-
-     NO 2.10s 927Mb / 4000
-     SO 2.87s 1.224Gb / 4000
-     2O 2.95s 1.512Gb / 4000
-     3O 3.64s 1.970Gb / 4000
-
-     Stop of increase -> less calls possible resulting in more searches?? 
-
-     Malvin slow
-
-     NO 1.62s 2,240Mb
-     SO 3.37 3,725Mb
-     2O 3.95 5,643Mb
-     3O 5.43 7,822Mb
-
-     Malvin quick
-
-     NO 0.28s 
-     SO 0.51s 480Mb / 4000
-     2O 0.78s 700Mb / 4000
-     3O 0.84s 997Mb / 4000
-
-*** TODO Other epistemic models
+*** DONE Add detail to the profiling - that we take averages 
+    CLOSED: [2019-05-09 Thu 13:21]
+*** DONE Other epistemic models
+    CLOSED: [2019-05-09 Thu 09:36]
 **** Prisoners
      As a testament to our tool working for other classes of epistemic models as
      well as just the Gossip problem, we implemented the "$n$-prisoners and a
@@ -567,12 +599,11 @@ communicate highly technical material.
      |         8 |  58.71 |   79,182 |
      |           |        |          |
      
-*** TODO Add detail to the profiling - that we take averages 
-*** TODO Find case where DFS on Malvin code is bad
 *** DONE Discuss protocols like ANY; the way in which we deal w/ them
     CLOSED: [2019-05-07 Tue 11:07]
 *** DONE Restructure conclusion; put each criticism into a section? 
     CLOSED: [2019-05-07 Tue 11:07]
+*** TODO Find case where DFS on Malvin code is bad
 ** Ch 6 - Conclusion
 *** DONE Add analysis of done stuff
     CLOSED: [2019-05-07 Tue 15:18]

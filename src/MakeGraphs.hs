@@ -14,7 +14,7 @@ type SequenceM = [CallM]
 type Phonebook = [[Int]]
 
 agentN :: Int
-agentN = 3
+agentN = 5
 
 instance Arbitrary (EpistM StateC GosProp) where
   arbitrary = standardEpistModel (getAgents agentN) <$> (sublistOf $ allNumbers agentN)

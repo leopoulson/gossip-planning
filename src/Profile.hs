@@ -24,13 +24,13 @@ prec :: Precondition Call GosProp
 prec = lns
 
 successfulFormula :: [Agent] -> Form GosProp
-successfulFormula ags = K c $ K b $ K a (allExpertsAg ags)
+successfulFormula ags = K b $ K a (allExpertsAg ags)
     --allKnowAllExperts ags --K b $ K a (allExpertsAg ags) --abKnowAllExperts
 
 allKnowAllExperts ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
 
 malvinSuccessfulFormula :: Malvin.Form
-malvinSuccessfulFormula = Malvin.K 2 Malvin.lns $ Malvin.K 1 Malvin.lns $ Malvin.K 0 Malvin.lns Malvin.allExperts
+malvinSuccessfulFormula = Malvin.allExperts
     --Profile.allKnowExperts--Malvin.K 1 Malvin.lns $ Malvin.K 0 Malvin.lns Malvin.allExperts
 
 allKnowExperts = Malvin.Conj [Malvin.K 0 Malvin.lns Malvin.allExperts, 
