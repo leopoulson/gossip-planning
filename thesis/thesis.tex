@@ -33,7 +33,6 @@ information from a system and simplify the real world.
 This use of mathematical models for real-world systems gives rise to the task of
 \emph{model checking}. This is the process of taking some model \tmc{M} and some
 formula $\phi$ and finding if the model \tmc{M} satisfies the formula $\phi$.
-\textbf{TODO add to this? }
 
 Planning is the task of computing a set of actions to take some state within a
 model to a successful state. In such a model we have a set of \emph{actors}, who
@@ -193,7 +192,7 @@ process with which this can be performed, and an example implementation of this.
 
 Then given an input pair \tmc{M}, which is a gossip graph, and some formula
 $\phi$ we are given the sequence of calls $c_1, c_2, \ldots, c_n$ whose
-occurence on \tmc{M} will reach a state in which $\phi$ is modelled. For
+occurrence on \tmc{M} will reach a state in which $\phi$ is modelled. For
 example, consider the graph in Figure \ref{fig:abacda}, with the winning formula
 $K_a \forall_{i \in Ag} E_i$\footnote{In this thesis we abbreviate the statement
   ``agent $i$ is an expert'' to be the proposition $E_i$. We also abbreviate the
@@ -483,7 +482,7 @@ communications. What if agent $a$ were lying, or agent $a$ was able to
 communicate with agent $b$ secretively, without the other agents realising?
 Clearly PAL is insufficient to model all of the complicated types of
 communication that may occur. It also only is capable of modelling
-communications; often, the occurence of some \emph{physical} action can change
+communications; often, the occurrence of some \emph{physical} action can change
 the knowledge states of agents involved in a system\footnote{An example of this
   is given in Figure \ref{fig:cointoss}}. 
 
@@ -523,7 +522,7 @@ Kripke model $\mc{M} \times \mc{E} ::= (W', R', V')$, where:
 We can see that the precondition function is used to ask the question ``is it
 possible for the event in question to occur at the given world'', whilst the
 postcondition function lets us compute the \emph{consequences} of a given event
-occuring at a world. They are best described in \cite{Prisoners}; for an event
+occurring at a world. They are best described in \cite{Prisoners}; for an event
 \textsf{e}, if $\pre(\textsf{e}) = \phi$ and $\post(\textsf{e}, p_1) = \psi_1$,
 we say ``if $\phi$ holds, then after \textsf{e} occurs $p_1 := \psi_1$''.
 
@@ -537,7 +536,7 @@ worlds and events. Here, the worlds remain indistinguishable only if they were
 indistinguishable before and both events are indistinguishable to $i$.
 
 We see that it is the postcondition function that allows for \emph{factual
-  change}; that is, the update of what is true at a state given the occurence of
+  change}; that is, the update of what is true at a state given the occurrence of
 some event. We can see how this gives us a much more expressive model than
 simple PAL; with carefully selected \tpre and \tpost functions, we can express a
 very wide range of communications and events. 
@@ -613,7 +612,7 @@ Here, $p$ stands for the proposition ``Alice gets the position''. This initial
 situation is represented by model \tmc{M}. In this initial situation, both Alice
 and Bob cannot distinguish between the worlds where $p$ is true and where $p$ is
 not true. Then the event model \tmc{E} represents the event of Alice reading the letter
-from the unviersity. $\alpha$ represents the event of Alice getting the position
+from the university. $\alpha$ represents the event of Alice getting the position
 and $\beta$ that she doesn't - hence the preconditions are $p$ and $\neg
 p$ respectively; that is, $\pre(\alpha) = p$ and $\pre(\beta) = \neg p$. Bob
 cannot distinguish between either of these events, but Alice can, as she reads
@@ -931,8 +930,8 @@ the existence of a central clock, which synchronises the calls between agents.
 The implications of this are that when a call occurs, all of the other agents
 are aware that a call occurs; but only the agents involved in the call are aware
 of who is involved in the call. Hence when a call occurs between agents $a$ and
-$b$, all agents know that \emph{some} call occued. $a$ and $b$ know exactly
-which call occured; however the other agents have no idea which call happened.
+$b$, all agents know that \emph{some} call occurred. $a$ and $b$ know exactly
+which call occurred; however the other agents have no idea which call happened.
 They \emph{consider it possible} that any call between any pair of agents
 (excluding themselves) could have happened.
 
@@ -1107,7 +1106,7 @@ propositions $\Lambda$, decide if $\mc{M} \models \phi$. Dually, planning for an
 epistemic model is the question: given an epistemic model \tmc{M}, an event
 model \tmc{E} and a formula $\phi \in \mc{L}(\Lambda)$ for some set of
 propositions $\Lambda$, compute a sequence of events $e_1, e_2, \ldots, e_n$,
-where each event in the sequence is an event \tmc{E}, whose occurence takes the
+where each event in the sequence is an event \tmc{E}, whose occurrence takes the
 model \tmc{M} to a state in which the formula $\phi$ is satisfied. 
 
 \subsection{DEMO-S5}
@@ -1118,9 +1117,9 @@ public announcements (e.g. an agent telling every other agent some statement) or
 publicly observable factual change (e.g. the flip of a coin, where the result is
 seen by every agent).
 
-This limitation removes support for indistinguishable events; the occurence of
+This limitation removes support for indistinguishable events; the occurrence of
 each event is seen by each agent and is perceived in the same way. This means
-that the occurence of an event never increases the amount of worlds considered
+that the occurrence of an event never increases the amount of worlds considered
 possible by an agent; conversely, the number of worlds considered possible only
 stays the same or decreases when some event occurs. This can be seen in the
 ``Drinking Logicians'' section of \cite{DEMO-S5}.
@@ -1221,7 +1220,7 @@ In \cite{UniformStrategies} - the reference for uniform strategies - a process
 is detailed that helps us towards this goal of positional evaluation of a
 formula of form $K_i \phi$. This process takes as input an automaton \tmc{A},
 whose successful states are those in which the formula $\phi$ is true, and a
-transducer $\mc{T}_i$\footnote{We give a recap of transducers in Section
+transducer $\mc{T}_i$\footnote{We give an introduction to transducers in Section
   \ref{sec:Transducers}.}, which relates pairs of events that are
 indistinguishable to agent $i$. As output, we are returned an automata
 $\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
@@ -1287,7 +1286,7 @@ $l$ lets us valuate the automata states.
 \subsection{Transducers}
 \label{sec:Transducers}
 
-We give a quick recap of transducers, as they are used heavily in the next two
+We give an introduction to transducers, as they are used heavily in the next two
 sections. A transducer is like a nondeterministic finite automaton with two
 tapes; an \emph{input} tape and an \emph{output} tape. The transducer reads
 an input finite word on its input and writes a finite word on its output tape.
@@ -1367,7 +1366,7 @@ Q$, where $Q$ is the set of states in the transducer and $S$ is the set of
 possible current states of $T$, and $Last : S \rightarrow \mc{P}(V)$\footnote{It may be
   more helpful to think of this as something a bit more tangible than a
   function, e.g. a list of tuples $(S, [P])$} associates to a state $q \in S$
-the set of the possible last positions on the output tape fo $T$ if the current
+the set of the possible last positions on the output tape of $T$ if the current
 state is $q$. The transitions in this arena follow those in \tmc{G}, except we
 now maintain the additional information about the configuration of the
 transducer.
@@ -1401,7 +1400,7 @@ $\widehat{\mc{G}} = (\widehat{V}, \widehat{E}, \widehat{v_I}, \widehat{l})$ as:
 \item $\widehat{l}(\widehat{v}) = l (v)$ if $\widehat{v}= (v, S, Last)$. 
 \end{itemize}
 
-The definition of transitons is quite complicated, and as such we give a high-level
+The definition of transitions is quite complicated, and as such we give a high-level
 explanation of it. Regarding the definition of the transitions,
 the first point means that our transitions in $\widehat{E}$ follow those in $E$,
 except for the transition leaving $\widehat{v_{-1}}$, which we use to define
@@ -1470,7 +1469,7 @@ form $K_i K_j \phi$.
 \end{wrapfigure}
 
 In this section, we formalise the algorithm that we use to solve the
-propostional epistemic planning problem. This is a major contribution of this
+propositional epistemic planning problem. This is a major contribution of this
 thesis; there is no existing, clear implementation of this in the literature.
 
 We first give a rough explanation of the process, before getting into the
@@ -1588,7 +1587,7 @@ which relates pairs of events that are indistinguishable to one another. We then
 step through \mestar again, building another automata $\wh{\mc{ME^\ast}}$ where
 the states are instead \emph{sets of states} in \mestar. This is done by
 following the transitions in \mestar and, whenever we make a transition through
-the occurence of an event, computing the set of events that are
+the occurrence of an event, computing the set of events that are
 indistinguishable to agent $i$ and applying this to all of the states in the set
 of states that we could be in. This means that at each state in this powerset
 automata, we have the set of states that $i$ considers possible, and hence we
@@ -1598,7 +1597,7 @@ can quickly check formulae of form $K_i \phi$. This yields \emph{positional
 We can see the process of performing this procedure on the automata in Figure
 \ref{fig:introgossipE1} in Figure \ref{fig:introgossipPSet}. We can see that the
 calls $cb, cd$ and $dc$ all take us to the same state. This is because agent $a$
-cannot distinguish between these three calls; hence the state the occurence of
+cannot distinguish between these three calls; hence the state the occurrence of
 any of these calls takes us to is the same. The state itself contains two states
 in \mestar. The former is resulting state from applying $cb$ to the initial
 state; the latter is the resulting state from applying $cd$ or $dc$ to the
@@ -1787,7 +1786,7 @@ word is accepted if and only if
 \[\delta (\ldots \delta(\delta(w, e_1), e_2), \ldots, e_n) \in F
 \]
 
-\noindent that is, all of the calls are permitted by \textsf{pre}, and the occurence of
+\noindent that is, all of the calls are permitted by \textsf{pre}, and the occurrence of
 all of the calls takes us to a world in which the winning formula is satisfied. 
 
 We now explain the definition. We can see that our alphabet is the set of
@@ -1932,7 +1931,7 @@ over the automata \mestar. This can be computed in another very straightforward
 manner. Given $\mc{ME}^\ast = (\Sigma, Q, \delta, q_0, F)$, we can construct the
 identity transducer $\mc{T}_{\text{id}} = (\Sigma, Q, \Delta, q_0, F)$ where
 $(q, e, e', q') \in \Delta$ iff $\delta(q, e) = q'$ and $e = e'$. This is useful
-as it lets us compute the effect of an event occuring and whether the event is
+as it lets us compute the effect of an event occurring and whether the event is
 permitted at the world in question. The single-state transducer computes which
 events \emph{could} happen, whilst the identity transducer computes the effects
 of these events. $\mc{T}_{\text{id}}$ is not useful on its own, however it
@@ -1958,7 +1957,7 @@ considers it possible to be in from the prior worlds.
 Hence, if we give as input to $\Delta$ an input pair $(q, e)$, where $q$ is a
 state and $e$ an event, it returns a set of pairs $(e', q')$, where $e'$ is some
 event indistinguishable from $e$ and $q'$ is the state we reach through the
-occurence of $e'$ at state $q$. This transducer is the one used in the
+occurrence of $e'$ at state $q$. This transducer is the one used in the
 definition of the transition relation in Section \ref{sec:Powerset}. This makes
 the transitions in the powerset automaton much more simple to implement.
 
@@ -2042,7 +2041,7 @@ this is $bc; ab$; $b$ calls $c$ to discover $c$'s secret, and then $a$ calls
 $b$. After the call $bc$ occurs, $a$ knows that some call has happened between
 the other agents, but can not tell if it was from $c$ to $d$ or $b$ to $c$; as
 such, $a$ considers both of these events possible. $a$ knows that they are in
-the state reached by the occurence of either event, but does not know which.
+the state reached by the occurrence of either event, but does not know which.
 Once $a$ calls $b$, $a$ learns that $b$ knows the secret of $c$, and hence the
 formula $K_a S_{bc}$ is satisfied. 
 
@@ -2129,7 +2128,7 @@ arise by repetition of this.
 \end{figure}
 
 Figure \ref{fig:egGossipE1} shows the three possible states that we could be in
-afer making one call from the initial state displayed in Figure
+after making one call from the initial state displayed in Figure
 \ref{fig:egGossip}. The red line indicates that agent $a$ cannot distinguish
 between these two states, as they were both reached by the execution of a call
 that agent $a$ was not a member of. Note that in the algorithm this connection
