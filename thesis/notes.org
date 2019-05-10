@@ -460,8 +460,11 @@ communicate highly technical material.
 *** Structure
 **** Address three challenges. 
 * Revisions
-** Overall [1/9]
+** Overall [1/13]
 *** TODO Spell check 
+*** TODO Change Nii to N_ii
+*** TODO Thesis / Dissertation
+*** TODO States / Worlds
 *** TODO Change formatting to remove \bigskip
 *** TODO Check capitals in things like "Dynamic Gossip"
 *** TODO Fix formatting everywhere - figures overrunning etc
@@ -470,9 +473,10 @@ communicate highly technical material.
 *** TODO Check use of automatA and automatON
 *** TODO Change citation style
 *** TODO Contractions!!
+*** TODO Check figure refs - usually need to change \caption to be above \label.
 *** DONE Update \texttt to \mintinline
     CLOSED: [2019-05-06 Mon 16:51]
-** Ch 1 - Introduction [2/3]
+** Ch 1 - Introduction [4/4]
 *** DONE Add example
     CLOSED: [2019-05-08 Wed 09:38]
 *** DONE Contributions
@@ -484,11 +488,17 @@ communicate highly technical material.
      itself. 
 **** Algorithm
      Specialisation of a very general theory of uniform strategies
-*** TODO Consider whether we move specifics about variants of GP to a later point
-** Ch 2 - Background [1/1]
+*** DONE Consider whether we move specifics about variants of GP to a later point
+    CLOSED: [2019-05-10 Fri 10:46]
+*** DONE Proofread
+    CLOSED: [2019-05-10 Fri 10:47]
+** Ch 2 - Background [2/3]
 *** DONE Move Uniform Strategies stuff to the appendix ? 
     CLOSED: [2019-05-09 Thu 10:00]
-** Ch 3 - Algorithm [4/4]
+*** TODO Make sure that events accessibility is Q thruout and not P
+*** DONE Proofread
+    CLOSED: [2019-05-10 Fri 14:26]
+** Ch 3 - Algorithm [4/5]
 *** DONE Consider changing the examples in §3. 
     CLOSED: [2019-05-09 Thu 16:51]
     Using K_A (Sbc) and then K_a (~Sba) is a bit annoying, could change it to be
@@ -499,7 +509,8 @@ communicate highly technical material.
     CLOSED: [2019-05-09 Thu 10:19]
 *** DONE Add examples to introduction. 
     CLOSED: [2019-05-08 Wed 11:37]
-** Ch 4 - Implementation [4/4]
+*** TODO Proofread
+** Ch 4 - Implementation [4/5]
 *** DONE Address code - compacting and removing stuff 
     CLOSED: [2019-05-09 Thu 12:31]
 *** DONE Add link to source code at start of implementation. 
@@ -527,8 +538,10 @@ communicate highly technical material.
 ***** TODO Maybe fix stuff about recursion? 
 *** DONE Mention the way we lift transducers
     CLOSED: [2019-05-09 Thu 10:58]
+*** TODO Proofread
 ** Ch 5 - Evaluation [7/8]
-*** DONE Correctness results [3/3]
+*** TODO Proofread
+*** DONE Correctness results [3/4]
     CLOSED: [2019-05-09 Thu 16:17]
 **** DONE Address how we did the testing, and results for basic
      CLOSED: [2019-05-07 Tue 15:13]
