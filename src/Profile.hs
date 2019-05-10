@@ -30,7 +30,7 @@ successfulFormula ags = K b $ K a (allExpertsAg ags)
 allKnowAllExperts ags = And $ [K ag (allExpertsAg ags) | ag <- ags]
 
 malvinSuccessfulFormula :: Malvin.Form
-malvinSuccessfulFormula = Malvin.allExperts
+malvinSuccessfulFormula = Malvin.K 2 Malvin.lns $ Malvin.K 1 Malvin.lns $ Malvin.K 0 Malvin.lns Malvin.allExperts
     --Profile.allKnowExperts--Malvin.K 1 Malvin.lns $ Malvin.K 0 Malvin.lns Malvin.allExperts
 
 allKnowExperts = Malvin.Conj [Malvin.K 0 Malvin.lns Malvin.allExperts, 

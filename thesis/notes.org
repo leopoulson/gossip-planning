@@ -460,11 +460,15 @@ communicate highly technical material.
 *** Structure
 **** Address three challenges. 
 * Revisions
-** Overall [1/13]
+** Overall [1/17]
 *** TODO Spell check 
 *** TODO Change Nii to N_ii
+*** TODO I -> We
+*** TODO Calls -> events (sometimes)
+*** TODO Bullets - hcange commas to semicolons
 *** TODO Thesis / Dissertation
 *** TODO States / Worlds
+*** TODO Fix minted formatting
 *** TODO Change formatting to remove \bigskip
 *** TODO Check capitals in things like "Dynamic Gossip"
 *** TODO Fix formatting everywhere - figures overrunning etc

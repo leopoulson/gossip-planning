@@ -2402,7 +2402,7 @@ states $Q$ to some other data type, e.g. $P (Q)$. We can very easily unwrap the
 datatype $P$ to access the underlying $Q$ and then use the previous $\delta$
 function. This can be used to make another function operating on elements of
 type $P (Q)$. The ease with which we can create, manipulate and compose
-functions is unique to Haskell, and makes tasks like conjoining automata very
+functions is unique to Haskell, and makes tasks like intersecting automata very
 simple. 
 
 Haskell offers a simple way to divide each file into a module and import a
@@ -2705,38 +2705,34 @@ automata. Finally, we have an automata with which we can evaluate the winning
 condition positionally; we can easily compute a successful path now. 
 
 In Figure \ref{fig:PState}, we see our first deviation from the algorithm in
-Section \ref{sec:PowersetAdapted}. Recall that we said that states in an
-automata $\wh{A}$ are of the form $(v, S)$, where $v$ is a state of $A$ and $S$
+Section \ref{sec:PowersetAdapted}. Recall that we said that states in a powerset
+automaton $\wh{A}$ are of the form $(v, S)$, where $v$ is a state of $A$ and $S$
 is a subset of the states of $A$. The \mintinline{haskell}{PCon} constructor
 solves this; holding in it the state $v$ in the first argument and the set $S$
 in the second. \mintinline{haskell}{PVar} serves to hold the \emph{underlying
-  states} - this can be seen as it contains a value of type
-\mintinline{haskell}{st}. These are used in the step discussed above, where we
-convert out states in \mestar to states of type \mintinline{haskell}{PState}.
-Finally, \mintinline{haskell}{PList} serves to help us perform intersection and
-union operations on automata.
+  states} - this is why it takes a value of type \mintinline{haskell}{st}. These
+are used in the step discussed above, where we convert out states in \mestar to
+states of type \mintinline{haskell}{PState}. Finally,
+\mintinline{haskell}{PList} serves to help us perform intersection
+operations on automata.
 
 \mintinline{haskell}{PVar} is the place where the formulae are actually
 evaluated. For instance, when we have a formula $K_a \phi$, our automata states
-are of the form \mih{PCon (PVar st) [PVar st]}. The evaluation of the knowledge
-is simple; we just go to each \mih{PVar} in the list and see if $\phi$ holds
-there; this will be done by checking $\phi$ against the formulae that are true
-at the states in \mih{PVar}. This process is the same if our successful formula
-is of the form $K_a K_b \phi$; we take our states\footnote{Here our states are
-  of the form \mih{PCon (PCon (PVar st) [PVar st]) [PCon (PVar st) [PVar
-    st]]}.}, take the set of indistinguishable states, and evaluate $K_b \phi$
-there. For any modal formula $K_i \phi$ we perform the same process, no matter
-what $\phi$ is.
-
-% The recursiveness in \mih{PState} lets us 
+are of the form \mih{PCon (PVar st) [PVar st]}. The evaluation of knowledge is
+simple; we just go to each \mih{PVar} in the list and see if $\phi$ holds there;
+this will be done by checking $\phi$ against the formulae that are true at the
+states in \mih{PVar}. This process is the same if our successful formula is of
+the form $K_a K_b \phi$; we take our states\footnote{Here our states are of the
+  form \mih{PCon (PCon (PVar st) [PVar st]) [PCon (PVar st) [PVar st]]}.}, take
+the set of indistinguishable states, and evaluate $K_b \phi$ there. For any
+modal formula $K_i \phi$ we perform the same process, no matter what $\phi$ is.
 
 
 The reason we do this is so that we can create our automata recursively.
-Consider the function in Figure \ref{fig:createSolvingAutomata}\footnote{For clarity
-  and brevity, we omit some of the supporting function calls, and also omit some
-  of the cases.}. This is the function we use to create the automata we traverse
-to find successful sequences of events; it pattern matches on the formula given
-in the first argument to decide the ``shape'' of the returned automata.
+Consider the function in Figure \ref{fig:createSolvingAutomata}. This is the
+function we use to create the automata we traverse to find successful sequences
+of events; it pattern matches on the formula given in the first argument to
+decide the ``shape'' of the returned automata.
 
 Let us first consider the bottom case. We receive some formula, e.g. $S_{ab}
 \land S_{bc}$. Then we build an automata \mestar whose successful states are
@@ -2751,22 +2747,22 @@ conjunction of modalities.
 
 \begin{figure}[h]
   \centering
-    \begin{minted}{haskell}
-      cSA :: Form p -> EpistM (State ev) p -> EventModel ev p
-             -> FSM (Character ev) (PState (QState p))
-      cSA form@(K agent phi) ep ev
-        = buildPSA 
-                   (cSA phi ep ev) 
-                   (buildComposedSS agent ep ev (cSA phi ep ev)) 
+  \begin{minted}{haskell}
+    cSA :: Form p -> EpistM (State ev) p -> EventModel ev p
+           -> FSM (Character ev) (PState (QState p))
+    cSA form@(K agent phi) ep ev
+      = buildPSA 
+                 (cSA phi ep ev) 
+                 (buildComposedSS agent ep ev (cSA phi ep ev)) 
 
-      cSA (Not phi) ep ev = complement $ cSA phi ep ev tfilter
+    cSA (Not phi) ep ev = complement $ cSA phi ep ev tfilter
 
-      cSA (And phis) ep ev = case includesK (And phis) of
-        True  -> toPList $ intersection $ map (\phi -> cSA phi ep ev) phis
-        False -> makeP $ buildMEStar (And phis) ep ev
+    cSA (And phis) ep ev = case includesK (And phis) of
+      True  -> intersection $ map (\phi -> cSA phi ep ev) phis
+      False -> buildMEStar (And phis) ep ev
 
-      cSA phi ep ev = makeP $ buildMEStar phi ep ev
-    \end{minted}
+    cSA phi ep ev = buildMEStar phi ep ev
+  \end{minted}
   \caption{The \mih{createSolvingAutomata} function.}
   \label{fig:createSolvingAutomata}
 \end{figure}
@@ -2775,23 +2771,25 @@ When our successful formula is of the form $K_b K_a \phi$, we can very easily
 \emph{lift} our transducers, as detailed in Section
 \ref{sec:LiftingTransducers}. Recall that we compose the single-state transducer
 that relates pairs of events with the identity transducer of \mestar in order to
-perform the powerset construction on \mestar to yield $\wh{\mc{ME^\ast}}$. In
-order to produce $\wh{\wh{\mc{ME^\ast}}}$, we repeat the powerset construction,
-this time stepping through $\wh{\mc{ME^\ast}}$ to create an automata whose
-states are of the form $(v, S)$ where $v$ is a state in $\wh{\mc{ME^\ast}}$ and
-every $s \in S$ is a state in $\wh{\mc{ME^\ast}}$. We compose the transducer
-relating pairs of events with the identity transducer over $\wh{\mc{ME^\ast}}$
-to generate the automata used in the powerset construction. This process then
-telescopes in the natural way depending on the number of $K$ modalities in the
-successful formula.
+perform the powerset construction on \mestar to yield $\wh{\mc{ME^\ast}}$. This
+time, we compose the transducer relating pairs of events with the identity
+transducer over $\wh{\mc{ME^\ast}}$ to generate the transducer used in the
+powerset construction. In order to produce $\wh{\wh{\mc{ME^\ast}}}$, we repeat
+the powerset construction, this time stepping through $\wh{\mc{ME^\ast}}$ to
+create an automata whose states are of the form $(v, S)$ where $v$ is a state in
+$\wh{\mc{ME^\ast}}$ and every $s \in S$ is a state in $\wh{\mc{ME^\ast}}$. This
+process then telescopes in the natural way depending on the number of $K$
+modalities in the successful formula.
 
 \newpage
 
 \chapter{Evaluation}
 
-\section{Plan for Testing}
+\section{Functional Testing}
 
-Throughout development we used the Haskell library \mih{HUnit}. This provides
+\subsection{Plan for Testing}
+
+Throughout development we used the Haskell unit testing library \mih{HUnit}. This provides
 a wealth of combinators that we can use to concisely write unit tests for our
 functions. This was used in a standard manner; before implementing a function we
 would write tests for it, and then implement the function, ensuring it passes
@@ -2799,11 +2797,9 @@ all tests and as such functions correctly.
 
 However, more interesting is our plan for functional testing. This is the part
 of testing in which we check that the system \emph{correctly functions}, and
-will tell us if what we have implemented is correct or not.
-
-Although our system is capable of planning for any epistemic model and
-propositional event model, we chose to test solely on gossip models. This is
-for several reasons:
+will tell us if what we have implemented is correct or not. Although our system
+is capable of planning for any epistemic model and propositional event model, we
+chose to test solely on gossip models. This is for several reasons:
 
 \begin{itemize}
 \item Gossip models cover every part of the system (epistemic models, \mestar,
@@ -2813,8 +2809,8 @@ for several reasons:
   works; the algorithm does not depend on what the particular model is. Hence if
   we know it is correct for a certian class of models, it will also be correct
   for any other class of models;
-\item We have an existing model checker specialised for the Gossip problem that we can use
-  (\cite{GithubGossip});
+\item We have an existing model checker specialised for the Gossip problem
+  (\cite{GithubGossip}) that we can use to validate our results;
 \item It is the class of models which I have the most experience with; hence if
   an error arises it should be quite easy to understand.
 \end{itemize}
@@ -2845,7 +2841,7 @@ the call sequence returned from our tool takes the gossip graph in question to a
 successful state; or, in the case of a negative result from our tool, that there
 are no successful paths returned from the other tool.
 
-\section{Testing Frameworks}
+\subsection{Testing Frameworks}
 \label{sec:TestingFrameworks}
 
 The next decision to be made was how to actually go through with the testing
@@ -2862,23 +2858,23 @@ to provide in order to generate these arbitrary values is an instance of the
       instance Arbitrary (EpistM StateC GosProp) where
         arbitrary = standardEpistModel agents <$> (sublistOf $ allNumbers agents)
   \end{minted}
-  \caption{An \mih{Arbitrary} instance for an epistemic model.}
+  \caption{An \mih{Arbitrary} instance for a gossip model.}
   \label{fig:Arbitrary}
 \end{figure}
 
 Once we have this, we perform a breadth-first search on the automata generated
-by this epistemic model and the target formula in order to find either a path
-that takes us to a successful state, or a response telling us that no such path
-exists. Whatever the outcome, we then send this result and the original model to
-a function that converts our model to a model in the style of
+by this epistemic model in order to find either a path that takes us to a state
+where the successful formula is made true, or a response telling us that no such
+path exists. Whatever the outcome, we then send this result and the original
+model to a function that converts our model to a model in the style of
 \cite{GithubGossip} and uses the model checker there to verify our answer.
 
-\mih{QuickCheck} was working well, however I quickly wanted to be able to check
+\mih{QuickCheck} was working well, however we quickly wanted to be able to check
 for every possible gossip graph. \mih{QuickCheck} will sometimes repeat
 instances \footnote{To verify this, simply open up your nearest Haskell REPL,
   import \mih{QuickCheck}, and run the line of code \mih{verboseCheck
     ((\s -> s == s) :: Bool -> Bool)}}; hence to get every single
-possible gossip graph I simply created a list with every single graph in and
+possible gossip graph we simply created a list with every single graph in and
 performed the same process of using the model checker from \cite{GithubGossip}
 on each graph. Naturally, this technique is impractical for numbers of agents
 greater than 4; there are thousands of possible gossip graphs for 5 agents, and
@@ -2895,11 +2891,12 @@ gossip graphs of 5 or more agents. This combination of the two testing methods
 ended up being the most practical for our situation.
 
 The generation of gossip graphs is very straightforward; we just produce some
-random set of propositions $T \subseteq \left\{ N_{ij} \mid i, j \in A, i \not = j
-\right\}$. Once we have this set $T$ we union it with the set $ID = \{N_{ij} \mid i,
-j \in A, i = j\} \cup \{S_{ij} \mid i, j \in A, i = j\}$. This latter set is the
-set of ``identity'' propositions; we can see them as being vacuously true, as
-all of the agents are bound to know their own phone number and secret.
+random set of propositions $T \subseteq \left\{ N_{ij} \mid i, j \in A, i \not =
+  j \right\}$. Once we have this set $T$ we union it with the set 
+$\{N_{ij} \mid i, j \in A, i = j\} \cup \{S_{ij} \mid i, j \in A,
+i = j\}$. This latter set is the set of ``identity'' propositions; we can see
+them as always being true, as all of the agents are bound to know their own
+phone number and secret.
 
 We only look for cases where the agents start out not knowing the secret 
 of any agent, only phone numbers - we call these \emph{phonebook} graphs.
@@ -2909,20 +2906,18 @@ There are a few reasons for this;
 \item These cases are the only interesting ones. Any gossip graph where some
   agent already knows the secret of another will either have the same call
   sequence or a shorter one than the same graph, where no agent knows the secret
-  of any other.
-\item These cases are the most faithful to the applications of the gossip
-  problem in reality.
-\item We want to generate well-formed test cases, in order strictly test
+  of any other;
+\item We want to generate well-formed test cases, in order to strictly test
   \emph{realistic} inputs. The only requirement that we put on a test case for
   it to be well-formed it that an agent cannot know the secret of another agent
   without knowing their phone number as well. If we remove the chance for an
   agent to know another's secret in the initial test cases, we satisfy this
-  requirement. 
+  requirement;
 \item On a pragmatic note, it is more straightforward to convert phonebook
   graphs to the representation in \cite{GithubGossip} than non-phonebook graphs.
 \end{itemize}
 
-\section{Correctness Results}
+\subsection{Correctness Results}
 
 The results from functional testing were on the whole positive. Our tool and
 \cite{GithubGossip} agreed on all test cases where the gossip graph was of a
@@ -2936,35 +2931,29 @@ Having fixed the size of gossip graphs to be 4, we now vary the successful
 formula in question. We abbreviate the statement ``all agents are experts'' to
 the proposition $E$. We investigate two things; the \emph{conjunction} of
 formulae and the \emph{order} of formulae\footnote{Where first-order is $K_a
-  \phi$, second-order is $K_b K_A \phi$, \ldots}. 
+  \phi$, second-order is $K_b K_A \phi$, and so on.}. 
 
-% 2-order - 3788 pos 3788 correct, 308 negative 290 correct
-% 3-order - 3676 pos 3676 correct, 420 negative 296 correct
 
-% 2-conj - 3794 pos 3794 correct, 302 neg 290 correct
-% 4-conj - 3593 pos 3593 correct, 503 neg 290 correct
-
-For $E$ and $K_a E$\footnote{Note that it does not matter which agents knowledge
-  we reason about; as we test for \emph{each} graph, all cases are covered. The
-  same goes for second- and higher-order knowledge; the only requirement is that we do not
-  have $K_i K_i \phi$. Refer to footnote \ref{note:KKFootnote} on page 
-  \pageref{note:KKFootnote} to be reminded why.}, the two tools agree on all
-gossip graphs.
-
-Once we address second-order and higher successful formulae, we start to get
-disagreeing results. We tested each possible initial gossip graph, of which
-there are 4096. For the successful formula $K_d K_c E$, we have 3788 positive
-results and 308 negative results. The other tool agreed on all 3788 positive
-results, however it only agreed on 290 of the negative results, leaving 18
-gossip graphs which the other tool could find a successful path for, but ours
-could not. This increases as the number of knowledge modalities increases; for
-the successful formula $K_b K_d K_c E$, the two tools agree on all 3676 positive
-results but disagree on 124 negative results\footnote{A happy result is that
-  when using the successful formula $K_a K_a \phi$, the two tools agree on all
-  results. This is a testament to what we have talked about in footnote
-  \ref{note:KKFootnote} on page \pageref{note:KKFootnote}; $K_a K_a \phi$ is
-  exactly the same as $K_a \phi$. The observed result is a testament as it shows
-that $K_a K_a \phi$ is not in the same class as $K_a K_b \phi$.}.
+For successful formulae $E$ and $K_a E$\footnote{Note that it does not matter
+  which agent's knowledge we reason about; as we test for \emph{each} graph, all
+  cases are covered. The same goes for second- and higher-order knowledge; the
+  only requirement is that we do not have $K_i K_i \phi$. Refer to footnote
+  \ref{note:KKFootnote} on page \pageref{note:KKFootnote} to be reminded why.},
+the two tools agree on all gossip graphs. However, once we address second-order
+and higher successful formulae, we start to get disagreeing results. We tested
+each possible initial gossip graph, of which there are 4096. For the successful
+formula $K_d K_c E$, we have 3788 positive results and 308 negative results. The
+other tool agreed on all of the positive results, however it only agreed on 290 of
+the negative results, leaving 18 gossip graphs which the other tool could find a
+successful path for, but ours could not. This increases as the number of
+knowledge modalities increases; for the successful formula $K_b K_d K_c E$, the
+two tools agree on all 3676 positive results but disagree on 124 negative
+results\footnote{A happy result is that when using the successful formula $K_a
+  K_a \phi$, the two tools agree on all results. This is a testament to what we
+  have talked about in footnote \ref{note:KKFootnote} on page
+  \pageref{note:KKFootnote}; $K_a K_a \phi$ is exactly the same as $K_a \phi$.
+  The observed result is a testament as it shows that $K_a K_a \phi$ is not in
+  the same class as $K_a K_b \phi$.}.
 
 Similar results were encountered when conjoining modalities. With the formula
 $K_a E \land K_b E$, our tool gave us 12 negative results out of 4096 that were
@@ -2972,20 +2961,19 @@ not agreed with by the other tool. With the formula $\bigwedge_{i \in Ag} K_i E$
 our tool gave us 213 negative results of 4096 that were not agreed with by the
 other tool.
 
-There are several reasons for why this may be the case. The first one is that
-the equivalence relation used in \cite{GithubGossip} has some nuances that
-changed it from being identical to the one used in this tool. These nuances can
-best be seen in Page 166 of \cite{SMCDEL}. This first caused problems when
-planning for formulae of the form $K_i \phi$ where $\phi \in
-\mc{L}_p(\Lambda)$\footnote{This fix can be seen in the \mih{knowFilter}
-  function in the code.}. Whilst the problems were fixed and all tests agree for
-these cases, it is possible that our fix is faulty for conjunctions and
-higher-order knowledge. Further work into the intricacies of knowledge could
-remedy this. It could also be an issue with the lifting of transducers,
-discussed in Section \ref{sec:LiftingTransducers}.  
-
-% This arises because at this point we reason about states
-% of the form \mih{PList} and \mih{PState}; 
+The clear issue with our tool is that it can sometimes return a negative result
+- that it cannot find a path from the initial state to a successful state -
+whilst \cite{GithubGossip} can. There are several reasons for why this may be
+the case. The first one is that the epistemic possibility relation used in
+\cite{GithubGossip} has some nuances that changed it from being identical to the
+one used in this tool. These nuances can best be seen in Page 166 of
+\cite{SMCDEL}. This first caused problems when planning for formulae of the form
+$K_i \phi$ where $\phi \in \mc{L}_p(\Lambda)$\footnote{This fix can be seen in
+  the \mih{knowFilter} function in the code.}. Whilst the problems were fixed
+and all tests agree for these cases, it is possible that our fix is faulty for
+conjunctions and higher-order knowledge. Further work into the intricacies of
+knowledge could remedy this. It could also be an issue with the lifting of
+transducers, discussed in Section \ref{sec:LiftingTransducers}.
 
 \section{Profiling}
 
@@ -2994,12 +2982,12 @@ implemented system. We have a number of reasons to do this;
 
 \begin{itemize}
 \item Firstly, it lets us give a quantitative comparison of our program's
-  efficacy compared to the existing tools.
+  efficacy compared to the existing tools;
 \item It also lets us find the parts of our code to try and optimise. It is said
   that a program spends $90\%$ of its time in $10\%$ of its code; a profiler helps
-  us find this $10\%$.
+  us find this $10\%$;
 \item It also lets us find the weaknesses of our program in comparison to other
-  tools, and as such find the weaknesses of the algorithm put forward. 
+  tools, and as such find the weaknesses of our algorithm.
 \end{itemize}
 
 In order to do this we used the profiling tool built into GHC. This gives us a
@@ -3041,18 +3029,14 @@ fairly testing the two systems, we make an adjustment to \cite{GithubGossip}, to
 make it return the first valid call sequence it comes across. We perform
 comparisons with both versions.
 
-\subsection{Profiling Framework}
-
 In our profiling we will generate random graphs as in
-\secref{sec:TestingFrameworks}, use them in both tools and then take averages.
-This is because certain graphs will take much less time than others
-\footnote{Consider a graph where no one knows anyone elses phone number; both
-  tools will very quickly decide that there is no successful path through this.
-  A graph where there is a successful path will take much longer to compute the
-  path, in comparison.}, and we want to give the most accurate statistics.
-
-We then perform the planning process on the generated gossip graph. As mentioned
-earlier we run for some amount of graphs and then take the average.
+\secref{sec:TestingFrameworks}, use them in both tools and then take the average
+of the time taken to run and the amount of memory consumed. This is because
+certain graphs will take much less time than others \footnote{Consider a graph
+  where no one knows anyone elses phone number; both tools will very quickly
+  decide that there is no successful path through this. A graph where there is a
+  successful path will take much longer to compute the path, in comparison.},
+and we want to give the most accurate statistics.
 
 \subsection{Profiling Results}
 
@@ -3065,17 +3049,17 @@ not including some arbitrary agent $a$, has interesting indistinguishable calls;
 it could be from $b$ to $c$, or $b$ to $d$, or $c$ to $d$ \footnote{Compare this
   to a gossip graph of size 3; a call not involving some agent $a$ can only be
   from either $b$ to $c$ or $c$ to $b$.}. Furthermore, graphs of size greater
-than 4 take an impractically long time - it is in the interests of time to use
-graphs of size 4.
+than 4 take an impractically long time, especially for the other tool. It is in
+the interests of time to use graphs of size 4.
 
 When testing, the variable that we varied is the complexity of target formula.
-This might seem like an odd choice, but it is well-motivated. This will give us
+This might seem like an odd choice, but it is well-motivated. This gives us
 a way to investigate the differences in the representations of knowledge in the
 two tools. Furthermore, increasing the number of the agents in the models
 usually drastically increases runtime for both tools without giving us any new
 information.
 
-We tabulate the results here. We abbreviate the statement ``all agents are
+We tabulate the results. We abbreviate the statement ``all agents are
 experts'' to the propositional variable $E$. $n$ is the number of agents in the
 initial gossip graph. All of figures in Table \ref{tab:Proflining1} and Table
 \ref{tab:Proflining2} are averages of many test cases. 
@@ -3087,8 +3071,8 @@ initial gossip graph. All of figures in Table \ref{tab:Proflining1} and Table
     & $E$ & $ K_a E$ & $K_b K_a E$ & $K_c K_b K_a E$ \\ \hline 
     Our tool, $n$ = 3 & 0.53ms, 0.23Mb & 0.72ms, 0.3Mb & 0.74ms, 0.38Mb & 0.91ms, 0.49Mb \\ \hline
     Other tool, $n$ = 3 & 0.41ms, 0.56Mb & 0.84ms, 0.93Mb & 0.99ms, 1.4Mb & 1.36ms, 1.96Mb \\ \hline \hline
-    Our tool, $n$ = 4   & 9.2ms, 7.36Mb & 15ms, 10.15Mb & 24ms, 14.12Mb & \\ \hline
-    Other tool, $n$ = 4 & 145ms, 251Mb & 724ms, 1250Mb & 3849ms, 6425Mb & \\ 
+    Our tool, $n$ = 4   & 9.2ms, 7.36Mb & 15ms, 10.15Mb & 24ms, 14.12Mb & 96.5ms, 65.1Mb \\ \hline
+    Other tool, $n$ = 4 & 145ms, 251Mb & 724ms, 1250Mb & 3849ms, 6425Mb & 10578ms, 18110Mb \\ 
     \hline
   \end{tabular}
   \caption{Profiling Results between our tool and \cite{GithubGossip}}
@@ -3127,14 +3111,16 @@ We see that the other tool now outperforms ours, in both space and time
 efficiency. We can see that, when we have 4 agents in the gossip graphs, the
 times are relatively similar; however once we increase the number of agents the
 runtime and space consumption balloons. This is due to the extra cost of needing
-to reason about \emph{8} more calls; this is nearly as many calls as we have
-in total with 4 agents. This large increase in time and space consumption occurs
-again in our analysis in Section \ref{sec:Prisoners}. Although the other tool
-suffers from slow down when increasing the number of agents in our gossip
-graphs, its increase is much less than in our tool. \textbf{Add in the why}.
+to reason about \emph{8} more calls; this is nearly as many calls as we have in
+total with 4 agents. This large increase in time and space consumption occurs
+again in our analysis in using the $n$ prisoners and a lightbulb model. Although
+the other tool suffers from slow down when increasing the number of agents in
+our gossip graphs, its increase is much less than in our tool. This is most
+likely because the other tool does not suffer from this state explosion problem
+as severely as ours. 
 
 In light of these results, we must remember the benefits our tool provides over
-the other. The most obvious is the facility of our tool to plan for generic
+the other. The most obvious is the capability of our tool to plan for generic
 epistemic models and propositional event models. There are many optimisations
 that could be made to our system if we were specialising the system to only plan
 for gossip models; for example, the technique discussed in Section
@@ -3144,21 +3130,20 @@ optimisations can be seen when comparing times taken to check whether a sequence
 is successful in \cite{SMCDEL} to the times taken for the other tool to plan in
 \ref{tab:Proflining2}. Although \cite{SMCDEL} is a much more advanced tool,
 using symbolic model checking, it is outperformed by \cite{GithubGossip}. This
-is most likely due to the Gossip-specific optimisations used in \cite{GithubGossip}.
-
-Another benefit our system exercises over \cite{GithubGossip} is its capability
-to plan for systems permitting infinite sequences of events. 
+is most likely due to the Gossip-specific optimisations used in
+\cite{GithubGossip}. We also need to remember that our tool is capable of
+reasoning about \emph{infinite} event sequences, whilst the other is not. 
 
 \subsubsection{$n$ Prisoners and a Lightbulb}
 \label{sec:Prisoners}
 
-As a testament to our tool working for other classes of epistemci models as well
-as gossip models, we implemented the ``$n$-prisoners and a lightbulb'' problem.
+As a testament to our tool working for other classes of epistemic models as well
+as gossip models, we implemented the ``$n$ prisoners and a lightbulb'' problem.
 This is a problem very similar to the gossip problem; we care about what the
 prisoners \emph{know}, how their knowledge \emph{changes} due to
 \emph{observations}, and how their \emph{actions} effect the state of the world. 
 
-The riddle is as follows. $n$ prisoners are all together in the prison
+The problem is as follows. $n$ prisoners are all together in the prison
 cafeteria. They are told they will all be put into isolation cells, and they
 will be brought out from the cells for interrogation one by one in a room
 containing a light with an on/off switch. The only way prisoners can communicate
@@ -3171,7 +3156,7 @@ announcement is incorrect they are all executed. Whilst in the dining room, can
 the prisoners agree on a protocol that will set them free? 
 
 The answer is of course yes. We take the simplest protocol listed in
-\cite{Prisoners}. In this, the $n$ prisoners appoint one prisoner to be the
+\cite{Prisoners}. In this, the prisoners appoint one prisoner to be the
 counter\footnote{This is the crux of the solution; the typical problem solver
   does not think about having different prisoners behave differently.}. All of
 the non-counting prisoners then follow the following protocol; the first time
@@ -3195,13 +3180,11 @@ Despite the fact that we only care about the knowledge state of one agent,
 increasing the number of prisoners yields an increase in events; and most
 importantly increases the number of events \emph{indistinguishable} to the agent
 in question. This yields a large increase in the amount of states we have in our
-automata. The effects of this can be seen in Figure \ref{fig:graphs}; our
-time and space complexity increase exponentially as we increase the number of
-prisoners. 
-
-Although through careful programming we could bring the size of the constants
-down in the graphs, it would take some rethinking of the algorithm to avoid the
-exponential increase that we suffer from here. \textbf{Maybe top this off better?}
+automata. The effects of this can be seen in Figure \ref{fig:graphs}; our time
+and space complexity increase exponentially as we increase the number of
+prisoners. Although through careful programming we could bring the size of the
+constants down in the graphs, it would take some rethinking of the algorithm to
+avoid the exponential increase that we suffer from here.
 
 \begin{figure}[h]
   \centering
@@ -3240,15 +3223,15 @@ exponential increase that we suffer from here. \textbf{Maybe top this off better
     \end{axis}
   \end{tikzpicture}
   \end{subfigure}
-  \label{fig:graphs}
   \caption{Complexity analysis graphs.}
+  \label{fig:graphs}
 \end{figure}
 
 \section{Results Analysis}
 
 \subsection{\mih{Models}}
 
-\begin{wrapfigure}{r}{0.5\textwidth}
+\begin{wrapfigure}{l}{0.6\textwidth}
   \begin{center}
     \begin{minted}{haskell}
       models :: Prop p => Set.Set p -> Form p -> Bool
@@ -3287,7 +3270,8 @@ of the given proposition $p$ and the event $e$. This occurs every time we wish
 to make a transition between two sets in our automata; clearly, this piece of
 code is being called a lot. However, this does not seem to be a particularly bad
 thing in itself; rather the opposite, it seems essential that this piece of code
-would be called a lot.
+would be called a lot. The effect of this could perhaps be reduced by using the
+technique described in Section \ref{sec:Monotonicity}.
 
 \subsection{Search Strategies}
 
@@ -3314,17 +3298,25 @@ than maintaining this set of indistinguishable states.
 % However, the method of computing these other call sequences is one that can only
 % be effectively utilised when we know the 
 
-One might ask why we don't copy this method of simply maintaining the set of
-strings of indistinguishable events which could have happened in the states of
-our automaton. This is a fine idea, however a problem arises when we come to
-considering the successful states. In the other tool it is known that the
-sequence of calls is ``final'', in the sense of a model checker - we want to
-know if this is successful or it isn't. But in ours we only stop either when we
-can make no more calls, or we are in a successful state. As such, we need to
-know if we are in a successful state \emph{every time we enter one}, and the
-only way we can do this is by performing each string of indistinguishable calls
-on the initial state and evaluating the target formula at the resultant states;
-it is clear that this will be less efficient.
+This method of computing the strings of indistinguishable events is impractical
+for our case. In the other tool it is known that the sequence of calls is
+``final'' in some sense; we want to know whether or not this precise set of
+calls takes us to a successful state. However, in our case, we check
+\emph{every} state we enter. Treating every state in this manner would be
+computationally inefficient; it would be akin to model checking every state. As
+such it is preferable to maintain our strategy.  
+
+% One might ask why we don't copy this method of simply maintaining the set of
+% strings of indistinguishable events which could have happened in the states of
+% our automaton. This is a fine idea, however a problem arises when we come to
+% considering the successful states. In the other tool it is known that the
+% sequence of calls is ``final'', in the sense of a model checker - we want to
+% know if this is successful or it isn't. But in ours we only stop either when we
+% can make no more calls, or we are in a successful state. As such, we need to
+% know if we are in a successful state \emph{every time we enter one}, and the
+% only way we can do this is by performing each string of indistinguishable calls
+% on the initial state and evaluating the target formula at the resultant states;
+% it is clear that this will be less efficient.
 
 \subsection{\mih{BFSM}}
 
@@ -3341,12 +3333,12 @@ need to perform two actions on our queue:
 \end{enumerate}
 
 In Haskell, list concatenation has runtime $O(n)$, where $n$ is the length of
-the list being appended to\footnote{I.e., in the command \mih{xs ++ ys}, $n$
-  is the length of \mih{xs}.}. This is far from ideal - however the
-\mih{Data.Seq} package offers us constant-time access to the first and last
-element of a sequence. This seems like it would be perfect for our situation,
-however \textbf{for some reason currently beyond me} the time nearly doubles and
-the space used balloons.
+the list being appended to\footnote{I.e., in the command \mih{xs ++ ys}, $n$ is
+  the length of \mih{xs}.}. This is far from ideal - however the \mih{Data.Seq}
+package offers us constant-time access to the first and last element of a
+sequence. This seems like it would be perfect for our situation, however the
+time nearly doubles and the space used balloons. As such, we stayed with just
+using a \mih{List}.
 
 \subsection{Monotonicity}
 \label{sec:Monotonicity}
@@ -3369,29 +3361,33 @@ This is because we know that the propositions in $v$ will be true at the state
 $\delta(q_v, e)$; hence we do not need to check again whether or not they will
 be true. 
 
-However I fear this would be an irresponsible change to make to our code.
-Remember that we do not want our system to solely plan for the Gossip problem;
-rather we want it to be capable of doing so for \emph{any} epistemic model and
-propositional event model. We have an example of a model where this occurs in
-\figref{fig:cointoss}; although this is quite a toy example, it does indeed show
-that such cases are possible. In the interests of portability then, it would be
-unwise to make such a change. 
+However this would be an irresponsible change to make to our code. Remember that
+we do not want our system to solely plan for the gossip problem; rather we want
+it to be capable of doing so for \emph{any} epistemic model and propositional
+event model. We have an example of this in the $n$ prisoners problem; a prisoner
+may enter the interrogation room and turn the light on. However we do \emph{not}
+have that it will always stay on; indeed, the escape of all of the prisoners
+relies on the light getting turned \emph{off} by the counter. As such we cannot
+use the described method. 
 
-\subsection{\textsf{ANY} and related protocols}
+\subsection{\textsf{ANY} and infinite event sequences}
 
 Early on in this thesis we mentioned that \cite{GithubGossip} is unable to plan
-for gossip graphs with protocols that allow for infinite call sequences (an
+for gossip graphs with protocols that allow for infinite event sequences (an
 example of this is \textsf{ANY}). One benefit that our tool demonstrates over
 \cite{GithubGossip} is the ability to plan using such protocols. This is because
 before the process of searching through the gossip graph we crop the automata to
 remove any calls that do not have an effect. This prevents the problem that can
 arise when using \textsf{ANY}, where two agents can just repeatedly call each
-other over and over again. 
+other over and over again. However, even without this cropping, we would still
+be successful. The nature of breadth-first search is that we avoid going down
+these infinite paths until we need to, when our search reaches that deep. 
 
 This manifests itself as a great advantage over the existing tool. \textsf{ANY}
 is a very practical protocol for use in the gossip problem as it requires no
-reasoning on behalf of the agents; they do not need to consider whether or not
-they can make a call. \textbf{Check this this is quite bad}.
+reasoning on behalf of the agents. Furthermore, in many other epistemic models,
+it is perfectly conceivable that we would need to reason about structures
+allowing for infinite sequences of events. 
 
 \newpage
 
@@ -3401,56 +3397,57 @@ We now take some time to reflect on the work done in this project. Our
 overarching aim in the project was to design an implement a system with which we
 can perform epistemic planning. This document's ordering reflects the order in
 which the challenges of the project were accomplished; we first reviewed the
-literature, then designed the algorithm, and then implemented it. Chapters 2, 3
-and 4 are respectively dedicated to each subtask.
+literature, then designed the algorithm, implemented it, and evaluated it. 
 
-In Chapter 2, we explained the concepts necessary to understand the algorithm
-put forward. When starting work on this project the understanding of the
-processes put forward in the literature was the first major difficulty, and as
-such care has been taken in the writing process to make these definitions as clear
-as possible. 
+In Chapter 2 we explained the concepts necessary to grasp the algorithm put
+forward. The first significant difficulty of this project was the understanding
+of the concepts and processes introduced in the literature. Care has been taken
+during the writing of this thesis to make these concepts as clear and simple as
+possible. 
 
-In Chapter 3, we put forward the algorithm designed to perform the task of
-planning. We hope that this communicates the magnitude of the wrok done here, as
-well as serves as a sufficient explanation for the process implemented. Whilst
-the existence of this algorithm was postulated in \cite{AutomataTechniques}, it
-did not exist in a simple, digestable form; the work in Chapter 3 is the first
-explanation of the process in this manner. We hope that if someone were to
-continue work in this area, this document would aid there understanding. 
+In Chapter 3 we derive the algorithm we use to solve the epistemic planning
+problem. This algorithm is capable of planning for any epistemic model and
+propositional event model. Whilst this algorithm was outlined in
+\cite{AutomataTechniques}, we present a conceptually clean process. We hope that
+if someone were to continue work in this area, this document would aid their
+understanding.
 
 Chapter 4 contains writing on implementation of the process. This details the
 design decisions made in the process, and argues a case for the use of Haskell
-in development of such a tool. 
+in development of such a tool. There exists no implementation of a planning
+algorithm for general epistemic models. 
 
 In Chapter 5 we gave an analysis - both quantitative and qualitative - of the
 algorithm developed and implementation. We compared our tool to an existing tool
 specialised for planning for gossip graphs, as well as investigating our tool's
-performance for the $n$ prisoners problem. 
+performance for the $n$ prisoners problem. We also commented on its strengths and
+weaknesses compared to \cite{GithubGossip}.
 
 \section{Future Work}
 
 It is clear to see that our system is very slow; when run on a gossip graph with
 greater than 6 agents the takes so long that it's not worth waiting for the
 results. Whilst there is scope for implementation-based
-optimisations\footnote{By which we mean optimisations like changing a
-  \mih{Set} to a \mih{HashSet} and so on.}, this is mainly due to the
-algorithm; in \cite{AutomataTechniques} it is shown that the propositional
-epistemic planning problem is in \textsf{$k + 1$-EXPTIME}, where $k$ is the
-depth of the deepest-nested knowledge operator. 
-
-The method that we use is very explicit; we will always explore a branch, no
-matter what its state is. We may be wasting computation by either exploring a
-branch that is never going to succeed, or is identical to another branch. It
-would be interesting to see the implementation of some checker for recomputed
-branches, a la dynamic programming.
+optimisations\footnote{By which we mean optimisations like changing a \mih{Set}
+  to a \mih{HashSet} and so on.}, this is mainly due to the algorithm; in
+\cite{AutomataTechniques} it is shown that the propositional epistemic planning
+problem is in \textsf{$k + 1$-EXPTIME}, where $k$ is the depth of the
+deepest-nested knowledge operator. The method that we use is very explicit; we
+will always explore a branch, no matter what its state is. We may be wasting
+computation by either exploring a branch that is never going to succeed, or is
+identical to another branch. It would be interesting to see the implementation
+of some checker for recomputed branches, \`{a} la dynamic programming.
 
 It also seems possible that there's scope for a symbolic approach, like in
 \cite{MalvinThesis}. The main issue with our system - and all model checking
 software as well - is the \emph{state explosion} problem; we have to consider
 thousands of states, making the program slow and memory hungry. Symbolic
-approaches are used in many practical model checkers, \cite{SMCDEL} being an
+approaches can avoid this problem, by not explicitly enumerating the states and
+instead representing the automata as a sentence in some logical language. These
+symbolic model checkers yield an improvement in space and time efficiency, and
+as such are used in many practical model checkers, \cite{SMCDEL} being an
 example. The work done in this thesis on the production of an automata-based
-method for epistemic planning can act as a good foundation for this. 
+method for epistemic planning can act as a good foundation for this.
 
 
 Epistemic preconditions are investigated in \cite{EpProforDyGo}. These allow for
@@ -3462,13 +3459,13 @@ models. However, recall that in this thesis we investigate the
 \emph{propositional} fragment of the epistemic planning problem, in which our
 \tpre conditions may only be propositional; hence such epistemic protocols are
 not possible. Despite this, there is a sensation that it would be possible to
-use these protocols. We could evaluate the protocols on the states in question
-, as long as they are of the \mih{PState} form. However, there might need to be
+use these protocols. We could evaluate the protocols on the states in question ,
+as long as they are of the \mih{PState} form. However, there might need to be
 significant restructuring of the algorithm to accommodate for this; currently
 protocols are restricted to just being propositional and as such are evaluated
-at the atomic, \mih{PVar} states. Furthermore, it is proven in
+at the atomic, \mih{PVar} states. Recall that it is proven in
 \cite{UndecidabilityEP} that non-propositional preconditions can yield
-undecidability; hence we prepare ourselves for this to not be possible. 
+undecidability; hence we prepare ourselves for this to not be possible.
 
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
