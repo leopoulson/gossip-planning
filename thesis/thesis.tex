@@ -2580,7 +2580,7 @@ identically mimic the tuple definitions in \secref{sec:Transducers}.
 
 Our FSM's transition returns a \mih{Maybe st} to encode that it is
 \emph{nondeterministic}; meaning that it is not guaranteed to return a state on
-a transition. This comes in useful in practise when we have as input to $\delta$
+a transition. This comes in useful in practice when we have as input to $\delta$
 some pair $(w, e)$ where $e$ is not permitted at $w$. In this case, $\delta(w,
 e) = \text{\mih{Nothing}}$. An example of this is a call $ij$ in a gossip model
 where $i$ does not know $j$'s phone number.
@@ -2806,7 +2806,7 @@ chose to test solely on gossip models. This is for several reasons:
   the code;
 \item Testing with a certain class of models tells us that all of the code
   works; the algorithm does not depend on what the particular model is. Hence if
-  we know it is correct for a certian class of models, it will also be correct
+  we know it is correct for a certain class of models, it will also be correct
   for any other class of models;
 \item We have an existing model checker specialised for the Gossip problem
   (\cite{GithubGossip}) that we can use to validate our results;
@@ -3032,7 +3032,7 @@ In our profiling we will generate random graphs as in
 \secref{sec:TestingFrameworks}, use them in both tools and then take the average
 of the time taken to run and the amount of memory consumed. This is because
 certain graphs will take much less time than others \footnote{Consider a graph
-  where no one knows anyone elses phone number; both tools will very quickly
+  where no one knows anyone else's phone number; both tools will very quickly
   decide that there is no successful path through this. A graph where there is a
   successful path will take much longer to compute the path, in comparison.},
 and we want to give the most accurate statistics.
@@ -3043,7 +3043,7 @@ and we want to give the most accurate statistics.
 
 When profiling, we generated gossip graphs of size 4 (by which we mean graphs
 with 4 agents in). This is not an arbitrary number; 4 is the smallest
-``interesting'' gossip graph, meaning the smallest graph where a call occuring,
+``interesting'' gossip graph, meaning the smallest graph where a call occurring,
 not including some arbitrary agent $a$, has interesting indistinguishable calls;
 it could be from $b$ to $c$, or $b$ to $d$, or $c$ to $d$ \footnote{Compare this
   to a gossip graph of size 3; a call not involving some agent $a$ can only be
