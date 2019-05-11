@@ -1,4 +1,19 @@
-\documentclass[10pt, a4paper]{report}
+% \documentclass[10pt, a4paper, twoside]{book}
+
+\documentclass[ % the name of the author
+                    author={Leo Poulson},
+                % the name of the supervisor
+                supervisor={Dr. Steven Ramsay},
+                % the degree programme
+                    degree={BSc},
+                % the dissertation    title (which cannot be blank)
+                     title={Epistemic Planning for the Dynamic Gossip problem},
+                % the dissertation subtitle (which can    be blank)
+                  subtitle={},
+                % the dissertation     type
+                %  type={enterprise},
+                % the year of submission
+                      year={2019} ]{dissertation}
 
 \input{preamble.tex}
 
@@ -9,15 +24,23 @@
 	\newline\newline % Space before institutions
 }
 
+
 \date{\today}
 
 \begin{document}
 
+\frontmatter
+
 \maketitle
-\thispagestyle{firstpage}
+
+\makedecl
+
+\makeabst
 
 \tableofcontents
-\newpage
+
+
+\mainmatter
 
 \chapter{Introduction}
 \label{sec:Introduction}
@@ -3455,6 +3478,8 @@ at the atomic, \mih{PVar} states. Recall that it is proven in
 undecidability; hence we prepare ourselves for this to not be possible.
 
 %%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\backmatter 
 
 \newpage
 
