@@ -24,7 +24,7 @@
 
 Often we come across situations, processes or phenomena in the real world that
 we want to reason about computationally. These real-world systems tend to
-contain lots of information that are useful to us - the state of knowledge of a
+contain lots of information that is useful to us - the state of knowledge of a
 certain agent, the wind speed on a certain day - and lots of information that is
 less useful - what an agent in question had for breakfast this morning, which
 day of the week it is. We use a \emph{model} to abstract away the unimportant
@@ -36,7 +36,7 @@ formula $\phi$ and finding if the model \tmc{M} satisfies the formula $\phi$.
 
 Planning is the task of computing a set of actions to take some state within a
 model to a successful state. In such a model we have a set of \emph{actors}, who
-will perform these actions that we search for. Put forward in
+will perform the actions that we search for. Put forward in
 \cite{PlanningBook}, planning covers a wide range of applications; from making a
 robot enter a room to synchronising multiple computers working on the same
 document. In this project we concern ourselves with a special case of planning;
@@ -141,6 +141,7 @@ and many potential decisions to make when defining the way the agents in the
 gossip behave. We list the decisions taken in this thesis here;
 
 \begin{itemize}
+  \setlength\itemsep{1em}
   \item We choose to use the \emph{synchronous} gossip problem. The asynchronous
     gossip problem lets two agents call each other at the same time, and has no
     way of controlling when agents can communicate each other. In contrast, the
@@ -222,7 +223,7 @@ later, this is a very inefficient method for planning.
 
 Despite this, there does not exist any software to solve the epistemic planning
 problem as envisioned in the literature; indeed, the only software to solve any
-epistemic planning problem is restricted to just gossip models.
+epistemic planning problem is restricted to gossip models.
 
 \section{Contributions}
 
@@ -232,11 +233,10 @@ is motivated by the Dynamic Gossip problem; despite all of the work done in the
 area of Gossip little has been done on the topic of \emph{planning} for the
 Gossip problem. Dynamic Gossip can be modelled perfectly by epistemic models and
 propositional event models, and hence is a perfect case study for the tool we
-will develop. 
-
-We have four major contributions in this thesis, as follows:
+will develop. We have four major contributions in this thesis, as follows:
 
 \begin{itemize}
+  \setlength\itemsep{1em}
 \item The first contribution is the background chapter. The literature on the
   topic spans from epistemic logic to game theory, and is far outside the reach
   of the standard computer science curriculum, We present the content in a
@@ -267,7 +267,7 @@ pleasant, simple manner is a goal of this thesis and this section achieves this.
 
 In Section 3 we put forward the algorithm we designed in order to solve the
 epistemic planning problem. This uses a simplified version of the process put
-forward in \secref{sec:PowersetAutomata}. We also give an exemplar execution of
+forward in Section \ref{sec:UniformStrategies}. We also give an exemplar execution of
 the algorithm, in order to show how it functions.
 
 Section 4 discusses the Haskell implementation of the algorithm designed in
@@ -341,8 +341,8 @@ For epistemic logic, we think of $R_i$ as being the set of pairs of worlds that
 an agent $i$ cannot distinguish between, and thus considers \emph{possible}.
 This notion of epistemic possibility is essential, and is key to understanding
 the rest of the thesis. As an example, consider waking up in the morning with
-the curtains drawn. You cannot distinguish between the world in which it's sunny
-outside and the world in which it's cloudy outside; if it were sunny outside you
+the curtains drawn. You cannot distinguish between the world in which it is sunny
+outside and the world in which it is cloudy outside; if it were sunny outside you
 could not tell, and likewise if it were cloudy outside. We label these two
 worlds \Sun and \Cloud, and at this state (\Sun, \Cloud) $\in R$
 \footnote{Respectively (\Cloud, \Sun) $\in R$; we later clarify that our
@@ -388,9 +388,9 @@ computationally tractable\footnote{Recall that the epistemic planning problem is
 relations. This means three things;
 
 \begin{itemize}
-\item $R_i$ is \emph{reflexive}; for all $w \in W$, $(w, w) \in R_i$.
+\item $R_i$ is \emph{reflexive}; for all $w \in W$, $(w, w) \in R_i$;
 \item $R_i$ is \emph{symmetric}; for all $w, v \in W, (w, v) \in R_i$ iff $(v,
-  w) \in R_i$.
+  w) \in R_i$;
 \item $R_i$ is \emph{transitive}; for all $w, v, u \in W$ if $(w, v) \in R_i$
   and $(v, u) \in R_i$, then $(w, u) \in R_i$.
 \end{itemize}
@@ -447,12 +447,12 @@ $w_1$ the proposition $q$ is true, and at $w_2$ propositions $p$ and $q$ are
 true. Our ``actual'' world is $w_1$, and as such it is double ringed. This means
 that any formula $\phi$ will be evaluated as $(\mc{M}, w_1) \models \phi$.
 
-To show some examples, let's evaluate some formulae on this model.
+To show some examples, we will evaluate some formulae on this model.
 
 \begin{itemize}
 \item $(\mc{M}, w_1) \models q$ as at $w_1$, $q$ is true.
 \item $(\mc{M}, w_1) \models K_{\text{Alice}} q$. To check that this is true,
-  let's consider all of the worlds Alice considers possible from $w_1$. This
+  let us consider all of the worlds Alice considers possible from $w_1$. This
   entails computing the set of worlds $\left\{ v \mid (w_1, v) \in R_{Alice}
   \right\}$. The only world is $w_1$ itself, and we know from above that
   $(\mc{M}, w_1) \models q$. Hence $K_{\text{Alice}} q$ holds here.
@@ -613,14 +613,14 @@ situation is represented by model \tmc{M}. In this initial situation, both Alice
 and Bob cannot distinguish between the worlds where $p$ is true and where $p$ is
 not true. Then the event model \tmc{E} represents the event of Alice reading the letter
 from the university. $\alpha$ represents the event of Alice getting the position
-and $\beta$ that she doesn't - hence the preconditions are $p$ and $\neg
+and $\beta$ that she does not - hence the preconditions are $p$ and $\neg
 p$ respectively; that is, $\pre(\alpha) = p$ and $\pre(\beta) = \neg p$. Bob
 cannot distinguish between either of these events, but Alice can, as she reads
 the letter. Then finally the epistemic model $\mc{M} \times \mc{E}$ represents the situation
 in \tmc{M} after the event \tmc{E} has occurred. We can see the epistemic model \tmc{M},
 event model \tmc{E} and updated model \tmc{M \times E} in \figref{fig:PhDExample}.
 
-As a second example, consider that Alice and Bob are in a room. There's a coin
+As a second example, consider that Alice and Bob are in a room. There is a coin
 on the table with the heads face up - we set this to be represented by the
 proposition $p$. Alice and Bob can both see the coin face up. This situation is
 modelled by epistemic model \tmc{M}. Then Bob picks up the coin and flips it in
@@ -841,7 +841,7 @@ $\mc{E} = (E, P, \pre, \post)$, where
     ji) \mid j \in A \right\}$, for every $i \in A$. We can read this as saying
   agent $i$ cannot distinguish between a call that it is not a part of; hence
   the former part of the definition. The later two sets say that agent $i$ does
-  not confuse a call that it's a part of with any other call. This means that
+  not confuse a call that it is a part of with any other call. This means that
   $a$ cannot distinguish between the world reached by the call $bc$ happening
   and the world reached by the call $cd$ happening; however $a$ can tell the
   difference between worlds reached by calls it is a member of.
@@ -1089,7 +1089,7 @@ as the lens through which we study epistemic planning;
   studied; these mainly are sorts of logic puzzles. Examples of these can be
   seen in \cite{DEMO-S5}.
 \item It encapsulates very easily all of the aspects of epistemic planning that
-  we're interested in - namely the indistinguishability of events from one
+  we are interested in - namely the indistinguishability of events from one
   another, leading to epistemic possibility from the point of view of agents -
   whilst still being a simple enough problem to understand intuitively.  
 \end{itemize}
@@ -1129,7 +1129,7 @@ formula representing either the announcement or the fact that changed, and
 updating the model with the event represented by the formula. The definition of
 the update used is very similar to the update of an epistemic model with an
 event model as defined in Section \ref{sec:Event Models}. The given events are
-applied, and once they have all been applied we check if we're in a successful
+applied, and once they have all been applied we check if we are in a successful
 state or not.
 
 Unfortunately we cannot use this to model check a gossip problem, as events in
@@ -1211,7 +1211,7 @@ Section \ref{sec:mestar}, this is not extremely simple to do; whilst it is
 straightforward to enumerate the set of worlds that can be reached through
 application of an event model to a Kripke model, it is not so straightforward to
 compute the worlds that an agent may consider possible from some world. We
-would need to consider the call sequence we made and compute the call sequences
+would need to consider the event sequence we made and compute the event sequences
 that are indistinguishable to the current one. This is a slow, costly process.
 What we want is to be able to evaluate epistemic formulae \emph{positionally};
 that is, by only looking at the world in question.
@@ -1222,7 +1222,7 @@ formula of form $K_i \phi$. This process takes as input an automaton \tmc{A},
 whose successful states are those in which the formula $\phi$ is true, and a
 transducer $\mc{T}_i$\footnote{We give an introduction to transducers in Section
   \ref{sec:Transducers}.}, which relates pairs of events that are
-indistinguishable to agent $i$. As output, we are returned an automata
+indistinguishable to agent $i$. As output, we are returned an automaton
 $\widehat{\mc{A}}$ whose transitions follow those in \tmc{A}\footnote{That is,
   a word accepted by \tmc{A} will also be accepted by $\widehat{\mc{A}}$. The
   difference between the two is that the states in $\widehat{\mc{A}}$ contain
@@ -1278,10 +1278,10 @@ vice versa. $v_I \in V$ is the initial position and $l : V \rightarrow
 of propositions that are true at it.
 
 It may be easy to see the relationship between game arenas and finite state
-automata. We can see $V$ as a set of states in an automata. $E$ encodes the
+automata. We can see $V$ as a set of states in an automaton. $E$ encodes the
 transitions between states, and as such we can see it as representing the
-transition function $\delta$. $v_I$ is the initial state of the automata, and
-$l$ lets us valuate the automata states. 
+transition function $\delta$. $v_I$ is the initial state of the automaton, and
+$l$ lets us valuate the automaton states. 
 
 \subsection{Transducers}
 \label{sec:Transducers}
@@ -1313,9 +1313,9 @@ Then we can define the extended transition relation $\Delta^\ast$ as the
 smallest relation satisfying:
 
 \begin{itemize}
-\item for all $q \in Q$, $(q, \epsilon, \epsilon, q) \in \Delta^\ast$
+\item for all $q \in Q$, $(q, \epsilon, \epsilon, q) \in \Delta^\ast$;
 \item if $(q, w, w', q') \in \Delta^\ast$ and $(q', a, b, q'') \in \Delta$, then
-  $(q, w . a, w' . b, q'') \in \Delta^\ast$
+  $(q, w . a, w' . b, q'') \in \Delta^\ast$.
   
 \end{itemize}
 
@@ -1346,7 +1346,7 @@ For an arena $\mc{G} = (V, E, v_I, l)$ and a transducer $T = (Q, \Sigma, \Gamma,
 I, F, \Delta)$ such that $[T] \subseteq Plays_\ast \times
 Plays_\ast$\footnote{$Plays_\ast$ is the set of \emph{finite} plays of the game
   in the game arena. A play is a string of events, moving from items in $V_1$ to
-  $V_2$ to $V_1$ and so on.}, we construct this automata $\widehat{\mc{G}}$ in
+  $V_2$ to $V_1$ and so on.}, we construct this automaton $\widehat{\mc{G}}$ in
 which we can evaluate formulas of the form $K_i \phi$ \emph{positionally}. We do
 this by bringing extra information into the states of $\wh{\mc{G}}$, including
 the set of other possible states we could be in.
@@ -1482,7 +1482,7 @@ the case of Figure \ref{fig:introgossip} this is the set $\{a, b, c, d\}$.
 
 \textbf{Step one}; we receive as input an epistemic model \tmc{M}, a
 propositional event model \tmc{E} and some formula $\phi \in \mc{L}(\Lambda)$,
-for some set of propositions $\Lambda$. We first construct an automata called
+for some set of propositions $\Lambda$. We first construct an automaton called
 \mestar, by simulating the repeated application of \tmc{E} onto \tmc{M}. \mestar
 is a representation of all worlds that we can access from the application of any
 sequence of events in \tmc{E}. This lets us easily traverse the set of possible
@@ -1491,7 +1491,7 @@ states we can reach from our initial model.
 In the case of planning for the Dynamic Gossip problem, recall that we can
 generate an event model \tmc{E} automatically given an initial gossip graph -
 like the one in Figure \ref{fig:introgossip}. The gossip graph forms the model
-\tmc{M}; hence given just the initial gossip graph we can produce the automata
+\tmc{M}; hence given just the initial gossip graph we can produce the automaton
 \mestar.
 
 Here, recall the definition of a planning problem from \secref{sec:Planning}. We
@@ -1584,18 +1584,18 @@ formulae.
 To this end, we perform the process detailed in Section
 \ref{sec:PowersetAdapted}. In this process we build a transducer $\mc{T}_i$
 which relates pairs of events that are indistinguishable to one another. We then
-step through \mestar again, building another automata $\wh{\mc{ME^\ast}}$ where
+step through \mestar again, building another automaton $\wh{\mc{ME^\ast}}$ where
 the states are instead \emph{sets of states} in \mestar. This is done by
 following the transitions in \mestar and, whenever we make a transition through
 the occurrence of an event, computing the set of events that are
 indistinguishable to agent $i$ and applying this to all of the states in the set
 of states that we could be in. This means that at each state in this powerset
-automata, we have the set of states that $i$ considers possible, and hence we
+automaton, we have the set of states that $i$ considers possible, and hence we
 can quickly check formulae of form $K_i \phi$. This yields \emph{positional
   evaluation} of epistemic formulae.
 
-We can see the process of performing this procedure on the automata in Figure
-\ref{fig:introgossipE1} in Figure \ref{fig:introgossipPSet}. We can see that the
+In Figure \ref{fig:introgossipPSet} we can see the effect of performing this
+procedure on the automaton in Figure \ref{fig:introgossipE1}. We can see that the
 calls $cb, cd$ and $dc$ all take us to the same state. This is because agent $a$
 cannot distinguish between these three calls; hence the state the occurrence of
 any of these calls takes us to is the same. The state itself contains two states
@@ -1697,7 +1697,7 @@ such is completely sure of which state they are in after the call occurs.
 We can repeat this process ad infinitum; for a formula of the form $K_b K_a
 \phi$, we need to find the set of states that agents $b$ considers possible, and
 then check $K_a \phi$ in these states\footnote{\label{note:KKFootnote}Note that in a situation where we have a
-  formula $K_a K_a \phi$ we do not need to build another powerset automata as in
+  formula $K_a K_a \phi$ we do not need to build another powerset automaton as in
   an \textsf{S5} model, $KK \ldots KK = K$ (\cite{ModalLogic}). However, for a
   formula $K_a K_b \phi$ we do; this is because we can see $K_i$ and $K_j$ as
   being different modalities for different agents $i$ and $j$.}.
@@ -1705,7 +1705,7 @@ then check $K_a \phi$ in these states\footnote{\label{note:KKFootnote}Note that 
 In cases where we have some conjunction or negation of formulae with a knowledge
 modality in, we first build automata where the successful formulae are the
 conjuncts or formula to be negated. We then perform intersection or complement
-on these automata to produce an automata where the winning formula is the
+on these automata to produce an automaton where the winning formula is the
 desired conjunction or negation. This is a very pleasing method and is a great
 display of why finite-state machines are so well-suited to this task.
 
@@ -1713,7 +1713,7 @@ display of why finite-state machines are so well-suited to this task.
 In our implementation we simply search for a single path, using breadth-first
 search; however given that we have a conventional finite-state machine one could
 use a wide array of other techniques to enumerate the set of all successful
-paths through the automata.
+paths through the automaton.
 
 After performing the breadth-first search, we either return the path found - a
 string of events $e_1 e_2 \ldots e_n$ - or a negative response to say that no
@@ -1721,7 +1721,7 @@ path to a successful state exists. This satisfies the return requirement of a
 planning problem; we return a set of actions that take us from the initial state
 to some successful state, as required. 
 
-In our example, we take the automata in Figure \ref{fig:introgossipPSet} and
+In our example, we take the automaton in Figure \ref{fig:introgossipPSet} and
 search through it to find a state where the successful formula $\forall_{i \in
   Ag} E_i$ is satisfied. This is an easy task now, as we can evaluate such
 formulae positionally in $\wh{\mc{ME^\ast}}$. This yields the string $ba, ca,
@@ -1732,7 +1732,7 @@ We now move onto the details of the system.
 \section{\mestar}
 \label{sec:mestar}
 
-Put forward in \cite{AutomataTechniques}, \mestar is an automata we use to
+Put forward in \cite{AutomataTechniques}, \mestar is an automaton we use to
 represent all the worlds that can be reached and how we can move between them
 given an epistemic model \tmc{M} and an event model \tmc{E}. Its name refers to
 how it represents the application of \tmc{E} onto \tmc{M} infinitely. Consider
@@ -1744,7 +1744,7 @@ on and so forth. Then we define \mestar as
   \mc{ME}^\ast = \bigcup_{n \geq 0} \mc{ME}^n
 \end{equation*}
 
-One might wonder how we can reason about this; it's a seemingly infinite
+One might wonder how we can reason about this; it is a seemingly infinite
 structure. The key thing to realise is that our worlds in \mestar can be indexed
 by the set of propositions that hold true at the world. This makes use of the
 bijection we discussed in Section \ref{sec:Formalisation}. For instance,
@@ -1754,7 +1754,7 @@ bijection we discussed in Section \ref{sec:Formalisation}. For instance,
 that our epistemic model ranges over has to be finite; consequently, our set of
 world is finite\footnote{Indeed, we know the exact size of our set of worlds in
   \mestar, which is $2^{|\Lambda|}$.}. The implication of this is that two
-completely different call paths from the same initial world could end at the
+completely different sequences of events from the same initial world could end at the
 same world in \mestar, if the sets of propositions that hold true are the same.
 It becomes very easy to understand what \mestar does when we inspect its
 definition.
@@ -1779,25 +1779,6 @@ which this formula is satisfied. Then define the automaton $\mc{ME}^\ast=
         \right.
     \end{array}
 \end{centermath}
-
-\mestar is designed to accept words of the form $we_1e_2 \ldots e_n$, and such a
-word is accepted if and only if
-
-\[\delta (\ldots \delta(\delta(w, e_1), e_2), \ldots, e_n) \in F
-\]
-
-\noindent that is, all of the calls are permitted by \textsf{pre}, and the occurrence of
-all of the calls takes us to a world in which the winning formula is satisfied. 
-
-We now explain the definition. We can see that our alphabet is the set of
-worlds in \tmc{M} and the events in \tmc{E}. See that $\delta(q, \sigma)$ is
-undefined when $q \not = q_i$ and $\sigma \in W$; we may only make a transition
-when $\sigma \in W$ if $q$ is the initial world. Recall that the worlds in
-\mestar are indexed just by the propositions that hold true at them; we can see
-this in the definition of Q above. Then when we make a transition $\delta(q_i,
-w)$ we move to the world $q_{V(w)}$, where $V$ is the valuation function from
-\tmc{M}. This means that we move to the world indexed by the propositions true
-at $w$.
 
 \begin{wrapfigure}{r}{0.2\linewidth}
   \centering
@@ -1828,6 +1809,26 @@ at $w$.
   }
   \caption{}
 \end{wrapfigure}
+
+\mestar is designed to accept words of the form $we_1e_2 \ldots e_n$, and such a
+word is accepted if and only if
+
+\[\delta (\ldots \delta(\delta(w, e_1), e_2), \ldots, e_n) \in F
+\]
+
+\noindent that is, all of the calls are permitted by \textsf{pre}, and the occurrence of
+all of the calls takes us to a world in which the winning formula is satisfied. 
+
+We now explain the definition. We can see that our alphabet is the set of
+worlds in \tmc{M} and the events in \tmc{E}. See that $\delta(q, \sigma)$ is
+undefined when $q \not = q_i$ and $\sigma \in W$; we may only make a transition
+when $\sigma \in W$ if $q$ is the initial world. Recall that the worlds in
+\mestar are indexed just by the propositions that hold true at them; we can see
+this in the definition of Q above. Then when we make a transition $\delta(q_i,
+w)$ we move to the world $q_{V(w)}$, where $V$ is the valuation function from
+\tmc{M}. This means that we move to the world indexed by the propositions true
+at $w$.
+
 
 After this, we can make no more transitions $\delta(q, \sigma)$ where $\sigma
 \in W$. The only other transitions we can make are when $q \in F$ and $\sigma
@@ -1868,10 +1869,10 @@ the truth value of $\phi$ there.
 However, \mestar is unable to perform this task. We have no way of computing the
 set of possible worlds; as mentioned before, in order to compute the set
 of states that $i$ considers possible we would have to go back and compute the
-set of call sequences that $i$ cannot distinguish between and find the state
+set of event sequences that $i$ cannot distinguish between and find the state
 resulting from the application of all of these. 
 
-It's clear to see how the powerset construction would be useful in our context;
+It is clear to see how the powerset construction would be useful in our context;
 it would give us the set of all states indistinguishable to $i$ built-in to the
 states. Hence we can quickly evaluate a formula of the form $K_i \phi$ on a
 state, as we have the set of indistinguishable states already built in to the
@@ -1883,7 +1884,7 @@ our successful formula is of the form $K_i \phi$. Currently, with \mestar, we
 may only plan when our successful formula is in $\mc{L}_P(\Lambda)$. When
 planning we visit each state and evaluate the successful formula on it. We are
 unable to evaluate knowledge-based formulae on states in \mestar; hence we are
-unable to plan for such formulae. The construction of a powerset automata of
+unable to plan for such formulae. The construction of a powerset automaton of
 \mestar - referred to as $\wh{\mc{ME^\ast}}$ - gives us this desirable property.
 
 In order to perform this task we need to construct a transducer that relates
@@ -1900,8 +1901,8 @@ the adaptation of the powerset construction for finite state automata.
 In conjunction with \mestar, we also need to produce a set of transducers
 $\mc{T} = \{\mc{T}_i \mid i \in A\}$, for the model in question. $\mc{T}_i$
 relates pairs of events that agent $i$ cannot distinguish between. This is
-critical to us performing the powerset construction on our \mestar automata.
-Hence we want $\left[ \mc{T}_i \right]$ to be equal to the set of pairs of calls
+critical to us performing the powerset construction on our \mestar automaton.
+Hence we want $\left[ \mc{T}_i \right]$ to be equal to the set of pairs of events
 indistinguishable to agent $i$\footnote{As an example, consider a gossip graph
   with three agents. Then $\left[ \mc{T}_a \right] = \left\{ (ab, ab), (ac, ac),
     (ba, ba), (ca, ca), (bc, bc), (bc, cb), (cb, bc), (cb, cb) \right\} $.}.
@@ -1927,7 +1928,7 @@ some agent. This requires two components, the first of which is the transducer
 defined in \ref{sec:PowersetArena}, which relates pairs of events that are
 indistinguishable to an agent. This can be constructed with ease from the event
 model, as discussed earlier. The second component is the identity transducer
-over the automata \mestar. This can be computed in another very straightforward
+over the automaton \mestar. This can be computed in another very straightforward
 manner. Given $\mc{ME}^\ast = (\Sigma, Q, \delta, q_0, F)$, we can construct the
 identity transducer $\mc{T}_{\text{id}} = (\Sigma, Q, \Delta, q_0, F)$ where
 $(q, e, e', q') \in \Delta$ iff $\delta(q, e) = q'$ and $e = e'$. This is useful
@@ -1951,7 +1952,7 @@ composition $\mc{T} = (\Sigma, Q, \Delta, q_0, F)$ where
 
 Note that \tmc{T} is nearly identical to $\mc{T}_2$; the states, alphabet,
 initial and final states are the same. Recall that this is because we use
-\tmc{T} to relate a world - call pair to a set of worlds that agent $i$
+\tmc{T} to relate a world - event pair to a set of worlds that agent $i$
 considers it possible to be in from the prior worlds. 
 
 Hence, if we give as input to $\Delta$ an input pair $(q, e)$, where $q$ is a
@@ -1964,12 +1965,12 @@ the transitions in the powerset automaton much more simple to implement.
 \subsection{The Construction}
 \label{sec:Powerset}
 
-Given an automata $\mc{ME^\ast} = (\Sigma, Q, \delta, q_i, F)$ and a transducer
+Given an automaton $\mc{ME^\ast} = (\Sigma, Q, \delta, q_i, F)$ and a transducer
 $\mc{T}_i = (\Sigma, Q, \Delta, q_0, F)$\footnote{Remember that this transducer
   is the composition of the event-pair transducer and the identity transducer
   over \mestar, as discussed in Section \ref{sec:TransducerComposition}.}, we construct a powerset
-automata $\wh{\mc{ME^\ast}} = (\wh{\Sigma}, \wh{Q}, \wh{\delta}, \wh{q}_i,
-\wh{F})$. In this automata, our states $\wh{q} \in \wh{Q}$ are of the form $(v,
+automaton $\wh{\mc{ME^\ast}} = (\wh{\Sigma}, \wh{Q}, \wh{\delta}, \wh{q}_i,
+\wh{F})$. In this automaton, our states $\wh{q} \in \wh{Q}$ are of the form $(v,
 S)$, where $S \subseteq Q$. This is because when we need to evaluate a formula
 of the form $K_i\phi$, we need to know the set of states indistinguishable
 to agent $i$ at this moment. The set $S$ serves this purpose; it contains all of
@@ -1991,12 +1992,12 @@ components of \mestar are as follows.
 \end{itemize}
 
 We see that this version is much simpler than the definition given in
-\secref{sec:PowersetArena}. This is because we don't need to keep track of the
+\secref{sec:PowersetArena}. This is because we do not need to keep track of the
 set of potential final states of the transducer's output tape; we only have to
 keep track of the other possible states of the transducer. The set of states in
-the transducer is exactly the same as the set of states in our \mestar automata,
+the transducer is exactly the same as the set of states in our \mestar automaton,
 so these transducer states correspond directly to the states that we
-\emph{could} be in in our \mestar automata.
+\emph{could} be in in our \mestar automaton.
 
 Note that we can update $\wh{F}$ to accept worlds in which $K_i \phi$ is made
 true very easily. Assuming that in the automaton the layer below, all the states
@@ -2050,7 +2051,7 @@ the program will reason about it. Let us step through one application of the
 event model \tmc{E} on this graph. In this case, our event model \tmc{E} is the
 set of all possible calls, similar to Figure \ref{fig:GossipEvMo}; however only
 three are permitted. The effects of updating Figure \ref{fig:egGossip} are seen
-in Figure \ref{fig:egGossipE1}. We can see this as being the automata
+in Figure \ref{fig:egGossipE1}. We can see this as being the automaton
 $\mc{ME}^1$. We hope that the reader can see how the structure \mestar would
 arise by repetition of this. 
 
@@ -2132,19 +2133,19 @@ after making one call from the initial state displayed in Figure
 \ref{fig:egGossip}. The red line indicates that agent $a$ cannot distinguish
 between these two states, as they were both reached by the execution of a call
 that agent $a$ was not a member of. Note that in the algorithm this connection
-does not exist; it's here simply for labelling. We can see the three states on
+does not exist; it is here simply for labelling. We can see the three states on
 the lower row as a Kripke model, where the three are worlds labelled by their
 valuation, and the two connected by the red line are indistinguishable to $a$.
 
 Now say that we wanted to evaluate the formula $\neg S_{ba}$ on the bottom-right
 world in Figure \ref{fig:egGossipE1}. This is very straightforward; we just need
-to check if $b$ does indeed know $a$'s secret; here it doesn't, and so the world
+to check if $b$ does indeed know $a$'s secret; here it does not, and so the world
 satisfies $\neg S_{ba}$. But what if we want to evaluate the formula $K_a \neg
 S_{ba}$? We need to visit each of the states indistinguishable from the state in
 question and see if $\neg S_{ba}$ holds there. Recall that, although the red
 line connecting the two bottom states indicates that agent $a$ cannot
 distinguish between these two worlds, this connection \emph{does not exist} in
-the automata; it is there just for our intuitions. \mestar has \emph{no notion}
+the automaton; it is there just for our intuitions. \mestar has \emph{no notion}
 of two states being indistinguishable from one another. Hence, this is currently
 impossible; \mestar has no idea whether agent $a$ cannot distinguish between
 this world and any others, and certainly no way of reaching such worlds. This is
@@ -2267,7 +2268,7 @@ states into the states themselves, yielding the possibility for \emph{positional
       \draw[dashed, ->] (0) -- (cd) node [midway, left = 2pt] {$cd$};
       \draw[dashed, ->] (bc) -- (ab3) node [midway, left = 2pt] {$ab$};
     \end{tikzpicture}
-    \caption{The automata in Figure \ref{fig:egGossipE1}, now with the
+    \caption{The automaton in Figure \ref{fig:egGossipE1}, now with the
       indistinguishable states in the states.}
     \label{fig:egGossipE1pset}
 \end{figure}
@@ -2276,7 +2277,7 @@ The difference between Figures \ref{fig:egGossipE1} and \ref{fig:egGossipE1pset}
 now is that the former has all of the states indistinguishable from itself to
 agent $a$ \emph{inside} the state. This means that we can evaluate the formula
 $K_a \neg S_{ba}$ at a state by simply inspecting the states indistinguishable
-from the one we're looking at to check a formula of such form. This is now an
+from the one we are looking at to check a formula of such form. This is now an
 extremely straightforward task!
 
 In the states in Figure \ref{fig:egGossipE1pset} we display the \emph{true} state on the left.
@@ -2298,10 +2299,10 @@ S_{bc}$ is satisfied, just as we promised.
 
 When we encounter a formula of the form $\phi \land \psi$, where $\phi, \psi \in
 \mc{L}_P(\Lambda)$, we can simply apply the method described in Section
-\ref{sec:mestar} to produce an automata whose successful states are those in
+\ref{sec:mestar} to produce an automaton whose successful states are those in
 which $\phi \land \psi$ are made true. The production of an automaton whose
 successful states are those in which a formula $\chi$ is made true is a process
-that we call \emph{constructing an automata to solve $\chi$}.
+that we call \emph{constructing an automaton to solve $\chi$}.
 
 However this is less straightforward when we encounter a formula of the formula
 $K_a \phi \land K_b \psi$ \footnote{This occurs very frequently; in this gossip
@@ -2318,9 +2319,9 @@ $q_0 = (q_{0A}, q_{0B})$ and $\delta(q_A, q_B) = (\delta_A(q_A),
 the conjunction of $n$ automata.
 
 We have a similar story for negation; given a formula $\neg K_a \phi$, to create
-an automata to solve this we build the automata to solve $K_a \phi$ and then
+an automaton to solve this we build the automaton to solve $K_a \phi$ and then
 take the complement of this. This consists of simply changing the set of
-accepting states. Given automata $A = (\Sigma, Q, \delta, q_0, F)$, we define
+accepting states. Given an automaton $A = (\Sigma, Q, \delta, q_0, F)$, we define
 $A_\neg = (\Sigma, Q, \delta, q_0, F_\neg)$ where $F_\neg = Q \setminus F$.
 
 To complete our little family of set operations, we should define disjunction
@@ -2351,7 +2352,7 @@ search strategy will result in the searching of infinite call sequences; this
 means that the program will loop infinitely and never return. With a
 breadth-first search this is less likely to happen, although in the case of
 there being no successful state in the graph this is still possible. To remedy
-this we pre-process the automata to remove all transitions from a state to
+this we pre-process the automaton to remove all transitions from a state to
 itself. This means that there is no scope to repeatedly investigate a state, and
 as such no risk of an infinite sequence of events where an event is repeated
 forever.
@@ -2386,7 +2387,7 @@ may only be detected at runtime. A simple example is that in our implementation
 we cannot represent a formula that is not well-formed\footnote{This is one of my
   favourite examples; the ease at which one can formulate and give a semantics
   to sentences in a logical language in Haskell is so straightforward and easy
-  that it's inconceivable to try to do this task in any other language.}; a more
+  that it is inconceivable to try to do this task in any other language.}; a more
 sophisticated one is the ability to make sure that an epistemic model and an
 event model span the same set of atomic propositions and events. Typeclasses
 help us make code that is very reusable but also safe; if we wanted to use a new
@@ -2432,9 +2433,8 @@ states we cannot distinguish an item between, and the use of partitions makes
 this a much simpler task. 
 
 \begin{figure}[h]
-  \centering
   \begin{subfigure}[b]{0.5\textwidth}
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       data EpistM ev prp = Mo {
         states :: [State ev],                  
         agents :: [Agent],              
@@ -2443,19 +2443,19 @@ this a much simpler task.
         actual :: [State ev],              
         allProps :: Set prp
       }
-    \end{minted}
+    \end{cminted}
     \caption{The Kripke model datatype}
   \end{subfigure}%
 ~
   \begin{subfigure}[b]{0.5\textwidth}
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       data EventModel ev prp = EvMo {
         events :: [ev],
         evrel :: [(Agent, [[st]])],
         pre :: ev -> Form prp,
         post :: (ev, prp) -> Form prp
       }
-    \end{minted}
+    \end{cminted}
     \caption{The Event model datatype}
   \end{subfigure}
   \caption{}
@@ -2470,9 +2470,9 @@ and propositions. Consider the function signature for \mintinline{haskell}{updat
 
 \begin{figure}[h]
   \centering
-  \begin{minted}{haskell}
+  \begin{cminted}{haskell}
     update :: Prop p => EpistM ev p -> EventModel ev p -> EpistM ev p
-\end{minted}
+\end{cminted}
   \caption{}
   \label{fig:UpdateType}
 \end{figure}
@@ -2500,7 +2500,7 @@ more straightforward later on.
 \begin{figure}[h]
   % \centering
   \begin{subfigure}[b]{0.5\textwidth}
-  \begin{minted}{haskell}
+  \begin{cminted}{haskell}
     update :: (Eq ev, Prop p) => EpistM ev p -> EventModel ev p -> EpistM ev p
     update epm evm = Mo states' (agents epm) val' rels' (actual epm) (allProps epm)
       where
@@ -2514,7 +2514,7 @@ more straightforward later on.
         val' = [(s, ps s) | s <- states']
         ps s = [P p | p <- props, satisfies (epm, trimLast s) (post evm (lastEv s, p))]
         props = allProps epm
-  \end{minted}
+  \end{cminted}
 \end{subfigure}
 \caption{The $\mc{M} \times \mc{E}$ function}
 \label{fig:update}
@@ -2550,7 +2550,7 @@ identically mimic the tuple definitions in \secref{sec:Transducers}.
 \begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.5\textwidth}
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       data FSM ch st = FSM {
         alphabet :: [ch],              
         states :: [st],               
@@ -2558,12 +2558,12 @@ identically mimic the tuple definitions in \secref{sec:Transducers}.
         initial :: [st],            
         accepting :: st -> Bool    
        }
-    \end{minted}
+    \end{cminted}
     \caption{The FSM datatype}
   \end{subfigure}%
 ~
   \begin{subfigure}[b]{0.5\textwidth}
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       data FST ch st = FST {
         alphabet :: [ch],                     
         states :: [st],                       
@@ -2571,7 +2571,7 @@ identically mimic the tuple definitions in \secref{sec:Transducers}.
         initial :: [st],                      
         accepting :: st -> Bool              
       }
-    \end{minted}
+    \end{cminted}
     \caption{The FST datatype}
   \end{subfigure}
   \caption{}
@@ -2619,16 +2619,16 @@ the \mintinline{haskell}{not} function before the accepting function.
 \section{\mih{ME.hs}}
 \label{sec:MEHaskell}
 
-\begin{wrapfigure}{r}{0.3\textwidth}
-  \begin{minted}{haskell}
+\begin{wrapfigure}{l}{0.55\textwidth}
+  \begin{cminted}{haskell}
     class (Ord st, Prop p) => EvalState st p where
       evalState :: Form p -> st -> Bool
-\end{minted}
+\end{cminted}
   \caption{}
   \label{fig:EvalState}
 \end{wrapfigure}
 
-We now come onto the module that handles construction of the automata \mestar.
+We now come onto the module that handles construction of the automaton \mestar.
 This is a slightly more interesting case.
 
 In this module we make use of one of the many language extensions Haskell offers
@@ -2637,20 +2637,20 @@ GHC enforces of being unable to use a typeclass with more than one type
 parameter, allowing us to write typeclasses like this in Figure
 \ref{fig:EvalState}.
 
-This lets us ensure in our functions that the propositions we're using can be
+This lets us ensure in our functions that the propositions we are using can be
 evaluated at the states we want them to be evaluated at. This prevents us from
 trying to evaluate formula of a certain language on a world it is incompatible
 with. This is another display of the way we can use Haskell's type system to our
 advantage. 
 
 \begin{figure}[h]
-\begin{minted}{haskell}
-meTrans :: (Prop p, Eq ev) => EpistM ev p -> EventModel ev p -> ((QState p, ev)
--> Maybe (QState p))
-meTrans (Mo _ _ _ _ _ props) evm    (Q ps, ev)
+\begin{cminted}{haskell}
+  meTrans :: (Prop p, Eq ev) =>
+          EpistM ev p -> EventModel ev p -> ((QState p, ev) -> Maybe (QState p))
+  meTrans (Mo _ _ _ _ _ props) evm    (Q ps, ev)
     | not $ ps `models` pre evm ev  = Nothing
-    | otherwise                     = Just . Q $ filter (\p -> ps `models` post evm (ev, p)) props
-\end{minted}
+    | otherwise                     = Just $ filter (\p -> ps `models` post evm (ev, p)) props
+\end{cminted}
   \caption{}
   \label{fig:metrans}
 \end{figure}
@@ -2658,7 +2658,7 @@ meTrans (Mo _ _ _ _ _ props) evm    (Q ps, ev)
 In Figure \ref{fig:metrans}, we can see the implementation of the transition
 function of \mestar; we give an epistemic model and an event model and we are
 returned a function of type \mintinline{haskell}{(QState p, ev) -> Maybe (QState
-  p)}. The \mintinline{haskell}{Nothing}s encode a call that is not permitted to
+  p)}. The \mintinline{haskell}{Nothing}s encode an event that is not permitted to
 occur, and as such is undefined. When an event is permitted, we travel to the
 corresponding state as per the definition of the transitions in \mestar in
 Section \ref{sec:mestar}. The definition of \mestar lends itself perfectly to
@@ -2676,14 +2676,14 @@ epistemic, then we need to apply the powerset construction to \mestar.
 
 \section{\mih{Powerset.hs}}
 
-\begin{wrapfigure}{l}{0.3\textwidth}
+\begin{wrapfigure}{l}{0.55\textwidth}
   \centering
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       data PState st = PList [PState st] 
                      | PCon (PState st) 
                             [PState st] 
                      | PVar st 
-    \end{minted}
+    \end{cminted}
   \caption{The \mih{PState} datatype.}
   \label{fig:PState}
 \end{wrapfigure}
@@ -2700,7 +2700,7 @@ we could be in into our states, so that $K_a \phi$ can be evaluated
 positionally. We convert the states in \mestar to states of type
 \mintinline{haskell}{PState} (these are discussed below), and then perform the
 powerset construction detailed in Section \ref{sec:PowersetAdapted} on this
-automata. Finally, we have an automata with which we can evaluate the winning
+automaton. Finally, we have an automaton with which we can evaluate the winning
 condition positionally; we can easily compute a successful path now. 
 
 In Figure \ref{fig:PState}, we see our first deviation from the algorithm in
@@ -2734,19 +2734,19 @@ of events; it pattern matches on the formula given in the first argument to
 decide the ``shape'' of the returned automata.
 
 Let us first consider the bottom case. We receive some formula, e.g. $S_{ab}
-\land S_{bc}$. Then we build an automata \mestar whose successful states are
+\land S_{bc}$. Then we build an automaton \mestar whose successful states are
 those which satisfy the formula $S_{ab} \land S_{bc}$, through the procedure in
 \secref{sec:MEHaskell}. 
 
 If it receives a formula $K_a \phi$, then we call the \mih{buildPSA}
 function, which performs the powerset creation process as detailed earlier. Note
-that it does so with the automata that solves the formula $\phi$, invariant of
+that it does so with the automaton that solves the formula $\phi$, invariant of
 the form of $\phi$ - it could be an atomic proposition or another modality, or a
 conjunction of modalities. 
 
 \begin{figure}[h]
   \centering
-  \begin{minted}{haskell}
+  \begin{cminted}{haskell}
     cSA :: Form p -> EpistM (State ev) p -> EventModel ev p
            -> FSM (Character ev) (PState (QState p))
     cSA form@(K agent phi) ep ev
@@ -2761,7 +2761,7 @@ conjunction of modalities.
       False -> buildMEStar (And phis) ep ev
 
     cSA phi ep ev = buildMEStar phi ep ev
-  \end{minted}
+  \end{cminted}
   \caption{The \mih{createSolvingAutomata} function.}
   \label{fig:createSolvingAutomata}
 \end{figure}
@@ -2775,7 +2775,7 @@ time, we compose the transducer relating pairs of events with the identity
 transducer over $\wh{\mc{ME^\ast}}$ to generate the transducer used in the
 powerset construction. In order to produce $\wh{\wh{\mc{ME^\ast}}}$, we repeat
 the powerset construction, this time stepping through $\wh{\mc{ME^\ast}}$ to
-create an automata whose states are of the form $(v, S)$ where $v$ is a state in
+create an automaton whose states are of the form $(v, S)$ where $v$ is a state in
 $\wh{\mc{ME^\ast}}$ and every $s \in S$ is a state in $\wh{\mc{ME^\ast}}$. This
 process then telescopes in the natural way depending on the number of $K$
 modalities in the successful formula.
@@ -2801,6 +2801,7 @@ is capable of planning for any epistemic model and propositional event model, we
 chose to test solely on gossip models. This is for several reasons:
 
 \begin{itemize}
+\setlength\itemsep{1em}
 \item Gossip models cover every part of the system (epistemic models, \mestar,
   the powerset construction) and as such let us test all the functionality of
   the code;
@@ -2810,7 +2811,7 @@ chose to test solely on gossip models. This is for several reasons:
   for any other class of models;
 \item We have an existing model checker specialised for the Gossip problem
   (\cite{GithubGossip}) that we can use to validate our results;
-\item It is the class of models which I have the most experience with; hence if
+\item It is the class of models which we have the most experience with; hence if
   an error arises it should be quite easy to understand.
 \end{itemize}
 
@@ -2833,7 +2834,7 @@ sequence to their representation in \cite{GithubGossip}, and check that the call
 sequence applied to the initial graph take us to a state in which the successful
 formula is made true. In the case that our tool tells us there is no successful
 call sequence given the initial model, we use the other tool to check that
-there's no successful path to take us to a successful state. We define the
+there is no successful path to take us to a successful state. We define the
 former case as a \emph{positive} result from our tool, and the latter a
 \emph{negative} result from our tool. We say that the two tools \emph{agree} if
 the call sequence returned from our tool takes the gossip graph in question to a
@@ -2853,15 +2854,15 @@ to provide in order to generate these arbitrary values is an instance of the
 
 \begin{figure}[h]
   \centering
-  \begin{minted}{haskell}
+  \begin{cminted}{haskell}
       instance Arbitrary (EpistM StateC GosProp) where
         arbitrary = standardEpistModel agents <$> (sublistOf $ allNumbers agents)
-  \end{minted}
+  \end{cminted}
   \caption{An \mih{Arbitrary} instance for a gossip model.}
   \label{fig:Arbitrary}
 \end{figure}
 
-Once we have this, we perform a breadth-first search on the automata generated
+Once we have this, we perform a breadth-first search on the automaton generated
 by this epistemic model in order to find either a path that takes us to a state
 where the successful formula is made true, or a response telling us that no such
 path exists. Whatever the outcome, we then send this result and the original
@@ -2902,6 +2903,7 @@ of any agent, only phone numbers - we call these \emph{phonebook} graphs.
 There are a few reasons for this;
 
 \begin{itemize}
+\setlength\itemsep{1em}
 \item These cases are the only interesting ones. Any gossip graph where some
   agent already knows the secret of another will either have the same call
   sequence or a shorter one than the same graph, where no agent knows the secret
@@ -2980,6 +2982,7 @@ One of the project aims was to perform a space and time analysis of our
 implemented system. We have a number of reasons to do this;
 
 \begin{itemize}
+\setlength\itemsep{1em}
 \item Firstly, it lets us give a quantitative comparison of our program's
   efficacy compared to the existing tools;
 \item It also lets us find the parts of our code to try and optimise. It is said
@@ -2996,7 +2999,8 @@ spent, as well as the space used by these functions. We can see an example in
 
 \begin{figure}[h]
 % This is after.prof.   
-\begin{minted}{text}
+  \centering
+\begin{cminted}{text}
 	Mon Apr 15 14:23 2019 Time and Allocation Profiling Report  (Final)
 
 	   Main +RTS -p -RTS
@@ -3011,7 +3015,7 @@ spent, as well as the space used by these functions. We can see an example in
   compare                ME                       9.7   22.0
   meTrans                ME                       9.2   11.5
   enqueue                BFSM                     5.2   10.8
-\end{minted}
+\end{cminted}
   \caption{An example cost centre output from GHC.}
   \label{fig:costcentre}
 \end{figure}
@@ -3173,7 +3177,7 @@ to this. Notable in our implementation is that we only care about the knowledge
 of the agent who is the counter; hence we \emph{do not} model the knowledge
 states of the other $n - 1$ prisoners. 
 
-The reason that we chose to use the $n$ prisoners problem is that it's very easy
+The reason that we chose to use the $n$ prisoners problem is that it is very easy
 to scale the problem's complexity up or down; we simply add more prisoners.
 Despite the fact that we only care about the knowledge state of one agent,
 increasing the number of prisoners yields an increase in events; and most
@@ -3187,40 +3191,39 @@ avoid the exponential increase that we suffer from here.
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[b]{0.3\textwidth}
-  \begin{tikzpicture}
+  \begin{subfigure}{0.5\textwidth}
     \centering
-    \begin{axis}[
-      title = {Planning runtime as number of agents increases},
-      xlabel = {Number of Prisoners},
-      ylabel = {Time / $s$},
-      ]
-
-      \addplot[
-      color = blue
-      ]
-      coordinates {(2, 0) (3, 0) (4, 0.01) (5, 0.04) (6, 0.21) (7, 1.77) (8, 58.71)};
-
-    \end{axis}
-  \end{tikzpicture}
-  \end{subfigure}%
- ~ 
-  \begin{subfigure}[b]{0.3\textwidth}
     \begin{tikzpicture}
-      \centering
-    \begin{axis}[
-      title = {Planning space consumption as number of agents increases},
-      xlabel = {Number of Prisoners},
-      ylabel = {Space / $s$},
-      ]
+      \begin{axis}[
+        title = {Runtime as number of agents increases},
+        xlabel = {Prisoners},
+        ylabel = {Time / $s$},
+        ]
 
-      \addplot[
-      color = red
-      ]
-      coordinates {(2, 0.11) (3, 0.459) (4, 2.78) (5, 18.478) (6, 160.479) (7, 2365) (8, 79812)};
+        \addplot[
+        color = blue
+        ]
+        coordinates {(2, 0) (3, 0) (4, 0.01) (5, 0.04) (6, 0.21) (7, 1.77) (8, 58.71)};
+      \end{axis}
+    \end{tikzpicture}
+  \end{subfigure}%
+~
+  \begin{subfigure}{0.5\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[
+        title = {Space consumption as number of agents increases},
+        xlabel = {Prisoners},
+        ylabel = {Space / $Mb$},
+        ]
 
-    \end{axis}
-  \end{tikzpicture}
+        \addplot[
+        color = red
+        ]
+        coordinates {(2, 0.11) (3, 0.459) (4, 2.78) (5, 18.478) (6, 160.479) (7, 2365) (8, 79812)};
+
+      \end{axis}
+    \end{tikzpicture}
   \end{subfigure}
   \caption{Complexity analysis graphs.}
   \label{fig:graphs}
@@ -3230,16 +3233,16 @@ avoid the exponential increase that we suffer from here.
 
 \subsection{\mih{Models}}
 
-\begin{wrapfigure}{l}{0.6\textwidth}
+\begin{wrapfigure}{l}{0.55\textwidth}
   \begin{center}
-    \begin{minted}{haskell}
+    \begin{cminted}{haskell}
       models :: Prop p => Set.Set p -> Form p -> Bool
       models _  Top         = True
       models ps (Not form)  = not $ models ps form
       models ps (P form)    = Set.member form ps
       models ps (Or forms)  = any (models ps) forms
       models ps (And forms) = all (models ps) forms
-    \end{minted}
+    \end{cminted}
   \end{center}
   \caption{The \mih{models} function}
   \label{fig:modelsfunction}
@@ -3248,7 +3251,7 @@ avoid the exponential increase that we suffer from here.
 Through looking at the cost centres given to us by GHC, we can see where our
 program spends the bulk of the time computing. In our tool, the culprit is
 \mih{models}, which can be seen in \figref{fig:modelsfunction}. Unfortunately
-there's no more we can do to speed up this function \footnote{Short of using a
+there is no more we can do to speed up this function \footnote{Short of using a
   HashSet, which gives us quicker lookup times.}, suggesting that the problem
 lies in the amount of times we call it. The function is one of the essential
 parts of the program; it lets us move from state to state.
@@ -3266,7 +3269,7 @@ The issue seems to arise from the final part of the definition of transitions in
 event $e$, we go through each proposition $p$ in the set of propositions for the
 current model and check if the set of propositions $v$ \emph{model} the postcondition
 of the given proposition $p$ and the event $e$. This occurs every time we wish
-to make a transition between two sets in our automata; clearly, this piece of
+to make a transition between two states in our automata; clearly, this piece of
 code is being called a lot. However, this does not seem to be a particularly bad
 thing in itself; rather the opposite, it seems essential that this piece of code
 would be called a lot. The effect of this could perhaps be reduced by using the
@@ -3294,9 +3297,6 @@ computationally efficient than ours; the generation of these indistinguishable
 call sequences is much more straightforward and requires much less heavy lifting
 than maintaining this set of indistinguishable states.
 
-% However, the method of computing these other call sequences is one that can only
-% be effectively utilised when we know the 
-
 This method of computing the strings of indistinguishable events is impractical
 for our case. In the other tool it is known that the sequence of calls is
 ``final'' in some sense; we want to know whether or not this precise set of
@@ -3304,18 +3304,6 @@ calls takes us to a successful state. However, in our case, we check
 \emph{every} state we enter. Treating every state in this manner would be
 computationally inefficient; it would be akin to model checking every state. As
 such it is preferable to maintain our strategy.  
-
-% One might ask why we don't copy this method of simply maintaining the set of
-% strings of indistinguishable events which could have happened in the states of
-% our automaton. This is a fine idea, however a problem arises when we come to
-% considering the successful states. In the other tool it is known that the
-% sequence of calls is ``final'', in the sense of a model checker - we want to
-% know if this is successful or it isn't. But in ours we only stop either when we
-% can make no more calls, or we are in a successful state. As such, we need to
-% know if we are in a successful state \emph{every time we enter one}, and the
-% only way we can do this is by performing each string of indistinguishable calls
-% on the initial state and evaluating the target formula at the resultant states;
-% it is clear that this will be less efficient.
 
 \subsection{\mih{BFSM}}
 
@@ -3343,7 +3331,7 @@ using a \mih{List}.
 \label{sec:Monotonicity}
 
 Another thing we could have used to reduce computation is the monotonicity of
-the propositions true at a state. At a state in the gossip protocol, if some set
+the propositions true at a state. At a state in the gossip problem, if some set
 $v$ of propositions are true and we make some call $e$, then the set of
 propositions at the state we move to, $v'$, is guaranteed to be a superset of
 $v$. Consider what this means; there is no phone call that can be made that will
@@ -3425,7 +3413,7 @@ weaknesses compared to \cite{GithubGossip}.
 \section{Future Work}
 
 It is clear to see that our system is very slow; when run on a gossip graph with
-greater than 6 agents the takes so long that it's not worth waiting for the
+greater than 6 agents this takes so long that it is not worth waiting for the
 results. Whilst there is scope for implementation-based
 optimisations\footnote{By which we mean optimisations like changing a \mih{Set}
   to a \mih{HashSet} and so on.}, this is mainly due to the algorithm; in
@@ -3437,7 +3425,7 @@ computation by either exploring a branch that is never going to succeed, or is
 identical to another branch. It would be interesting to see the implementation
 of some checker for recomputed branches, \`{a} la dynamic programming.
 
-It also seems possible that there's scope for a symbolic approach, like in
+It also seems possible that there is scope for a symbolic approach, like in
 \cite{MalvinThesis}. The main issue with our system - and all model checking
 software as well - is the \emph{state explosion} problem; we have to consider
 thousands of states, making the program slow and memory hungry. Symbolic

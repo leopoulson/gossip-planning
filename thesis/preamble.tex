@@ -51,7 +51,7 @@
 \usepackage{lastpage} % Used to determine the number of pages in the document (for "Page X of Total")
 
 \usepackage{graphicx} % Required for adding images
-
+\usepackage{xpatch,letltxmacro}
 \usepackage{subcaption} % Add subfigures
 \usepackage{enumitem} % Required for customising lists
 \setlist{noitemsep} % Remove spacing between bullet/numbered list elements
@@ -115,6 +115,14 @@
 \newcommand{\figref}[1]{Figure \ref{#1}}
 
 \newcommand{\mih}[1]{\mintinline{haskell}{#1}}
+
+
+\LetLtxMacro{\cminted}{\minted}
+\let\endcminted\endminted
+\xpretocmd{\cminted}{\RecustomVerbatimEnvironment{Verbatim}{BVerbatim}{}}{}{}
+
+\renewcommand{\figurename}{Listing}
+
 
 % --------------------------------------------------------
 %   NEW ENVIRONMENTS

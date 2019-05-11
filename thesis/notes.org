@@ -460,24 +460,37 @@ communicate highly technical material.
 *** Structure
 **** Address three challenges. 
 * Revisions
-** Overall [1/17]
-*** TODO Spell check 
+** Overall [13/18]
 *** TODO Change Nii to N_ii
-*** TODO I -> We
-*** TODO Calls -> events (sometimes)
-*** TODO Bullets - hcange commas to semicolons
-*** TODO Thesis / Dissertation
-*** TODO States / Worlds
-*** TODO Fix minted formatting
-*** TODO Change formatting to remove \bigskip
+*** DONE Fix minted formatting
+    CLOSED: [2019-05-11 Sat 12:16]
 *** TODO Check capitals in things like "Dynamic Gossip"
 *** TODO Fix formatting everywhere - figures overrunning etc
 **** 
-*** TODO Increase bullet pt spacing
-*** TODO Check use of automatA and automatON
 *** TODO Change citation style
-*** TODO Contractions!!
-*** TODO Check figure refs - usually need to change \caption to be above \label.
+*** TODO Title page etc
+*** DONE States / Worlds
+    CLOSED: [2019-05-11 Sat 11:44]
+*** DONE Check figure refs - usually need to change \caption to be above \label.
+    CLOSED: [2019-05-11 Sat 11:44]
+*** DONE Increase bullet pt spacing
+    CLOSED: [2019-05-11 Sat 11:44]
+*** DONE Check use of automatA and automatON
+    CLOSED: [2019-05-11 Sat 11:25]
+*** DONE Contractions!!
+    CLOSED: [2019-05-11 Sat 11:17]
+*** DONE Spell check 
+    CLOSED: [2019-05-11 Sat 10:43]
+*** DONE Bullets - hcange commas to semicolons
+    CLOSED: [2019-05-11 Sat 10:51]
+*** DONE I -> We
+    CLOSED: [2019-05-11 Sat 10:44]
+*** DONE Calls -> events (sometimes)
+    CLOSED: [2019-05-11 Sat 11:02]
+*** DONE Thesis / Dissertation
+    CLOSED: [2019-05-11 Sat 10:51]
+*** DONE Change formatting to remove \bigskip
+    CLOSED: [2019-05-11 Sat 11:02]
 *** DONE Update \texttt to \mintinline
     CLOSED: [2019-05-06 Mon 16:51]
 ** Ch 1 - Introduction [4/4]
@@ -502,7 +515,7 @@ communicate highly technical material.
 *** TODO Make sure that events accessibility is Q thruout and not P
 *** DONE Proofread
     CLOSED: [2019-05-10 Fri 14:26]
-** Ch 3 - Algorithm [4/5]
+** Ch 3 - Algorithm [5/5]
 *** DONE Consider changing the examples in §3. 
     CLOSED: [2019-05-09 Thu 16:51]
     Using K_A (Sbc) and then K_a (~Sba) is a bit annoying, could change it to be
@@ -513,8 +526,9 @@ communicate highly technical material.
     CLOSED: [2019-05-09 Thu 10:19]
 *** DONE Add examples to introduction. 
     CLOSED: [2019-05-08 Wed 11:37]
-*** TODO Proofread
-** Ch 4 - Implementation [4/5]
+*** DONE Proofread
+    CLOSED: [2019-05-11 Sat 10:43]
+** Ch 4 - Implementation [5/5]
 *** DONE Address code - compacting and removing stuff 
     CLOSED: [2019-05-09 Thu 12:31]
 *** DONE Add link to source code at start of implementation. 
@@ -542,9 +556,11 @@ communicate highly technical material.
 ***** TODO Maybe fix stuff about recursion? 
 *** DONE Mention the way we lift transducers
     CLOSED: [2019-05-09 Thu 10:58]
-*** TODO Proofread
-** Ch 5 - Evaluation [7/8]
-*** TODO Proofread
+*** DONE Proofread
+    CLOSED: [2019-05-11 Sat 10:43]
+** Ch 5 - Evaluation [9/9]
+*** DONE Proofread
+    CLOSED: [2019-05-11 Sat 10:43]
 *** DONE Correctness results [3/4]
     CLOSED: [2019-05-09 Thu 16:17]
 **** DONE Address how we did the testing, and results for basic
@@ -621,7 +637,8 @@ communicate highly technical material.
     CLOSED: [2019-05-07 Tue 11:07]
 *** DONE Restructure conclusion; put each criticism into a section? 
     CLOSED: [2019-05-07 Tue 11:07]
-*** TODO Find case where DFS on Malvin code is bad
+*** DONE Find case where DFS on Malvin code is bad
+    CLOSED: [2019-05-11 Sat 10:43]
 ** Ch 6 - Conclusion
 *** DONE Add analysis of done stuff
     CLOSED: [2019-05-07 Tue 15:18]
